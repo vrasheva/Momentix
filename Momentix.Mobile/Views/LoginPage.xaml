@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Momentix.Mobile.Views.LoginPage"
+             Title="Вход"
+             BackgroundColor="#F5F5F5">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="32" Spacing="16" VerticalOptions="Center">
+
+            <Label Text="Momentix"
+                   FontSize="36"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#6750A4"/>
+
+            <Label Text="Влез в акаунта си"
+                   FontSize="16"
+                   HorizontalOptions="Center"
+                   TextColor="#666666"
+                   Margin="0,0,0,16"/>
+
+            <Entry Placeholder="Имейл"
+                   Text="{Binding UserEmail}"
+                   Keyboard="Email"
+                   BackgroundColor="White"
+                   HeightRequest="52"/>
+
+            <Entry Placeholder="Парола"
+                   Text="{Binding UserPassword}"
+                   IsPassword="True"
+                   BackgroundColor="White"
+                   HeightRequest="52"/>
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="Red"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
+
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="#6750A4"/>
+
+            <Button Text="Вход"
+                    Command="{Binding LoginCommand}"
+                    BackgroundColor="#6750A4"
+                    TextColor="White"
+                    HeightRequest="52"
+                    CornerRadius="8"/>
+
+            <Button Text="Нямаш акаунт? Регистрирай се"
+                    Command="{Binding GoToRegisterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#6750A4"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
