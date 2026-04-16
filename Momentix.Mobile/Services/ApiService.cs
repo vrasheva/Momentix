@@ -7,7 +7,7 @@ namespace Momentix.Mobile.Services
     public class ApiService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "https://localhost:7113/api/";
+        private const string BaseUrl = "http://10.0.2.2:5036/api/";
 
         public ApiService()
         {

@@ -7,8 +7,9 @@ namespace Momentix.API.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
+            var connectionString = "Server=127.0.0.1;Port=3306;Database=momentixdb;User=root;Password=root;";
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=MomentixDb;Trusted_Connection=True;MultipleActiveResultSets=true");
+            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
             return new AppDbContext(optionsBuilder.Options);
         }
