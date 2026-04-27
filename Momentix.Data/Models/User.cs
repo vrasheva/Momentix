@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace Momentix.API.Models
+namespace Momentix.Data.Models
 {
     public class User : IdentityUser
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Momentix.API.DTOs;
-using Momentix.API.Models;
+using Momentix.Data.Models;
 using Momentix.API.Services;
 
 namespace Momentix.API.Controllers

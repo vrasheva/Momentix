@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Momentix.API.Data;
+using Momentix.Data.Data;
 using Momentix.API.DTOs;
-using Momentix.API.Models;
+using Momentix.Data.Models;
 using System.Security.Claims;
 
 namespace Momentix.API.Controllers

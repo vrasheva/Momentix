@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Reflection.Emit;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Momentix.API.Models;
+using Momentix.Data.Models;
 
-namespace Momentix.API.Data
+namespace Momentix.Data.Data
 {
     public class AppDbContext : IdentityDbContext<User>
     {
@@ -23,7 +21,6 @@ namespace Momentix.API.Data
         {
             base.OnModelCreating(builder);
 
-            // AlbumMember
             builder.Entity<AlbumMember>()
                 .HasIndex(am => new { am.AlbumId, am.UserId })
                 .IsUnique();
@@ -34,7 +31,6 @@ namespace Momentix.API.Data
                 .HasForeignKey(am => am.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // TimeCapsuleMember
             builder.Entity<TimeCapsuleMember>()
                 .HasIndex(tm => new { tm.TimeCapsuleId, tm.UserId })
                 .IsUnique();
@@ -45,7 +41,6 @@ namespace Momentix.API.Data
                 .HasForeignKey(tm => tm.UserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // ChallengeVote
             builder.Entity<ChallengeVote>()
                 .HasIndex(cv => new { cv.SubmissionId, cv.VotedByUserId })
                 .IsUnique();
@@ -56,21 +51,18 @@ namespace Momentix.API.Data
                 .HasForeignKey(cv => cv.VotedByUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Media
             builder.Entity<Media>()
                 .HasOne(m => m.UploadedBy)
                 .WithMany()
                 .HasForeignKey(m => m.UploadedById)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // TimeCapsule
             builder.Entity<TimeCapsule>()
                 .HasOne(tc => tc.Owner)
                 .WithMany(u => u.TimeCapsules)
                 .HasForeignKey(tc => tc.OwnerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // ChallengeSubmission
             builder.Entity<ChallengeSubmission>()
                 .HasOne(cs => cs.User)
                 .WithMany()

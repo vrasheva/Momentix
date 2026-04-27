@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Momentix.API.Data;
+using Momentix.Data.Data;
 
 #nullable disable
 
-namespace Momentix.API.Migrations
+namespace Momentix.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260416092528_InitialCreate")]
+    [Migration("20260427194051_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -150,7 +150,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Album", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Album", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -177,7 +177,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("Albums");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.AlbumMember", b =>
+            modelBuilder.Entity("Momentix.Data.Models.AlbumMember", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -206,7 +206,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("AlbumMembers");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Challenge", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Challenge", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -230,7 +230,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("Challenges");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.ChallengeSubmission", b =>
+            modelBuilder.Entity("Momentix.Data.Models.ChallengeSubmission", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -259,7 +259,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("ChallengeSubmissions");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.ChallengeVote", b =>
+            modelBuilder.Entity("Momentix.Data.Models.ChallengeVote", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -286,7 +286,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("ChallengeVotes");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Media", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Media", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -329,7 +329,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("MediaItems");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.TimeCapsule", b =>
+            modelBuilder.Entity("Momentix.Data.Models.TimeCapsule", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -362,7 +362,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("TimeCapsules");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.TimeCapsuleMember", b =>
+            modelBuilder.Entity("Momentix.Data.Models.TimeCapsuleMember", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -385,7 +385,7 @@ namespace Momentix.API.Migrations
                     b.ToTable("TimeCapsuleMembers");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.User", b =>
+            modelBuilder.Entity("Momentix.Data.Models.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
@@ -473,7 +473,7 @@ namespace Momentix.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Momentix.API.Models.User", null)
+                    b.HasOne("Momentix.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -482,7 +482,7 @@ namespace Momentix.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Momentix.API.Models.User", null)
+                    b.HasOne("Momentix.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -497,7 +497,7 @@ namespace Momentix.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Momentix.API.Models.User", null)
+                    b.HasOne("Momentix.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -506,16 +506,16 @@ namespace Momentix.API.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Momentix.API.Models.User", null)
+                    b.HasOne("Momentix.Data.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Album", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Album", b =>
                 {
-                    b.HasOne("Momentix.API.Models.User", "Owner")
+                    b.HasOne("Momentix.Data.Models.User", "Owner")
                         .WithMany("Albums")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -524,15 +524,15 @@ namespace Momentix.API.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.AlbumMember", b =>
+            modelBuilder.Entity("Momentix.Data.Models.AlbumMember", b =>
                 {
-                    b.HasOne("Momentix.API.Models.Album", "Album")
+                    b.HasOne("Momentix.Data.Models.Album", "Album")
                         .WithMany("Members")
                         .HasForeignKey("AlbumId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Momentix.API.Models.User", "User")
+                    b.HasOne("Momentix.Data.Models.User", "User")
                         .WithMany("AlbumMemberships")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -543,15 +543,15 @@ namespace Momentix.API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.ChallengeSubmission", b =>
+            modelBuilder.Entity("Momentix.Data.Models.ChallengeSubmission", b =>
                 {
-                    b.HasOne("Momentix.API.Models.Challenge", "Challenge")
+                    b.HasOne("Momentix.Data.Models.Challenge", "Challenge")
                         .WithMany("Submissions")
                         .HasForeignKey("ChallengeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Momentix.API.Models.User", "User")
+                    b.HasOne("Momentix.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -562,15 +562,15 @@ namespace Momentix.API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.ChallengeVote", b =>
+            modelBuilder.Entity("Momentix.Data.Models.ChallengeVote", b =>
                 {
-                    b.HasOne("Momentix.API.Models.ChallengeSubmission", "Submission")
+                    b.HasOne("Momentix.Data.Models.ChallengeSubmission", "Submission")
                         .WithMany("Votes")
                         .HasForeignKey("SubmissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Momentix.API.Models.User", "VotedBy")
+                    b.HasOne("Momentix.Data.Models.User", "VotedBy")
                         .WithMany()
                         .HasForeignKey("VotedByUserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -581,17 +581,17 @@ namespace Momentix.API.Migrations
                     b.Navigation("VotedBy");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Media", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Media", b =>
                 {
-                    b.HasOne("Momentix.API.Models.Album", "Album")
+                    b.HasOne("Momentix.Data.Models.Album", "Album")
                         .WithMany("MediaItems")
                         .HasForeignKey("AlbumId");
 
-                    b.HasOne("Momentix.API.Models.TimeCapsule", "TimeCapsule")
+                    b.HasOne("Momentix.Data.Models.TimeCapsule", "TimeCapsule")
                         .WithMany("MediaItems")
                         .HasForeignKey("TimeCapsuleId");
 
-                    b.HasOne("Momentix.API.Models.User", "UploadedBy")
+                    b.HasOne("Momentix.Data.Models.User", "UploadedBy")
                         .WithMany()
                         .HasForeignKey("UploadedById")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -604,9 +604,9 @@ namespace Momentix.API.Migrations
                     b.Navigation("UploadedBy");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.TimeCapsule", b =>
+            modelBuilder.Entity("Momentix.Data.Models.TimeCapsule", b =>
                 {
-                    b.HasOne("Momentix.API.Models.User", "Owner")
+                    b.HasOne("Momentix.Data.Models.User", "Owner")
                         .WithMany("TimeCapsules")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -615,15 +615,15 @@ namespace Momentix.API.Migrations
                     b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.TimeCapsuleMember", b =>
+            modelBuilder.Entity("Momentix.Data.Models.TimeCapsuleMember", b =>
                 {
-                    b.HasOne("Momentix.API.Models.TimeCapsule", "TimeCapsule")
+                    b.HasOne("Momentix.Data.Models.TimeCapsule", "TimeCapsule")
                         .WithMany("Members")
                         .HasForeignKey("TimeCapsuleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Momentix.API.Models.User", "User")
+                    b.HasOne("Momentix.Data.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -634,31 +634,31 @@ namespace Momentix.API.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Album", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Album", b =>
                 {
                     b.Navigation("MediaItems");
 
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.Challenge", b =>
+            modelBuilder.Entity("Momentix.Data.Models.Challenge", b =>
                 {
                     b.Navigation("Submissions");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.ChallengeSubmission", b =>
+            modelBuilder.Entity("Momentix.Data.Models.ChallengeSubmission", b =>
                 {
                     b.Navigation("Votes");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.TimeCapsule", b =>
+            modelBuilder.Entity("Momentix.Data.Models.TimeCapsule", b =>
                 {
                     b.Navigation("MediaItems");
 
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("Momentix.API.Models.User", b =>
+            modelBuilder.Entity("Momentix.Data.Models.User", b =>
                 {
                     b.Navigation("AlbumMemberships");
 

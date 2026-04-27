@@ -1,4 +1,4 @@
-﻿namespace Momentix.API.Models
+﻿namespace Momentix.Data.Models
 {
     public class TimeCapsuleMember
     {

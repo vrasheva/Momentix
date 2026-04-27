@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Momentix.API.Data;
-using Momentix.API.Models;
+using Momentix.Data.Data;
+using Momentix.Data.Models;
 using Momentix.API.Services;
 
 namespace Momentix.API

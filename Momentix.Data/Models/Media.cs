@@ -1,4 +1,4 @@
-﻿namespace Momentix.API.Models
+﻿namespace Momentix.Data.Models
 {
     public enum MediaType { Image, Video, Audio, Letter }
 

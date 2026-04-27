@@ -2,7 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Momentix.API.Models;
+using Momentix.Data.Models;
 
 namespace Momentix.API.Services
 {
