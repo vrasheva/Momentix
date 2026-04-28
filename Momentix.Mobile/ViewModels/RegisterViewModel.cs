@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using Momentix.Mobile.Services;
+using Momentix.Data.DTOs;
+using Microsoft.Maui.Storage;
+using Microsoft.Maui.Controls;
 
 namespace Momentix.Mobile.ViewModels
 {
@@ -65,16 +68,19 @@ namespace Momentix.Mobile.ViewModels
 
             try
             {
-                var result = await _apiService.PostAsync<Models.AuthResponse>("Auth/register", new
-                {
-                    fullName = FullName,
-                    email = UserEmail,
-                    password = UserPassword
-                });
+                var result = await _apiService.PostAsync<RegisterDto, AuthResponseDto>(
+                    "Auth/register",
+                    new RegisterDto
+                    {
+                        FullName = FullName,
+                        Email = UserEmail,
+                        Password = UserPassword
+                    });
 
                 if (result != null)
                 {
                     _apiService.SetToken(result.Token);
+
                     Preferences.Set("auth_token", result.Token);
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);

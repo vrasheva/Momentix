@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Momentix.Data.Data;
-using Momentix.API.DTOs;
+using Momentix.Data.DTOs;
 using Momentix.Data.Models;
 using System.Security.Claims;
 
