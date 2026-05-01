@@ -75,7 +75,7 @@ namespace Momentix.Mobile.ViewModels
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);
 
-                    await Shell.Current.GoToAsync("//MainPage");
+                    await Shell.Current.GoToAsync("//AlbumsPage");
                 }
                 else
                 {

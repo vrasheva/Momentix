@@ -17,5 +17,11 @@
     <ShellContent
         Route="MainPage"
         ContentTemplate="{DataTemplate local:MainPage}" />
+    <ShellContent
+    Route="AlbumsPage"
+    ContentTemplate="{DataTemplate views:AlbumsPage}" />
+    <ShellContent
+    Route="CreateAlbumPage"
+    ContentTemplate="{DataTemplate views:CreateAlbumPage}" />
 
 </Shell>

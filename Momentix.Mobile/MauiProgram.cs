@@ -29,6 +29,10 @@ namespace Momentix.Mobile
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<MainPage>();
+            builder.Services.AddTransient<AlbumsViewModel>();
+            builder.Services.AddTransient<AlbumsPage>();
+            builder.Services.AddTransient<CreateAlbumViewModel>();
+            builder.Services.AddTransient<CreateAlbumPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
