@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.CreateTimeCapsulePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="New Capsule"
+    BackgroundColor="#F6F4EF">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <Label
+                Text="New Time Capsule"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#1D1B20" />
+
+            <Entry
+                Placeholder="Capsule title"
+                Text="{Binding Title}"
+                BackgroundColor="White"
+                HeightRequest="52" />
+
+            <Editor
+                Placeholder="Description"
+                Text="{Binding Description}"
+                AutoSize="TextChanges"
+                BackgroundColor="White"
+                HeightRequest="120" />
+
+            <Label Text="Unlock date" FontAttributes="Bold" TextColor="#1D1B20" />
+            <DatePicker Date="{Binding UnlockDate}" BackgroundColor="White" HeightRequest="52" />
+
+            <Label Text="Unlock time" FontAttributes="Bold" TextColor="#1D1B20" />
+            <TimePicker Time="{Binding UnlockTime}" BackgroundColor="White" HeightRequest="52" />
+
+            <Label Text="{Binding ErrorMessage}" TextColor="#B3261E" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="#6750A4" />
+
+            <Button
+                Text="Save Capsule"
+                Command="{Binding SaveCommand}"
+                BackgroundColor="#6750A4"
+                TextColor="White"
+                HeightRequest="52"
+                CornerRadius="8" />
+
+            <Button
+                Text="Cancel"
+                Command="{Binding CancelCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#6750A4" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

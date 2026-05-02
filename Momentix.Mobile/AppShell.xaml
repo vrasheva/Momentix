@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Momentix.Mobile.Views"
-    xmlns:local="clr-namespace:Momentix.Mobile"
     Shell.FlyoutBehavior="Disabled">
 
     <ShellContent
@@ -14,14 +13,25 @@
         Route="RegisterPage"
         ContentTemplate="{DataTemplate views:RegisterPage}" />
 
+    <TabBar Route="Home">
+        <ShellContent
+            Title="Albums"
+            Route="AlbumsPage"
+            ContentTemplate="{DataTemplate views:AlbumsPage}" />
+
+        <ShellContent
+            Title="Capsules"
+            Route="TimeCapsulesPage"
+            ContentTemplate="{DataTemplate views:TimeCapsulesPage}" />
+
+        <ShellContent
+            Title="Challenge"
+            Route="ChallengesPage"
+            ContentTemplate="{DataTemplate views:ChallengesPage}" />
+    </TabBar>
+
     <ShellContent
-        Route="MainPage"
-        ContentTemplate="{DataTemplate local:MainPage}" />
-    <ShellContent
-    Route="AlbumsPage"
-    ContentTemplate="{DataTemplate views:AlbumsPage}" />
-    <ShellContent
-    Route="CreateAlbumPage"
-    ContentTemplate="{DataTemplate views:CreateAlbumPage}" />
+        Route="CreateAlbumPage"
+        ContentTemplate="{DataTemplate views:CreateAlbumPage}" />
 
 </Shell>

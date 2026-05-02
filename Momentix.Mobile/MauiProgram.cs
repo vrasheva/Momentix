@@ -18,21 +18,24 @@ namespace Momentix.Mobile
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Services
             builder.Services.AddSingleton<ApiService>();
-
-            // ViewModels
             builder.Services.AddTransient<LoginViewModel>();
             builder.Services.AddTransient<RegisterViewModel>();
-
-            // Views
             builder.Services.AddTransient<LoginPage>();
             builder.Services.AddTransient<RegisterPage>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<AlbumsViewModel>();
             builder.Services.AddTransient<AlbumsPage>();
+            builder.Services.AddTransient<AlbumDetailsViewModel>();
+            builder.Services.AddTransient<AlbumDetailsPage>();
             builder.Services.AddTransient<CreateAlbumViewModel>();
             builder.Services.AddTransient<CreateAlbumPage>();
+            builder.Services.AddTransient<TimeCapsulesViewModel>();
+            builder.Services.AddTransient<TimeCapsulesPage>();
+            builder.Services.AddTransient<CreateTimeCapsuleViewModel>();
+            builder.Services.AddTransient<CreateTimeCapsulePage>();
+            builder.Services.AddTransient<ChallengesViewModel>();
+            builder.Services.AddTransient<ChallengesPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

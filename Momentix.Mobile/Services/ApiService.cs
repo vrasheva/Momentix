@@ -13,12 +13,21 @@ public class ApiService
         {
             BaseAddress = new Uri("http://10.0.2.2:5036/api/")
         };
+
+        var savedToken = Preferences.Get("auth_token", string.Empty);
+        if (!string.IsNullOrWhiteSpace(savedToken))
+            SetToken(savedToken);
     }
 
     public void SetToken(string token)
     {
         _httpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    public void ClearToken()
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = null;
     }
 
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest data)
@@ -31,6 +40,12 @@ public class ApiService
         return await response.Content.ReadFromJsonAsync<TResponse>();
     }
 
+    public async Task<bool> PostAsync<TRequest>(string endpoint, TRequest data)
+    {
+        var response = await _httpClient.PostAsJsonAsync(endpoint, data);
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task<T?> GetAsync<T>(string endpoint)
     {
         var response = await _httpClient.GetAsync(endpoint);
@@ -39,5 +54,17 @@ public class ApiService
             return default;
 
         return await response.Content.ReadFromJsonAsync<T>();
+    }
+
+    public async Task<bool> PutAsync<TRequest>(string endpoint, TRequest data)
+    {
+        var response = await _httpClient.PutAsJsonAsync(endpoint, data);
+        return response.IsSuccessStatusCode;
+    }
+
+    public async Task<bool> DeleteAsync(string endpoint)
+    {
+        var response = await _httpClient.DeleteAsync(endpoint);
+        return response.IsSuccessStatusCode;
     }
 }

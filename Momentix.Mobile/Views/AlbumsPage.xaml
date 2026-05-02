@@ -3,72 +3,100 @@
     x:Class="Momentix.Mobile.Views.AlbumsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Albums">
+    Title="Albums"
+    BackgroundColor="#F6F4EF">
 
     <VerticalStackLayout Padding="20" Spacing="15">
-
-        <Grid ColumnDefinitions="*,Auto">
-            <Label
-                Text="My Albums"
-                FontSize="28"
-                FontAttributes="Bold"
-                VerticalOptions="Center" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Spacing="2">
+                <Label
+                    Text="Momentix Albums"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="#1D1B20" />
+                <Label
+                    Text="This is the updated mobile build"
+                    FontSize="13"
+                    TextColor="#625B71" />
+            </VerticalStackLayout>
 
             <Button
                 Grid.Column="1"
                 Text="Logout"
-                Command="{Binding LogoutCommand}" />
+                Command="{Binding LogoutCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#6750A4" />
         </Grid>
 
         <Button
-            Text="Load Albums"
-            Command="{Binding LoadAlbumsCommand}" />
+            Text="Refresh Albums"
+            Command="{Binding LoadAlbumsCommand}"
+            BackgroundColor="#EADDFF"
+            TextColor="#21005D"
+            CornerRadius="8" />
 
         <Button
             Text="Create Album"
-            Command="{Binding GoToCreateAlbumCommand}" />
+            Command="{Binding GoToCreateAlbumCommand}"
+            BackgroundColor="#6750A4"
+            TextColor="White"
+            CornerRadius="8" />
 
         <ActivityIndicator
             IsRunning="{Binding IsLoading}"
-            IsVisible="{Binding IsLoading}" />
+            IsVisible="{Binding IsLoading}"
+            Color="#6750A4" />
 
         <Label
             Text="{Binding ErrorMessage}"
-            TextColor="Red" />
+            TextColor="#B3261E" />
 
-        <CollectionView ItemsSource="{Binding Albums}">
+        <CollectionView
+            ItemsSource="{Binding Albums}"
+            SelectedItem="{Binding SelectedAlbum, Mode=TwoWay}"
+            SelectionMode="Single">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Frame
                         Padding="15"
                         Margin="0,5"
-                        CornerRadius="12">
+                        CornerRadius="8"
+                        BackgroundColor="White"
+                        BorderColor="#E7E0EC">
                         <VerticalStackLayout Spacing="6">
                             <Label
                                 Text="{Binding Title}"
                                 FontSize="20"
-                                FontAttributes="Bold" />
+                                FontAttributes="Bold"
+                                TextColor="#1D1B20" />
 
                             <Label
                                 Text="{Binding Description}"
-                                FontSize="14" />
+                                FontSize="14"
+                                TextColor="#49454F" />
 
                             <Label
-                                Text="{Binding OwnerName}"
-                                FontSize="13" />
+                                Text="{Binding OwnerName, StringFormat='Owner: {0}'}"
+                                FontSize="13"
+                                TextColor="#625B71" />
 
-                            <Label
-                                Text="{Binding MemberCount, StringFormat='Members: {0}'}"
-                                FontSize="13" />
+                            <Grid ColumnDefinitions="*,*">
+                                <Label
+                                    Text="{Binding MemberCount, StringFormat='Members: {0}'}"
+                                    FontSize="13"
+                                    TextColor="#625B71" />
 
-                            <Label
-                                Text="{Binding MediaCount, StringFormat='Media: {0}'}"
-                                FontSize="13" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding MediaCount, StringFormat='Media: {0}'}"
+                                    FontSize="13"
+                                    HorizontalTextAlignment="End"
+                                    TextColor="#625B71" />
+                            </Grid>
                         </VerticalStackLayout>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
     </VerticalStackLayout>
 </ContentPage>

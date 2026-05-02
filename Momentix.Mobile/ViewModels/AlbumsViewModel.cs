@@ -13,6 +13,20 @@ namespace Momentix.Mobile.ViewModels
 
         public ObservableCollection<AlbumResponseDto> Albums { get; } = new();
 
+        private AlbumResponseDto? _selectedAlbum;
+        public AlbumResponseDto? SelectedAlbum
+        {
+            get => _selectedAlbum;
+            set
+            {
+                _selectedAlbum = value;
+                OnPropertyChanged();
+
+                if (value != null)
+                    OpenAlbumCommand.Execute(value);
+            }
+        }
+
         private string _errorMessage = string.Empty;
         public string ErrorMessage
         {
@@ -29,6 +43,7 @@ namespace Momentix.Mobile.ViewModels
 
         public IRelayCommand LoadAlbumsCommand => new AsyncRelayCommand(LoadAlbums);
         public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
+        public IRelayCommand<AlbumResponseDto> OpenAlbumCommand => new AsyncRelayCommand<AlbumResponseDto>(OpenAlbum);
 
         public AlbumsViewModel(ApiService apiService)
         {
@@ -67,6 +82,7 @@ namespace Momentix.Mobile.ViewModels
             Preferences.Remove("auth_token");
             Preferences.Remove("user_name");
             Preferences.Remove("user_id");
+            _apiService.ClearToken();
 
             await Shell.Current.GoToAsync("//LoginPage");
         }
@@ -95,6 +111,22 @@ namespace Momentix.Mobile.ViewModels
         private async Task GoToCreateAlbum()
         {
             await Shell.Current.GoToAsync("//CreateAlbumPage");
+        }
+
+        private async Task OpenAlbum(AlbumResponseDto? album)
+        {
+            if (album == null)
+                return;
+
+            SelectedAlbum = null;
+
+            var parameters = new Dictionary<string, object>
+            {
+                ["AlbumId"] = album.Id,
+                ["AlbumTitle"] = album.Title
+            };
+
+            await Shell.Current.GoToAsync("AlbumDetailsPage", parameters);
         }
     }
 }

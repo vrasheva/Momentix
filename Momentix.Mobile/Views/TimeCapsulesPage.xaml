@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.TimeCapsulesPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Capsules"
+    BackgroundColor="#F6F4EF">
+
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <VerticalStackLayout Spacing="2">
+                <Label
+                    Text="Time Capsules"
+                    FontSize="28"
+                    FontAttributes="Bold"
+                    TextColor="#1D1B20" />
+                <Label
+                    Text="Locked memories with a live countdown"
+                    FontSize="13"
+                    TextColor="#625B71" />
+            </VerticalStackLayout>
+
+            <Button
+                Grid.Column="1"
+                Text="Logout"
+                Command="{Binding LogoutCommand}"
+                BackgroundColor="Transparent"
+                TextColor="#6750A4" />
+        </Grid>
+
+        <RefreshView
+            Grid.Row="1"
+            Command="{Binding LoadCapsulesCommand}"
+            IsRefreshing="{Binding IsLoading}">
+            <ScrollView>
+                <VerticalStackLayout Spacing="14">
+                    <Button
+                        Text="New Capsule"
+                        Command="{Binding GoToCreateCapsuleCommand}"
+                        BackgroundColor="#6750A4"
+                        TextColor="White"
+                        CornerRadius="8"
+                        HeightRequest="50" />
+
+                    <Label
+                        Text="{Binding ErrorMessage}"
+                        TextColor="#B3261E" />
+
+                    <CollectionView ItemsSource="{Binding Capsules}">
+                        <CollectionView.EmptyView>
+                            <Label
+                                Text="No capsules yet."
+                                Padding="0,48"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#625B71" />
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame
+                                    Padding="16"
+                                    Margin="0,6"
+                                    CornerRadius="8"
+                                    BackgroundColor="White"
+                                    BorderColor="#E7E0EC">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label
+                                                Text="{Binding Title}"
+                                                FontSize="20"
+                                                FontAttributes="Bold"
+                                                TextColor="#1D1B20" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding StatusText}"
+                                                FontSize="13"
+                                                TextColor="#6750A4" />
+                                        </Grid>
+
+                                        <Label
+                                            Text="{Binding Description}"
+                                            FontSize="14"
+                                            TextColor="#49454F" />
+
+                                        <Label
+                                            Text="{Binding CountdownText}"
+                                            FontSize="24"
+                                            FontAttributes="Bold"
+                                            TextColor="#386A20" />
+
+                                        <Label
+                                            Text="{Binding UnlockDateText}"
+                                            FontSize="13"
+                                            TextColor="#625B71" />
+
+                                        <Grid ColumnDefinitions="*,*">
+                                            <Label
+                                                Text="{Binding MemberCount, StringFormat='Members: {0}'}"
+                                                FontSize="13"
+                                                TextColor="#625B71" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding MediaCount, StringFormat='Media: {0}'}"
+                                                FontSize="13"
+                                                HorizontalTextAlignment="End"
+                                                TextColor="#625B71" />
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

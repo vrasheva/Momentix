@@ -50,7 +50,7 @@ namespace Momentix.API.Controllers
                 Token = token,
                 UserId = user.Id,
                 FullName = user.FullName,
-                Email = user.Email
+                Email = user.Email ?? string.Empty
             });
         }
 
@@ -72,7 +72,7 @@ namespace Momentix.API.Controllers
                 Token = token,
                 UserId = user.Id,
                 FullName = user.FullName,
-                Email = user.Email
+                Email = user.Email ?? string.Empty
             });
         }
     }
