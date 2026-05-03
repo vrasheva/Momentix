@@ -46,11 +46,11 @@ namespace Momentix.API.Controllers
                     Description = tc.Description,
                     UnlockAt = tc.UnlockAt,
                     CreatedAt = tc.CreatedAt,
-                    IsUnlocked = tc.IsUnlocked,
+                    IsUnlocked = tc.IsUnlocked || tc.UnlockAt <= now,
                     OwnerName = tc.Owner.FullName,
                     MemberCount = tc.Members.Count,
                     MediaCount = tc.MediaItems.Count,
-                    TimeRemaining = tc.IsUnlocked ? null : (tc.UnlockAt > now ? tc.UnlockAt - now : TimeSpan.Zero)
+                    TimeRemaining = (tc.IsUnlocked || tc.UnlockAt <= now) ? null : tc.UnlockAt - now
                 })
                 .ToListAsync();
 
@@ -86,11 +86,11 @@ namespace Momentix.API.Controllers
                 Description = capsule.Description,
                 UnlockAt = capsule.UnlockAt,
                 CreatedAt = capsule.CreatedAt,
-                IsUnlocked = capsule.IsUnlocked,
+                IsUnlocked = capsule.IsUnlocked || capsule.UnlockAt <= now,
                 OwnerName = capsule.Owner.FullName,
                 MemberCount = capsule.Members.Count,
                 MediaCount = capsule.MediaItems.Count,
-                TimeRemaining = capsule.IsUnlocked ? null : (capsule.UnlockAt > now ? capsule.UnlockAt - now : TimeSpan.Zero)
+                TimeRemaining = (capsule.IsUnlocked || capsule.UnlockAt <= now) ? null : capsule.UnlockAt - now
             });
         }
 

@@ -43,7 +43,7 @@
 
                 <Label Text="{Binding StatusMessage}" TextColor="#6750A4" />
 
-                <Label Text="My submissions" FontSize="20" FontAttributes="Bold" TextColor="#1D1B20" />
+                <Label Text="Feed" FontSize="20" FontAttributes="Bold" TextColor="#1D1B20" />
 
                 <CollectionView ItemsSource="{Binding Submissions}">
                     <CollectionView.EmptyView>
@@ -65,10 +65,20 @@
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding UserName}" FontAttributes="Bold" TextColor="#1D1B20" />
                                     <Label Text="{Binding MediaUrl}" TextColor="#49454F" />
-                                    <Label
-                                        Text="{Binding SubmittedAt, StringFormat='Submitted: {0:dd.MM.yyyy HH:mm}'}"
-                                        FontSize="13"
-                                        TextColor="#625B71" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <Label
+                                            Text="{Binding VoteCount, StringFormat='Votes: {0}'}"
+                                            FontSize="13"
+                                            TextColor="#625B71" />
+                                        <Button
+                                            Grid.Column="1"
+                                            Text="Vote"
+                                            Command="{Binding BindingContext.VoteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#386A20"
+                                            TextColor="White"
+                                            CornerRadius="8" />
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Frame>
                         </DataTemplate>

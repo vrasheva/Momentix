@@ -44,10 +44,8 @@ public class ChallengesController : ControllerBase
     [HttpGet("{challengeId}/submissions")]
     public async Task<IActionResult> GetSubmissions(int challengeId)
     {
-        var userId = GetUserId();
-
         var submissions = await _context.ChallengeSubmissions
-            .Where(s => s.ChallengeId == challengeId && s.UserId == userId)
+            .Where(s => s.ChallengeId == challengeId)
             .Include(s => s.User)
             .Include(s => s.Votes)
             .OrderByDescending(s => s.SubmittedAt)

@@ -62,6 +62,9 @@ public partial class ChallengesViewModel : BaseViewModel
 
     private async Task Load()
     {
+        if (IsLoading)
+            return;
+
         IsLoading = true;
         StatusMessage = string.Empty;
 
@@ -91,14 +94,25 @@ public partial class ChallengesViewModel : BaseViewModel
             $"Challenges/{ActiveChallenge.Id}/submissions");
 
         if (result == null)
+        {
+            StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                ? "Submissions could not be loaded."
+                : _apiService.LastErrorMessage;
             return;
+        }
 
-        foreach (var submission in result)
+        foreach (var submission in result
+            .GroupBy(s => s.Id)
+            .Select(g => g.First())
+            .OrderByDescending(s => s.SubmittedAt))
             Submissions.Add(submission);
     }
 
     private async Task Submit()
     {
+        if (IsLoading)
+            return;
+
         if (ActiveChallenge == null)
         {
             StatusMessage = "No active challenge.";
@@ -122,11 +136,15 @@ public partial class ChallengesViewModel : BaseViewModel
 
             if (result == null)
             {
-                StatusMessage = "Submission was not saved.";
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Submission was not saved."
+                    : _apiService.LastErrorMessage;
                 return;
             }
 
-            Submissions.Insert(0, result);
+            if (!Submissions.Any(s => s.Id == result.Id))
+                Submissions.Insert(0, result);
+
             SubmissionText = string.Empty;
             StatusMessage = "Submission saved. Streak +1.";
         }

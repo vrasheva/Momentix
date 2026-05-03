@@ -58,6 +58,9 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
     private async Task LoadCapsules()
     {
+        if (IsLoading)
+            return;
+
         IsLoading = true;
         ErrorMessage = string.Empty;
 
@@ -68,7 +71,9 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
             if (result == null)
             {
-                ErrorMessage = "Capsules could not be loaded. Login again and make sure the API is running.";
+                ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Capsules could not be loaded. Login again and make sure the API is running."
+                    : _apiService.LastErrorMessage;
                 return;
             }
 
@@ -78,11 +83,11 @@ public partial class TimeCapsulesViewModel : BaseViewModel
                 return;
             }
 
-            if (result != null)
-            {
-                foreach (var capsule in result.OrderBy(c => c.UnlockAt))
-                    Capsules.Add(new TimeCapsuleItemViewModel(capsule));
-            }
+            foreach (var capsule in result
+                .GroupBy(c => c.Id)
+                .Select(g => g.First())
+                .OrderBy(c => c.UnlockAt))
+                Capsules.Add(new TimeCapsuleItemViewModel(capsule));
         }
         catch (Exception ex)
         {
@@ -96,7 +101,14 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
     private async Task GoToCreateCapsule()
     {
-        await Shell.Current.GoToAsync("CreateTimeCapsulePage");
+        try
+        {
+            await Shell.Current.GoToAsync("CreateTimeCapsulePage");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
     }
 
     private async Task Logout()

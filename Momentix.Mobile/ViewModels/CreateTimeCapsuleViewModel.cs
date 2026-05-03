@@ -89,7 +89,9 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
 
             if (result == null)
             {
-                ErrorMessage = "Capsule was not created.";
+                ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Capsule was not created."
+                    : _apiService.LastErrorMessage;
                 return;
             }
 
