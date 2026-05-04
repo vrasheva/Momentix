@@ -74,7 +74,7 @@ public partial class CreateAlbumViewModel : BaseViewModel
             Title = string.Empty;
             Description = string.Empty;
 
-            await Shell.Current.GoToAsync("//AlbumsPage");
+            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
@@ -88,6 +88,6 @@ public partial class CreateAlbumViewModel : BaseViewModel
 
     private async Task Cancel()
     {
-        await Shell.Current.GoToAsync("//AlbumsPage");
+        await Shell.Current.GoToAsync("..");
     }
 }

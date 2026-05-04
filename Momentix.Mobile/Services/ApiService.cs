@@ -69,6 +69,30 @@ public class ApiService
         return await response.Content.ReadFromJsonAsync<T>();
     }
 
+    public async Task<T?> PostFileAsync<T>(
+        string endpoint,
+        Stream fileStream,
+        string fileName,
+        string contentType)
+    {
+        LastErrorMessage = string.Empty;
+
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(fileStream);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        content.Add(streamContent, "file", fileName);
+
+        var response = await _httpClient.PostAsync(endpoint, content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            LastErrorMessage = await response.Content.ReadAsStringAsync();
+            return default;
+        }
+
+        return await response.Content.ReadFromJsonAsync<T>();
+    }
+
     public async Task<bool> PutAsync<TRequest>(string endpoint, TRequest data)
     {
         LastErrorMessage = string.Empty;

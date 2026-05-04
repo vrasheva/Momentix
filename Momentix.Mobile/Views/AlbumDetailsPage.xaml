@@ -26,6 +26,18 @@
             <Frame Padding="14" CornerRadius="8" BackgroundColor="White" BorderColor="#E7E0EC">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="Share album" FontSize="18" FontAttributes="Bold" TextColor="#1D1B20" />
+                    <Picker
+                        Title="Select friend"
+                        ItemsSource="{Binding Friends}"
+                        SelectedItem="{Binding SelectedFriend}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        BackgroundColor="#F6F4EF" />
+                    <Button
+                        Text="Add Selected Friend"
+                        Command="{Binding AddSelectedFriendCommand}"
+                        BackgroundColor="#EADDFF"
+                        TextColor="#21005D"
+                        CornerRadius="8" />
                     <Entry
                         Placeholder="User email"
                         Text="{Binding MemberEmail}"
@@ -38,6 +50,18 @@
                     <Button
                         Text="Add Member"
                         Command="{Binding AddMemberCommand}"
+                        BackgroundColor="#6750A4"
+                        TextColor="White"
+                        CornerRadius="8" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame Padding="14" CornerRadius="8" BackgroundColor="White" BorderColor="#E7E0EC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Photo upload" FontSize="18" FontAttributes="Bold" TextColor="#1D1B20" />
+                    <Button
+                        Text="Pick Photo"
+                        Command="{Binding PickPhotoCommand}"
                         BackgroundColor="#6750A4"
                         TextColor="White"
                         CornerRadius="8" />
@@ -90,7 +114,17 @@
                             BorderColor="#E7E0EC">
                             <VerticalStackLayout Spacing="8">
                                 <Label Text="{Binding Type}" FontSize="13" TextColor="#6750A4" />
-                                <Label Text="{Binding Url}" FontSize="16" TextColor="#1D1B20" />
+                                <Image
+                                    Source="{Binding Url}"
+                                    IsVisible="{Binding IsImage}"
+                                    Aspect="AspectFill"
+                                    HeightRequest="220"
+                                    BackgroundColor="#F6F4EF" />
+                                <Label
+                                    Text="{Binding Url}"
+                                    IsVisible="{Binding IsLetter}"
+                                    FontSize="16"
+                                    TextColor="#1D1B20" />
                                 <Label
                                     Text="{Binding UploadedByName, StringFormat='By: {0}'}"
                                     FontSize="13"

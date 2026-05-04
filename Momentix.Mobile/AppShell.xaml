@@ -20,6 +20,11 @@
             ContentTemplate="{DataTemplate views:AlbumsPage}" />
 
         <ShellContent
+            Title="Friends"
+            Route="FriendsPage"
+            ContentTemplate="{DataTemplate views:FriendsPage}" />
+
+        <ShellContent
             Title="Capsules"
             Route="TimeCapsulesPage"
             ContentTemplate="{DataTemplate views:TimeCapsulesPage}" />
@@ -29,9 +34,4 @@
             Route="ChallengesPage"
             ContentTemplate="{DataTemplate views:ChallengesPage}" />
     </TabBar>
-
-    <ShellContent
-        Route="CreateAlbumPage"
-        ContentTemplate="{DataTemplate views:CreateAlbumPage}" />
-
 </Shell>

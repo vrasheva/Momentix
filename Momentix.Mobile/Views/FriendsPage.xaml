@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.FriendsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Friends"
+    BackgroundColor="#F6F4EF">
+
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
+        <VerticalStackLayout Spacing="2">
+            <Label
+                Text="Friends"
+                FontSize="28"
+                FontAttributes="Bold"
+                TextColor="#1D1B20" />
+            <Label
+                Text="People you can quickly add to shared albums"
+                FontSize="13"
+                TextColor="#625B71" />
+        </VerticalStackLayout>
+
+        <RefreshView
+            Grid.Row="1"
+            Command="{Binding LoadFriendsCommand}"
+            IsRefreshing="{Binding IsLoading}">
+            <ScrollView>
+                <VerticalStackLayout Spacing="14">
+                    <Frame Padding="14" CornerRadius="8" BackgroundColor="White" BorderColor="#E7E0EC">
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="Add friend" FontSize="18" FontAttributes="Bold" TextColor="#1D1B20" />
+                            <Entry
+                                Placeholder="Friend email"
+                                Text="{Binding FriendEmail}"
+                                Keyboard="Email"
+                                BackgroundColor="#F6F4EF" />
+                            <Button
+                                Text="Add Friend"
+                                Command="{Binding AddFriendCommand}"
+                                BackgroundColor="#6750A4"
+                                TextColor="White"
+                                CornerRadius="8" />
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <Button
+                        Text="Refresh Friends"
+                        Command="{Binding LoadFriendsCommand}"
+                        BackgroundColor="#EADDFF"
+                        TextColor="#21005D"
+                        CornerRadius="8" />
+
+                    <Label
+                        Text="{Binding StatusMessage}"
+                        TextColor="#6750A4" />
+
+                    <CollectionView x:Name="FriendsList" ItemsSource="{Binding Friends}">
+                        <CollectionView.EmptyView>
+                            <Label
+                                Text="No friends yet."
+                                Padding="0,40"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#625B71" />
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame
+                                    Padding="14"
+                                    Margin="0,6"
+                                    CornerRadius="8"
+                                    BackgroundColor="White"
+                                    BorderColor="#E7E0EC">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Label
+                                                Text="{Binding FullName}"
+                                                FontSize="18"
+                                                FontAttributes="Bold"
+                                                TextColor="#1D1B20" />
+                                            <Label
+                                                Text="{Binding Email}"
+                                                FontSize="13"
+                                                TextColor="#625B71" />
+                                        </VerticalStackLayout>
+
+                                        <Button
+                                            Grid.Column="1"
+                                            Text="Remove"
+                                            Command="{Binding BindingContext.RemoveFriendCommand, Source={x:Reference FriendsList}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#B3261E" />
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

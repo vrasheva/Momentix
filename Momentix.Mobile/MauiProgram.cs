@@ -30,6 +30,8 @@ namespace Momentix.Mobile
             builder.Services.AddTransient<AlbumDetailsPage>();
             builder.Services.AddTransient<CreateAlbumViewModel>();
             builder.Services.AddTransient<CreateAlbumPage>();
+            builder.Services.AddTransient<FriendsViewModel>();
+            builder.Services.AddTransient<FriendsPage>();
             builder.Services.AddTransient<TimeCapsulesViewModel>();
             builder.Services.AddTransient<TimeCapsulesPage>();
             builder.Services.AddTransient<CreateTimeCapsuleViewModel>();

@@ -1,12 +1,15 @@
 using CommunityToolkit.Mvvm.Input;
 using Momentix.Data.DTOs;
 using Momentix.Mobile.Services;
+using System.Collections.ObjectModel;
 
 namespace Momentix.Mobile.ViewModels;
 
 public partial class CreateTimeCapsuleViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
+
+    public ObservableCollection<SelectedPhotoItemViewModel> SelectedPhotos { get; } = new();
 
     private string _title = string.Empty;
     public string Title
@@ -51,11 +54,56 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     }
 
     public IRelayCommand SaveCommand => new AsyncRelayCommand(Save);
+    public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
+    public IRelayCommand<SelectedPhotoItemViewModel> RemovePhotoCommand => new RelayCommand<SelectedPhotoItemViewModel>(RemovePhoto);
     public IRelayCommand CancelCommand => new AsyncRelayCommand(Cancel);
+
+    public string SelectedPhotoCountText => SelectedPhotos.Count == 0
+        ? "No photos selected"
+        : $"{SelectedPhotos.Count} photo(s) selected";
 
     public CreateTimeCapsuleViewModel(ApiService apiService)
     {
         _apiService = apiService;
+    }
+
+    private async Task PickPhoto()
+    {
+        try
+        {
+            var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Select capsule photo"
+            });
+
+            if (file == null)
+                return;
+
+            SelectedPhotos.Add(new SelectedPhotoItemViewModel(file));
+            OnPropertyChanged(nameof(SelectedPhotoCountText));
+            ErrorMessage = string.Empty;
+        }
+        catch (FeatureNotSupportedException)
+        {
+            ErrorMessage = "Photo picker is not supported on this device.";
+        }
+        catch (PermissionException)
+        {
+            ErrorMessage = "Photo permission was denied.";
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private void RemovePhoto(SelectedPhotoItemViewModel? photo)
+    {
+        if (photo == null)
+            return;
+
+        SelectedPhotos.Remove(photo);
+        OnPropertyChanged(nameof(SelectedPhotoCountText));
     }
 
     private async Task Save()
@@ -95,8 +143,32 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
                 return;
             }
 
+            foreach (var photo in SelectedPhotos.ToList())
+            {
+                await using var stream = await photo.File.OpenReadAsync();
+                var contentType = string.IsNullOrWhiteSpace(photo.File.ContentType)
+                    ? "image/jpeg"
+                    : photo.File.ContentType;
+
+                var uploadResult = await _apiService.PostFileAsync<MediaResponseDto>(
+                    $"Media/timecapsule/{result.Id}/photo",
+                    stream,
+                    photo.File.FileName,
+                    contentType);
+
+                if (uploadResult == null)
+                {
+                    ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                        ? "Capsule was created, but a photo was not uploaded."
+                        : _apiService.LastErrorMessage;
+                    return;
+                }
+            }
+
             Title = string.Empty;
             Description = string.Empty;
+            SelectedPhotos.Clear();
+            OnPropertyChanged(nameof(SelectedPhotoCountText));
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)

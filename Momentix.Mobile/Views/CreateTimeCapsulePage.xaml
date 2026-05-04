@@ -33,6 +33,40 @@
             <Label Text="Unlock time" FontAttributes="Bold" TextColor="#1D1B20" />
             <TimePicker Time="{Binding UnlockTime}" BackgroundColor="White" HeightRequest="52" />
 
+            <Frame Padding="14" CornerRadius="8" BackgroundColor="White" BorderColor="#E7E0EC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Capsule photos" FontSize="18" FontAttributes="Bold" TextColor="#1D1B20" />
+                    <Label Text="{Binding SelectedPhotoCountText}" FontSize="13" TextColor="#625B71" />
+                    <Button
+                        Text="Add Photo"
+                        Command="{Binding PickPhotoCommand}"
+                        BackgroundColor="#EADDFF"
+                        TextColor="#21005D"
+                        CornerRadius="8" />
+
+                    <CollectionView x:Name="SelectedPhotosList" ItemsSource="{Binding SelectedPhotos}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="0,4">
+                                    <Label
+                                        Text="{Binding FileName}"
+                                        FontSize="13"
+                                        VerticalOptions="Center"
+                                        TextColor="#49454F" />
+                                    <Button
+                                        Grid.Column="1"
+                                        Text="Remove"
+                                        Command="{Binding BindingContext.RemovePhotoCommand, Source={x:Reference SelectedPhotosList}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#B3261E" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
+
             <Label Text="{Binding ErrorMessage}" TextColor="#B3261E" />
 
             <ActivityIndicator

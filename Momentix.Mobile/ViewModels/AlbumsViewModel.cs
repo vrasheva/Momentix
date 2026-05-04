@@ -13,20 +13,6 @@ namespace Momentix.Mobile.ViewModels
 
         public ObservableCollection<AlbumResponseDto> Albums { get; } = new();
 
-        private AlbumResponseDto? _selectedAlbum;
-        public AlbumResponseDto? SelectedAlbum
-        {
-            get => _selectedAlbum;
-            set
-            {
-                _selectedAlbum = value;
-                OnPropertyChanged();
-
-                if (value != null)
-                    OpenAlbumCommand.Execute(value);
-            }
-        }
-
         private string _errorMessage = string.Empty;
         public string ErrorMessage
         {
@@ -110,7 +96,14 @@ namespace Momentix.Mobile.ViewModels
         }
         private async Task GoToCreateAlbum()
         {
-            await Shell.Current.GoToAsync("//CreateAlbumPage");
+            try
+            {
+                await Shell.Current.GoToAsync("CreateAlbumPage");
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
         }
 
         private async Task OpenAlbum(AlbumResponseDto? album)
@@ -118,15 +111,20 @@ namespace Momentix.Mobile.ViewModels
             if (album == null)
                 return;
 
-            SelectedAlbum = null;
-
             var parameters = new Dictionary<string, object>
             {
                 ["AlbumId"] = album.Id,
                 ["AlbumTitle"] = album.Title
             };
 
-            await Shell.Current.GoToAsync("AlbumDetailsPage", parameters);
+            try
+            {
+                await Shell.Current.GoToAsync("AlbumDetailsPage", parameters);
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
         }
     }
 }

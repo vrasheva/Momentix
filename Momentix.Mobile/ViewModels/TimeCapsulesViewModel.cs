@@ -28,6 +28,7 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
     public IRelayCommand LoadCapsulesCommand => new AsyncRelayCommand(LoadCapsules);
     public IRelayCommand GoToCreateCapsuleCommand => new AsyncRelayCommand(GoToCreateCapsule);
+    public IRelayCommand<TimeCapsuleItemViewModel> OpenCapsuleCommand => new AsyncRelayCommand<TimeCapsuleItemViewModel>(OpenCapsule);
     public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
 
     public TimeCapsulesViewModel(ApiService apiService)
@@ -111,6 +112,27 @@ public partial class TimeCapsulesViewModel : BaseViewModel
         }
     }
 
+    private async Task OpenCapsule(TimeCapsuleItemViewModel? capsule)
+    {
+        if (capsule == null)
+            return;
+
+        try
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                ["TimeCapsuleId"] = capsule.Id,
+                ["CapsuleTitle"] = capsule.Title
+            };
+
+            await Shell.Current.GoToAsync("TimeCapsuleDetailsPage", parameters);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
     private async Task Logout()
     {
         Preferences.Remove("auth_token");
@@ -126,6 +148,7 @@ public class TimeCapsuleItemViewModel : BaseViewModel
 {
     private readonly TimeCapsuleResponseDto _capsule;
 
+    public int Id => _capsule.Id;
     public string Title => _capsule.Title;
     public string? Description => _capsule.Description;
     public string OwnerName => _capsule.OwnerName;

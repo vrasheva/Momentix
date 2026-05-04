@@ -16,6 +16,7 @@ namespace Momentix.Data.Data
         public DbSet<Challenge> Challenges { get; set; }
         public DbSet<ChallengeSubmission> ChallengeSubmissions { get; set; }
         public DbSet<ChallengeVote> ChallengeVotes { get; set; }
+        public DbSet<Friend> Friends { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -49,6 +50,22 @@ namespace Momentix.Data.Data
                 .HasOne(cv => cv.VotedBy)
                 .WithMany()
                 .HasForeignKey(cv => cv.VotedByUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Friend>()
+                .HasIndex(f => new { f.UserId, f.FriendUserId })
+                .IsUnique();
+
+            builder.Entity<Friend>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Friend>()
+                .HasOne(f => f.FriendUser)
+                .WithMany()
+                .HasForeignKey(f => f.FriendUserId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.Entity<Media>()

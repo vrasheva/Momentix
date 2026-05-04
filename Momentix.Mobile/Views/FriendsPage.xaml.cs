@@ -2,11 +2,11 @@ using Momentix.Mobile.ViewModels;
 
 namespace Momentix.Mobile.Views;
 
-public partial class AlbumDetailsPage : ContentPage
+public partial class FriendsPage : ContentPage
 {
-    private readonly AlbumDetailsViewModel _viewModel;
+    private readonly FriendsViewModel _viewModel;
 
-    public AlbumDetailsPage(AlbumDetailsViewModel viewModel)
+    public FriendsPage(FriendsViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
@@ -16,6 +16,8 @@ public partial class AlbumDetailsPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.PageAppeared();
+
+        if (_viewModel.LoadFriendsCommand.CanExecute(null))
+            _viewModel.LoadFriendsCommand.Execute(null);
     }
 }
