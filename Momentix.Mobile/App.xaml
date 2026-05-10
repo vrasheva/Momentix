@@ -6,6 +6,17 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <Color x:Key="PageBackground">#F7F6F2</Color>
+            <Color x:Key="CardBackground">#FFFFFF</Color>
+            <Color x:Key="TextPrimary">#1A1A1A</Color>
+            <Color x:Key="TextSecondary">#888888</Color>
+            <Color x:Key="BorderColor">#E5E3DC</Color>
+            <Color x:Key="TabBackground">#FFFFFF</Color>
+            <Color x:Key="Primary">#7F77DD</Color>
+            <Color x:Key="PrimaryDark">#534AB7</Color>
+            <Color x:Key="PrimaryLight">#EEEDFE</Color>
+            <Color x:Key="PrimaryBorder">#CECBF6</Color>
+            <Color x:Key="PrimaryText">#26215C</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -41,7 +41,8 @@ namespace Momentix.Mobile
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-
+            var app = builder.Build();
+            return app;
             return builder.Build();
         }
     }

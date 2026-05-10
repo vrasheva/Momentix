@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Momentix.Mobile.Views.ThemePickerPage"
+             Title="Избери тема">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="24">
+
+            <Label Text="Персонализирай Momentix"
+                   FontSize="22" FontAttributes="Bold"
+                   HorizontalOptions="Center"/>
+
+            <Label Text="Избери цвят"
+                   FontSize="14" TextColor="{DynamicResource TextSecondary}"/>
+
+            <HorizontalStackLayout Spacing="12" HorizontalOptions="Center"
+                                   x:Name="SwatchContainer"/>
+
+            <Label Text="Тема" FontSize="14"
+                   TextColor="{DynamicResource TextSecondary}"/>
+
+            <HorizontalStackLayout Spacing="12">
+                <Label Text="Светла" VerticalOptions="Center"/>
+                <Switch x:Name="DarkSwitch" Toggled="OnDarkToggled"/>
+                <Label Text="Тъмна" VerticalOptions="Center"/>
+            </HorizontalStackLayout>
+
+            <Button Text="Запази и продължи"
+                    Clicked="OnSave"
+                    BackgroundColor="{DynamicResource Primary}"
+                    TextColor="White"
+                    CornerRadius="16"
+                    HeightRequest="52"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -4,7 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="Albums"
-    BackgroundColor="#F6F4EF">
+    BackgroundColor="{DynamicResource PageBackground}">
 
     <VerticalStackLayout Padding="20" Spacing="15">
         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
@@ -13,11 +13,11 @@
                     Text="Momentix Albums"
                     FontSize="28"
                     FontAttributes="Bold"
-                    TextColor="#1D1B20" />
+                    TextColor="{DynamicResource TextPrimary}" />
                 <Label
                     Text="This is the updated mobile build"
                     FontSize="13"
-                    TextColor="#625B71" />
+                    TextColor="{DynamicResource TextSecondary}" />
             </VerticalStackLayout>
 
             <Button
@@ -25,27 +25,27 @@
                 Text="Logout"
                 Command="{Binding LogoutCommand}"
                 BackgroundColor="Transparent"
-                TextColor="#6750A4" />
+                TextColor="{DynamicResource Primary}" />
         </Grid>
 
         <Button
             Text="Refresh Albums"
             Command="{Binding LoadAlbumsCommand}"
-            BackgroundColor="#EADDFF"
-            TextColor="#21005D"
-            CornerRadius="8" />
+            BackgroundColor="{DynamicResource PrimaryLight}"
+            TextColor="{DynamicResource PrimaryText}"
+            CornerRadius="12" />
 
         <Button
             Text="Create Album"
             Command="{Binding GoToCreateAlbumCommand}"
-            BackgroundColor="#6750A4"
+            BackgroundColor="{DynamicResource Primary}"
             TextColor="White"
-            CornerRadius="8" />
+            CornerRadius="12" />
 
         <ActivityIndicator
             IsRunning="{Binding IsLoading}"
             IsVisible="{Binding IsLoading}"
-            Color="#6750A4" />
+            Color="{DynamicResource Primary}" />
 
         <Label
             Text="{Binding ErrorMessage}"
@@ -57,58 +57,61 @@
             SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame
+                    <Border
                         Padding="15"
                         Margin="0,5"
-                        CornerRadius="8"
-                        BackgroundColor="White"
-                        BorderColor="#E7E0EC">
-                        <Frame.GestureRecognizers>
+                        BackgroundColor="{DynamicResource CardBackground}"
+                        StrokeThickness="1"
+                        Stroke="{DynamicResource BorderColor}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
                             <TapGestureRecognizer
                                 Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference AlbumsList}}"
                                 CommandParameter="{Binding .}" />
-                        </Frame.GestureRecognizers>
+                        </Border.GestureRecognizers>
 
                         <VerticalStackLayout Spacing="10">
                             <Label
                                 Text="{Binding Title}"
                                 FontSize="20"
                                 FontAttributes="Bold"
-                                TextColor="#1D1B20" />
+                                TextColor="{DynamicResource TextPrimary}" />
 
                             <Label
                                 Text="{Binding Description}"
                                 FontSize="14"
-                                TextColor="#49454F" />
+                                TextColor="{DynamicResource TextSecondary}" />
 
                             <Label
                                 Text="{Binding OwnerName, StringFormat='Owner: {0}'}"
                                 FontSize="13"
-                                TextColor="#625B71" />
+                                TextColor="{DynamicResource TextSecondary}" />
 
                             <Grid ColumnDefinitions="*,*">
                                 <Label
                                     Text="{Binding MemberCount, StringFormat='Members: {0}'}"
                                     FontSize="13"
-                                    TextColor="#625B71" />
+                                    TextColor="{DynamicResource TextSecondary}" />
 
                                 <Label
                                     Grid.Column="1"
                                     Text="{Binding MediaCount, StringFormat='Media: {0}'}"
                                     FontSize="13"
                                     HorizontalTextAlignment="End"
-                                    TextColor="#625B71" />
+                                    TextColor="{DynamicResource TextSecondary}" />
                             </Grid>
 
                             <Button
                                 Text="Open Album"
                                 Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference AlbumsList}}"
                                 CommandParameter="{Binding .}"
-                                BackgroundColor="#6750A4"
+                                BackgroundColor="{DynamicResource Primary}"
                                 TextColor="White"
-                                CornerRadius="8" />
+                                CornerRadius="10" />
                         </VerticalStackLayout>
-                    </Frame>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

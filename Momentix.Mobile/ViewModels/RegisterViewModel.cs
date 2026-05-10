@@ -45,6 +45,13 @@ namespace Momentix.Mobile.ViewModels
             set { _isLoading = value; OnPropertyChanged(); }
         }
 
+        private string _selectedTheme = "Purple";
+        public string SelectedTheme
+        {
+            get => _selectedTheme;
+            set { _selectedTheme = value; OnPropertyChanged(); }
+        }
+
         public RegisterViewModel(ApiService apiService)
         {
             _apiService = apiService;
@@ -52,6 +59,19 @@ namespace Momentix.Mobile.ViewModels
 
         public IRelayCommand RegisterCommand => new AsyncRelayCommand(Register);
         public IRelayCommand GoToLoginCommand => new AsyncRelayCommand(GoToLogin);
+        public IRelayCommand<string> SelectThemeCommand => new RelayCommand<string>(SelectTheme);
+
+        private void SelectTheme(string? theme)
+        {
+            if (string.IsNullOrEmpty(theme)) return;
+
+            var xpRequired = ThemeService.ThemeXpRequired;
+            if (!xpRequired.ContainsKey(theme)) return;
+            if (xpRequired[theme] > 0) return; // само безплатни теми при регистрация
+
+            SelectedTheme = theme;
+            ThemeService.Instance.ApplyTheme(theme, false);
+        }
 
         private async Task Register()
         {
@@ -80,21 +100,23 @@ namespace Momentix.Mobile.ViewModels
                 if (result != null)
                 {
                     _apiService.SetToken(result.Token);
-
                     Preferences.Set("auth_token", result.Token);
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);
-
+                    Preferences.Set("user_xp", 0);
+                    ThemeService.Instance.ApplyTheme(SelectedTheme, false);
                     await Shell.Current.GoToAsync("//AlbumsPage");
                 }
                 else
                 {
-                    ErrorMessage = "Грешка при регистрацията. Опитай отново.";
+                    ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                        ? "Грешка при регистрацията. Опитай отново."
+                        : _apiService.LastErrorMessage;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ErrorMessage = "Грешка при свързване със сървъра.";
+                ErrorMessage = $"Грешка: {ex.Message}";
             }
             finally
             {

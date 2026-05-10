@@ -3,62 +3,77 @@
     x:Class="Momentix.Mobile.Views.LoginPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Login"
-    BackgroundColor="#F6F4EF">
+    Title=""
+    BackgroundColor="White">
 
     <ScrollView>
-        <VerticalStackLayout Padding="32" Spacing="16" VerticalOptions="Center">
-            <Label
-                Text="Momentix"
-                FontSize="36"
-                FontAttributes="Bold"
-                HorizontalOptions="Center"
-                TextColor="#6750A4" />
+        <VerticalStackLayout Padding="32" Spacing="0" VerticalOptions="Center"
+                         MinimumHeightRequest="600">
 
-            <Label
-                Text="Sign in to your memory space"
-                FontSize="16"
-                HorizontalOptions="Center"
-                TextColor="#625B71"
-                Margin="0,0,0,16" />
+            <Label Text="Momentix" FontSize="42" FontAttributes="Bold,Italic"
+                   TextColor="#111111" CharacterSpacing="-1" Margin="0,0,0,4"/>
 
-            <Entry
-                Placeholder="Email"
-                Text="{Binding UserEmail}"
-                Keyboard="Email"
-                BackgroundColor="White"
-                HeightRequest="52" />
+            <Label Text="Добре дошъл отново" FontSize="14"
+                   TextColor="#888888" Margin="0,0,0,36"/>
 
-            <Entry
-                Placeholder="Password"
-                Text="{Binding UserPassword}"
-                IsPassword="True"
-                BackgroundColor="White"
-                HeightRequest="52" />
+            <Label Text="Имейл" FontSize="11" FontAttributes="Bold"
+                   TextColor="#888888" Margin="0,0,0,6"/>
+            <Border BackgroundColor="White" StrokeThickness="1"
+                    Stroke="#E0E0E0" Margin="0,0,0,16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10"/>
+                </Border.StrokeShape>
+                <Entry Placeholder="email@example.com" Text="{Binding UserEmail}"
+                       Keyboard="Email" HeightRequest="46" Margin="8,0"
+                       TextColor="#111111" PlaceholderColor="#BBBBBB"
+                       BackgroundColor="Transparent"/>
+            </Border>
 
-            <Label
-                Text="{Binding ErrorMessage}"
-                TextColor="#B3261E"
-                IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}" />
+            <Label Text="Парола" FontSize="11" FontAttributes="Bold"
+                   TextColor="#888888" Margin="0,0,0,6"/>
+            <Border BackgroundColor="White" StrokeThickness="1"
+                    Stroke="#E0E0E0" Margin="0,0,0,8">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10"/>
+                </Border.StrokeShape>
+                <Entry Placeholder="••••••••" Text="{Binding UserPassword}"
+                       IsPassword="True" HeightRequest="46" Margin="8,0"
+                       TextColor="#111111" PlaceholderColor="#BBBBBB"
+                       BackgroundColor="Transparent"/>
+            </Border>
 
-            <ActivityIndicator
-                IsRunning="{Binding IsLoading}"
-                IsVisible="{Binding IsLoading}"
-                Color="#6750A4" />
+            <Label Text="Забравена парола?" FontSize="11" FontAttributes="Bold"
+                   TextColor="{DynamicResource Primary}"
+                   HorizontalOptions="End" Margin="0,0,0,28"/>
 
-            <Button
-                Text="Login"
-                Command="{Binding LoginCommand}"
-                BackgroundColor="#6750A4"
-                TextColor="White"
-                HeightRequest="52"
-                CornerRadius="8" />
+            <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A"
+                   FontSize="12" HorizontalOptions="Center"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"
+                   Margin="0,0,0,8"/>
 
-            <Button
-                Text="Create account"
-                Command="{Binding GoToRegisterCommand}"
-                BackgroundColor="Transparent"
-                TextColor="#6750A4" />
+            <ActivityIndicator IsRunning="{Binding IsLoading}"
+                               IsVisible="{Binding IsLoading}"
+                               Color="{DynamicResource Primary}"
+                               Margin="0,0,0,8"/>
+
+            <Button Text="Влез" Command="{Binding LoginCommand}"
+                    BackgroundColor="#111111" TextColor="White"
+                    HeightRequest="50" CornerRadius="12"
+                    FontAttributes="Bold" FontSize="14"
+                    HorizontalOptions="Fill"
+                    Margin="0,0,0,16"/>
+
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
+                <Label Text="Нямаш акаунт?" FontSize="13"
+                       TextColor="#888888" VerticalOptions="Center"/>
+                <Label Text="Регистрирай се" FontSize="13" FontAttributes="Bold"
+                       TextColor="{DynamicResource Primary}" VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoToRegisterCommand}"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </HorizontalStackLayout>
+
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
