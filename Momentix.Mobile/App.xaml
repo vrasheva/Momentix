@@ -3,20 +3,22 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:Momentix.Mobile.Converters"
              x:Class="Momentix.Mobile.App">
+    
     <Application.Resources>
         <ResourceDictionary>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:ThemeToStrokeConverter x:Key="ThemeToStrokeConverter"/>
             <Color x:Key="PageBackground">#F7F6F2</Color>
             <Color x:Key="CardBackground">#FFFFFF</Color>
             <Color x:Key="TextPrimary">#1A1A1A</Color>
             <Color x:Key="TextSecondary">#888888</Color>
             <Color x:Key="BorderColor">#E5E3DC</Color>
             <Color x:Key="TabBackground">#FFFFFF</Color>
-            <Color x:Key="Primary">#7F77DD</Color>
-            <Color x:Key="PrimaryDark">#534AB7</Color>
-            <Color x:Key="PrimaryLight">#EEEDFE</Color>
-            <Color x:Key="PrimaryBorder">#CECBF6</Color>
-            <Color x:Key="PrimaryText">#26215C</Color>
+            <Color x:Key="Primary">#60A5FA</Color>
+            <Color x:Key="PrimaryDark">#2563EB</Color>
+            <Color x:Key="PrimaryLight">#DBEAFE</Color>
+            <Color x:Key="PrimaryBorder">#93C5FD</Color>
+            <Color x:Key="PrimaryText">#1E3A5F</Color>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

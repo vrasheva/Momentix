@@ -7,7 +7,8 @@ namespace Momentix.Data.Data
     {
         public AppDbContext CreateDbContext(string[] args)
         {
-            var connectionString = "Server=127.0.0.1;Port=3306;Database=momentixdb;User=root;Password=root;";
+            var connectionString = "Server=bx6baoj00tcloacutkmw-mysql.services.clever-cloud.com;Port=3306;Database=bx6baoj00tcloacutkmw;User=uwrbrtilsz3sfzsj;Password=NPRZaWE80Ccx7uFvtR7X;SslMode=None;";
+
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 

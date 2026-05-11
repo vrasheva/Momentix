@@ -9,58 +9,58 @@ public class ThemeService
 
     public static readonly Dictionary<string, Dictionary<string, Color>> Themes = new()
     {
+        ["Blue"] = new()
+        {
+            ["Primary"] = Color.FromArgb("#60A5FA"),
+            ["PrimaryDark"] = Color.FromArgb("#2563EB"),
+            ["PrimaryLight"] = Color.FromArgb("#DBEAFE"),
+            ["PrimaryBorder"] = Color.FromArgb("#93C5FD"),
+            ["PrimaryText"] = Color.FromArgb("#1E3A5F"),
+        },
+        ["Green"] = new()
+        {
+            ["Primary"] = Color.FromArgb("#34D399"),
+            ["PrimaryDark"] = Color.FromArgb("#059669"),
+            ["PrimaryLight"] = Color.FromArgb("#D1FAE5"),
+            ["PrimaryBorder"] = Color.FromArgb("#6EE7B7"),
+            ["PrimaryText"] = Color.FromArgb("#064E3B"),
+        },
+        ["Yellow"] = new()
+        {
+            ["Primary"] = Color.FromArgb("#FBBF24"),
+            ["PrimaryDark"] = Color.FromArgb("#D97706"),
+            ["PrimaryLight"] = Color.FromArgb("#FEF3C7"),
+            ["PrimaryBorder"] = Color.FromArgb("#FCD34D"),
+            ["PrimaryText"] = Color.FromArgb("#78350F"),
+        },
         ["Purple"] = new()
         {
-            ["Primary"] = Color.FromArgb("#7F77DD"),
-            ["PrimaryDark"] = Color.FromArgb("#534AB7"),
-            ["PrimaryLight"] = Color.FromArgb("#EEEDFE"),
-            ["PrimaryBorder"] = Color.FromArgb("#CECBF6"),
-            ["PrimaryText"] = Color.FromArgb("#26215C"),
+            ["Primary"] = Color.FromArgb("#A78BFA"),
+            ["PrimaryDark"] = Color.FromArgb("#7C3AED"),
+            ["PrimaryLight"] = Color.FromArgb("#EDE9FE"),
+            ["PrimaryBorder"] = Color.FromArgb("#C4B5FD"),
+            ["PrimaryText"] = Color.FromArgb("#2E1065"),
         },
-        ["Teal"] = new()
+        ["Black"] = new()
         {
-            ["Primary"] = Color.FromArgb("#1D9E75"),
-            ["PrimaryDark"] = Color.FromArgb("#0F6E56"),
-            ["PrimaryLight"] = Color.FromArgb("#E1F5EE"),
-            ["PrimaryBorder"] = Color.FromArgb("#9FE1CB"),
-            ["PrimaryText"] = Color.FromArgb("#04342C"),
-        },
-        ["Coral"] = new()
-        {
-            ["Primary"] = Color.FromArgb("#D85A30"),
-            ["PrimaryDark"] = Color.FromArgb("#993C1D"),
-            ["PrimaryLight"] = Color.FromArgb("#FAECE7"),
-            ["PrimaryBorder"] = Color.FromArgb("#F5C4B3"),
-            ["PrimaryText"] = Color.FromArgb("#4A1B0C"),
-        },
-        ["Pink"] = new()
-        {
-            ["Primary"] = Color.FromArgb("#D4537E"),
-            ["PrimaryDark"] = Color.FromArgb("#993556"),
-            ["PrimaryLight"] = Color.FromArgb("#FBEAF0"),
-            ["PrimaryBorder"] = Color.FromArgb("#F4C0D1"),
-            ["PrimaryText"] = Color.FromArgb("#4B1528"),
-        },
-        ["Amber"] = new()
-        {
-            ["Primary"] = Color.FromArgb("#BA7517"),
-            ["PrimaryDark"] = Color.FromArgb("#854F0B"),
-            ["PrimaryLight"] = Color.FromArgb("#FAEEDA"),
-            ["PrimaryBorder"] = Color.FromArgb("#FAC775"),
-            ["PrimaryText"] = Color.FromArgb("#412402"),
+            ["Primary"] = Color.FromArgb("#1F2937"),
+            ["PrimaryDark"] = Color.FromArgb("#111827"),
+            ["PrimaryLight"] = Color.FromArgb("#F3F4F6"),
+            ["PrimaryBorder"] = Color.FromArgb("#6B7280"),
+            ["PrimaryText"] = Color.FromArgb("#F9FAFB"),
         },
     };
 
     public static readonly Dictionary<string, int> ThemeXpRequired = new()
     {
+        ["Blue"] = 0,
+        ["Green"] = 0,
+        ["Yellow"] = 0,
         ["Purple"] = 0,
-        ["Teal"] = 0,
-        ["Coral"] = 150,
-        ["Pink"] = 300,
-        ["Amber"] = 500,
+        ["Black"] = 0,
     };
 
-    private string _currentTheme = "Purple";
+    private string _currentTheme = "Blue";
     private bool _isDark = false;
 
     public string CurrentTheme => _currentTheme;
@@ -104,7 +104,7 @@ public class ThemeService
 
     public void LoadSaved()
     {
-        var name = Preferences.Get("theme_name", "Purple");
+        var name = Preferences.Get("theme_name", "Blue");
         var dark = Preferences.Get("theme_dark", false);
         ApplyTheme(name, dark);
     }
