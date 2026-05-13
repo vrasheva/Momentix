@@ -20,9 +20,19 @@
                                FontAttributes="Bold" TextColor="{DynamicResource TextPrimary}" />
                         <Label Text="{Binding RevealText}" FontSize="14"
                                TextColor="{DynamicResource TextSecondary}" />
-                        <Editor Placeholder="Describe your photo or paste an image link..."
+                        <Label
+                            Text="{Binding SelectedPhotoName}"
+                            FontSize="13"
+                            TextColor="{DynamicResource TextSecondary}" />
+                        <Button
+                            Text="Pick Photo"
+                            Command="{Binding PickPhotoCommand}"
+                            BackgroundColor="{DynamicResource PrimaryLight}"
+                            TextColor="{DynamicResource PrimaryText}"
+                            CornerRadius="12" />
+                        <Editor Placeholder="Optional caption..."
                                 Text="{Binding SubmissionText}" AutoSize="TextChanges"
-                                HeightRequest="110"
+                                HeightRequest="80"
                                 BackgroundColor="{DynamicResource PageBackground}"
                                 TextColor="{DynamicResource TextPrimary}"/>
                         <Button Text="Submit" Command="{Binding SubmitCommand}"
@@ -52,8 +62,11 @@
                                 <VerticalStackLayout Spacing="8">
                                     <Label Text="{Binding UserName}" FontAttributes="Bold"
                                            TextColor="{DynamicResource TextPrimary}" />
-                                    <Label Text="{Binding MediaUrl}"
-                                           TextColor="{DynamicResource TextSecondary}" />
+                                    <Image
+                                        Source="{Binding MediaUrl}"
+                                        Aspect="AspectFill"
+                                        HeightRequest="240"
+                                        BackgroundColor="{DynamicResource PageBackground}" />
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                         <Label Text="{Binding VoteCount, StringFormat='Votes: {0}'}"
                                                FontSize="13" TextColor="{DynamicResource TextSecondary}" />

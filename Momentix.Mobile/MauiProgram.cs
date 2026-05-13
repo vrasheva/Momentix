@@ -36,13 +36,13 @@ namespace Momentix.Mobile
             builder.Services.AddTransient<TimeCapsulesPage>();
             builder.Services.AddTransient<CreateTimeCapsuleViewModel>();
             builder.Services.AddTransient<CreateTimeCapsulePage>();
+            builder.Services.AddTransient<TimeCapsuleDetailsViewModel>();
+            builder.Services.AddTransient<TimeCapsuleDetailsPage>();
             builder.Services.AddTransient<ChallengesViewModel>();
             builder.Services.AddTransient<ChallengesPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
-            var app = builder.Build();
-            return app;
             return builder.Build();
         }
     }

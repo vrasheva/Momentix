@@ -28,7 +28,7 @@
 
                     <Label Text="{Binding ErrorMessage}" TextColor="#B3261E" />
 
-                    <CollectionView ItemsSource="{Binding Capsules}">
+                    <CollectionView x:Name="CapsulesList" ItemsSource="{Binding Capsules}">
                         <CollectionView.EmptyView>
                             <Label Text="No capsules yet." Padding="0,48"
                                    HorizontalTextAlignment="Center"
@@ -42,7 +42,12 @@
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="16"/>
                                     </Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="8">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.OpenCapsuleCommand, Source={x:Reference CapsulesList}}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="10">
                                         <Grid ColumnDefinitions="*,Auto">
                                             <Label Text="{Binding Title}" FontSize="20"
                                                    FontAttributes="Bold"
@@ -65,6 +70,13 @@
                                                    FontSize="13" HorizontalTextAlignment="End"
                                                    TextColor="{DynamicResource TextSecondary}" />
                                         </Grid>
+                                        <Button
+                                            Text="Open Capsule"
+                                            Command="{Binding BindingContext.OpenCapsuleCommand, Source={x:Reference CapsulesList}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="{DynamicResource Primary}"
+                                            TextColor="White"
+                                            CornerRadius="12" />
                                     </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>

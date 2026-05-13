@@ -310,6 +310,39 @@ namespace Momentix.Data.Migrations
                     b.ToTable("Friends");
                 });
 
+            modelBuilder.Entity("Momentix.Data.Models.FriendRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("AddresseeId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RequesterId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddresseeId");
+
+                    b.HasIndex("RequesterId", "AddresseeId")
+                        .IsUnique();
+
+                    b.ToTable("FriendRequests");
+                });
+
             modelBuilder.Entity("Momentix.Data.Models.Media", b =>
                 {
                     b.Property<int>("Id")
@@ -622,6 +655,25 @@ namespace Momentix.Data.Migrations
                     b.Navigation("FriendUser");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Momentix.Data.Models.FriendRequest", b =>
+                {
+                    b.HasOne("Momentix.Data.Models.User", "Addressee")
+                        .WithMany()
+                        .HasForeignKey("AddresseeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Momentix.Data.Models.User", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Addressee");
+
+                    b.Navigation("Requester");
                 });
 
             modelBuilder.Entity("Momentix.Data.Models.Media", b =>

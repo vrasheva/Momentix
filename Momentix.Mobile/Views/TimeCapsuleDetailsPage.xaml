@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.TimeCapsuleDetailsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Capsule"
+    BackgroundColor="{DynamicResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <Button
+                    Text="Back"
+                    Command="{Binding BackCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="{DynamicResource Primary}" />
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding CapsuleTitle}"
+                    FontSize="26"
+                    FontAttributes="Bold"
+                    VerticalOptions="Center"
+                    TextColor="{DynamicResource TextPrimary}" />
+            </Grid>
+
+            <Border
+                Padding="16"
+                BackgroundColor="{DynamicResource CardBackground}"
+                StrokeThickness="1"
+                Stroke="{DynamicResource BorderColor}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="16" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        Text="{Binding StatusText}"
+                        FontSize="14"
+                        TextColor="{DynamicResource Primary}" />
+                    <Label
+                        Text="{Binding Description}"
+                        FontSize="15"
+                        TextColor="{DynamicResource TextSecondary}" />
+                    <Label
+                        Text="{Binding CountdownText}"
+                        FontSize="28"
+                        FontAttributes="Bold"
+                        TextColor="#386A20" />
+                    <Label
+                        Text="{Binding UnlockDateText}"
+                        FontSize="13"
+                        TextColor="{DynamicResource TextSecondary}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Label
+                Text="{Binding StatusMessage}"
+                TextColor="{DynamicResource Primary}" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                Color="{DynamicResource Primary}" />
+
+            <Label
+                Text="Photos"
+                FontSize="20"
+                FontAttributes="Bold"
+                IsVisible="{Binding IsUnlocked}"
+                TextColor="{DynamicResource TextPrimary}" />
+
+            <Label
+                Text="Photos will appear here when the capsule unlocks."
+                IsVisible="{Binding IsLocked}"
+                TextColor="{DynamicResource TextSecondary}" />
+
+            <CollectionView
+                ItemsSource="{Binding MediaItems}"
+                IsVisible="{Binding IsUnlocked}">
+                <CollectionView.EmptyView>
+                    <Label
+                        Text="No photos in this capsule."
+                        Padding="0,24"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{DynamicResource TextSecondary}" />
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Padding="12"
+                            Margin="0,6"
+                            BackgroundColor="{DynamicResource CardBackground}"
+                            StrokeThickness="1"
+                            Stroke="{DynamicResource BorderColor}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="8">
+                                <Image
+                                    Source="{Binding Url}"
+                                    IsVisible="{Binding IsImage}"
+                                    Aspect="AspectFill"
+                                    HeightRequest="240"
+                                    BackgroundColor="{DynamicResource PageBackground}" />
+                                <Label
+                                    Text="{Binding UploadedByName, StringFormat='By: {0}'}"
+                                    FontSize="13"
+                                    TextColor="{DynamicResource TextSecondary}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -37,6 +37,25 @@ public partial class ChallengesViewModel : BaseViewModel
         set { _submissionText = value; OnPropertyChanged(); }
     }
 
+    private FileResult? _selectedPhoto;
+    public FileResult? SelectedPhoto
+    {
+        get => _selectedPhoto;
+        set
+        {
+            _selectedPhoto = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(SelectedPhotoName));
+            OnPropertyChanged(nameof(HasSelectedPhoto));
+        }
+    }
+
+    public string SelectedPhotoName => SelectedPhoto == null
+        ? "No photo selected"
+        : SelectedPhoto.FileName;
+
+    public bool HasSelectedPhoto => SelectedPhoto != null;
+
     private string _statusMessage = string.Empty;
     public string StatusMessage
     {
@@ -52,12 +71,39 @@ public partial class ChallengesViewModel : BaseViewModel
     }
 
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
+    public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand SubmitCommand => new AsyncRelayCommand(Submit);
     public IRelayCommand<ChallengeSubmissionResponseDto> VoteCommand => new AsyncRelayCommand<ChallengeSubmissionResponseDto>(Vote);
 
     public ChallengesViewModel(ApiService apiService)
     {
         _apiService = apiService;
+    }
+
+    private async Task PickPhoto()
+    {
+        try
+        {
+            SelectedPhoto = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            {
+                Title = "Select challenge photo"
+            });
+
+            if (SelectedPhoto != null)
+                StatusMessage = string.Empty;
+        }
+        catch (FeatureNotSupportedException)
+        {
+            StatusMessage = "Photo picker is not supported on this device.";
+        }
+        catch (PermissionException)
+        {
+            StatusMessage = "Photo permission was denied.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
     }
 
     private async Task Load()
@@ -119,9 +165,9 @@ public partial class ChallengesViewModel : BaseViewModel
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(SubmissionText))
+        if (SelectedPhoto == null)
         {
-            StatusMessage = "Add a description or image link.";
+            StatusMessage = "Pick a photo first.";
             return;
         }
 
@@ -130,9 +176,16 @@ public partial class ChallengesViewModel : BaseViewModel
 
         try
         {
-            var result = await _apiService.PostAsync<CreateChallengeSubmissionDto, ChallengeSubmissionResponseDto>(
-                $"Challenges/{ActiveChallenge.Id}/submissions",
-                new CreateChallengeSubmissionDto { MediaUrl = SubmissionText });
+            await using var stream = await SelectedPhoto.OpenReadAsync();
+            var contentType = string.IsNullOrWhiteSpace(SelectedPhoto.ContentType)
+                ? "image/jpeg"
+                : SelectedPhoto.ContentType;
+
+            var result = await _apiService.PostFileAsync<ChallengeSubmissionResponseDto>(
+                $"Challenges/{ActiveChallenge.Id}/submissions/photo",
+                stream,
+                SelectedPhoto.FileName,
+                contentType);
 
             if (result == null)
             {
@@ -146,6 +199,7 @@ public partial class ChallengesViewModel : BaseViewModel
                 Submissions.Insert(0, result);
 
             SubmissionText = string.Empty;
+            SelectedPhoto = null;
             StatusMessage = "Submission saved. Streak +1.";
         }
         catch (Exception ex)
