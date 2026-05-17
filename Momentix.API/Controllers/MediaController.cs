@@ -43,7 +43,8 @@ public class MediaController : ControllerBase
                 Url = m.Url,
                 Type = m.Type,
                 UploadedAt = m.UploadedAt,
-                UploadedByName = m.UploadedBy.FullName
+                UploadedByName = m.UploadedBy.FullName,
+                UnlockAt = m.UnlockAt
             })
             .ToListAsync();
 
@@ -113,7 +114,8 @@ public class MediaController : ControllerBase
             AlbumId = albumId,
             UploadedById = userId,
             Type = MediaType.Letter,
-            Url = dto.Text.Trim()
+            Url = dto.Text.Trim(),
+            UnlockAt = dto.UnlockAt
         };
 
         _context.MediaItems.Add(media);
@@ -130,7 +132,8 @@ public class MediaController : ControllerBase
             Url = media.Url,
             Type = media.Type,
             UploadedAt = media.UploadedAt,
-            UploadedByName = userName
+            UploadedByName = userName,
+            UnlockAt = media.UnlockAt
         });
     }
 

@@ -3,117 +3,195 @@
     x:Class="Momentix.Mobile.Views.AlbumsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Albums"
-    BackgroundColor="{DynamicResource PageBackground}">
+    xmlns:views="clr-namespace:Momentix.Mobile.Views"
+    Title=""
+    BackgroundColor="White"
+    Shell.TabBarIsVisible="False">
 
-    <VerticalStackLayout Padding="20" Spacing="15">
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-            <VerticalStackLayout Spacing="2">
-                <Label
-                    Text="Momentix Albums"
-                    FontSize="28"
-                    FontAttributes="Bold"
-                    TextColor="{DynamicResource TextPrimary}" />
-                <Label
-                    Text="This is the updated mobile build"
-                    FontSize="13"
-                    TextColor="{DynamicResource TextSecondary}" />
-            </VerticalStackLayout>
+    <Grid RowDefinitions="*,Auto">
 
-            <Button
-                Grid.Column="1"
-                Text="Logout"
-                Command="{Binding LogoutCommand}"
-                BackgroundColor="Transparent"
-                TextColor="{DynamicResource Primary}" />
-        </Grid>
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="0">
 
-        <Button
-            Text="Refresh Albums"
-            Command="{Binding LoadAlbumsCommand}"
-            BackgroundColor="{DynamicResource PrimaryLight}"
-            TextColor="{DynamicResource PrimaryText}"
-            CornerRadius="12" />
-
-        <Button
-            Text="Create Album"
-            Command="{Binding GoToCreateAlbumCommand}"
-            BackgroundColor="{DynamicResource Primary}"
-            TextColor="White"
-            CornerRadius="12" />
-
-        <ActivityIndicator
-            IsRunning="{Binding IsLoading}"
-            IsVisible="{Binding IsLoading}"
-            Color="{DynamicResource Primary}" />
-
-        <Label
-            Text="{Binding ErrorMessage}"
-            TextColor="#B3261E" />
-
-        <CollectionView
-            x:Name="AlbumsList"
-            ItemsSource="{Binding Albums}"
-            SelectionMode="None">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Border
-                        Padding="15"
-                        Margin="0,5"
-                        BackgroundColor="{DynamicResource CardBackground}"
-                        StrokeThickness="1"
-                        Stroke="{DynamicResource BorderColor}">
+                <!-- Topbar -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,10"
+                      BackgroundColor="White">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Momentix" FontSize="22" FontAttributes="Bold,Italic"
+                               TextColor="#111111" CharacterSpacing="-0.5"/>
+                        <Label Text="Албуми" FontSize="13" FontAttributes="Bold"
+                               TextColor="#111111"/>
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="#F3F4F6" StrokeThickness="0">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="16"/>
+                            <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference AlbumsList}}"
-                                CommandParameter="{Binding .}" />
+                            <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
                         </Border.GestureRecognizers>
-
-                        <VerticalStackLayout Spacing="10">
-                            <Label
-                                Text="{Binding Title}"
-                                FontSize="20"
-                                FontAttributes="Bold"
-                                TextColor="{DynamicResource TextPrimary}" />
-
-                            <Label
-                                Text="{Binding Description}"
-                                FontSize="14"
-                                TextColor="{DynamicResource TextSecondary}" />
-
-                            <Label
-                                Text="{Binding OwnerName, StringFormat='Owner: {0}'}"
-                                FontSize="13"
-                                TextColor="{DynamicResource TextSecondary}" />
-
-                            <Grid ColumnDefinitions="*,*">
-                                <Label
-                                    Text="{Binding MemberCount, StringFormat='Members: {0}'}"
-                                    FontSize="13"
-                                    TextColor="{DynamicResource TextSecondary}" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    Text="{Binding MediaCount, StringFormat='Media: {0}'}"
-                                    FontSize="13"
-                                    HorizontalTextAlignment="End"
-                                    TextColor="{DynamicResource TextSecondary}" />
-                            </Grid>
-
-                            <Button
-                                Text="Open Album"
-                                Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference AlbumsList}}"
-                                CommandParameter="{Binding .}"
-                                BackgroundColor="{DynamicResource Primary}"
-                                TextColor="White"
-                                CornerRadius="10" />
-                        </VerticalStackLayout>
+                        <Label Text="TU" FontSize="11" FontAttributes="Bold"
+                               TextColor="#111111" HorizontalOptions="Center"
+                               VerticalOptions="Center"/>
                     </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+                </Grid>
+
+                <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="{DynamicResource Primary}"
+                                   Margin="0,8"/>
+
+                <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A"
+                       FontSize="12" Margin="16,4"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
+
+                <!-- Моите албуми -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
+                    <Label Text="Моите албуми" FontSize="13" FontAttributes="Bold"
+                           TextColor="#111111" VerticalOptions="Center"/>
+                    <Border Grid.Column="1" WidthRequest="28" HeightRequest="28"
+                            BackgroundColor="#F3F4F6" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToCreateAlbumCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="+" FontSize="18" TextColor="#111111"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Border>
+                </Grid>
+
+                <!-- Grid от албуми -->
+                <CollectionView ItemsSource="{Binding MyAlbums}"
+                                Margin="12,0,12,8">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2"
+                                         HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Spacing="4">
+                                <Border BackgroundColor="#EEEDFE" StrokeThickness="0"
+                                        HeightRequest="100">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenAlbumCommand}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                    <Border BackgroundColor="#111111" StrokeThickness="0"
+                                            WidthRequest="28" HeightRequest="18"
+                                            HorizontalOptions="End" VerticalOptions="End"
+                                            Margin="0,0,6,6">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="5"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding MediaCount}" FontSize="10"
+                                               FontAttributes="Bold" TextColor="White"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                </Border>
+                                <Label Text="{Binding Title}" FontSize="12" FontAttributes="Bold"
+                                       TextColor="#111111" LineBreakMode="TailTruncation"/>
+                                <Label Text="{Binding MediaCount, StringFormat='{0} снимки'}"
+                                       FontSize="10" TextColor="#888888"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,4"/>
+
+                <!-- Споделени с мен -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
+                    <Label Text="Споделени с мен" FontSize="13" FontAttributes="Bold"
+                           TextColor="#111111" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="{Binding SharedWithMe.Count}"
+                           FontSize="12" TextColor="#888888" VerticalOptions="Center"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding SharedWithMe}" Margin="16,0,16,8">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12"
+                                  Padding="0,10" RowSpacing="0">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenAlbumCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
+                                <Border BackgroundColor="#E1F5EE" StrokeThickness="0"
+                                        WidthRequest="46" HeightRequest="46">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10"/>
+                                    </Border.StrokeShape>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}" FontSize="13" FontAttributes="Bold"
+                                           TextColor="#111111"/>
+                                    <Label Text="{Binding OwnerName, StringFormat='{0} · {1} снимки'}"
+                                           FontSize="11" TextColor="#888888"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="18"
+                                       TextColor="#CCCCCC" VerticalOptions="Center"/>
+                                <BoxView Grid.ColumnSpan="3" HeightRequest="0.5"
+                                         BackgroundColor="#F5F5F5" VerticalOptions="End"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,4"/>
+
+                <!-- Споделени от мен -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
+                    <Label Text="Споделени от мен" FontSize="13" FontAttributes="Bold"
+                           TextColor="#111111" VerticalOptions="Center"/>
+                    <Label Grid.Column="1" Text="{Binding SharedByMe.Count}"
+                           FontSize="12" TextColor="#888888" VerticalOptions="Center"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding SharedByMe}" Margin="16,0,16,16">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12"
+                                  Padding="0,10" RowSpacing="0">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenAlbumCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Grid.GestureRecognizers>
+                                <Border BackgroundColor="#FEF3C7" StrokeThickness="0"
+                                        WidthRequest="46" HeightRequest="46">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10"/>
+                                    </Border.StrokeShape>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Title}" FontSize="13" FontAttributes="Bold"
+                                           TextColor="#111111"/>
+                                    <Label Text="{Binding MemberCount, StringFormat='С {0} приятели · {1} снимки'}"
+                                           FontSize="11" TextColor="#888888"/>
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="›" FontSize="18"
+                                       TextColor="#CCCCCC" VerticalOptions="Center"/>
+                                <BoxView Grid.ColumnSpan="3" HeightRequest="0.5"
+                                         BackgroundColor="#F5F5F5" VerticalOptions="End"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Custom Bottom Nav Bar -->
+        <views:BottomNavBar Grid.Row="1" ActiveTab="Albums"/>
+
+    </Grid>
 </ContentPage>

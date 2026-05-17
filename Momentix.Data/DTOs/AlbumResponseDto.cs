@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Momentix.Data.DTOs;
+﻿namespace Momentix.Data.DTOs;
 
 public class AlbumResponseDto
 {
@@ -12,7 +6,10 @@ public class AlbumResponseDto
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }
+    public string OwnerId { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
     public int MemberCount { get; set; }
     public int MediaCount { get; set; }
+    public bool IsOwner { get; set; }
+    public bool IsSharedWithMe { get; set; }
 }

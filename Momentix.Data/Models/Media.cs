@@ -10,6 +10,7 @@
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public DateTime? UnlockAt { get; set; }
 
         public string UploadedById { get; set; } = string.Empty;
         public User UploadedBy { get; set; } = null!;

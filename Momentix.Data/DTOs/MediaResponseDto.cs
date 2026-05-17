@@ -9,4 +9,6 @@ public class MediaResponseDto
     public MediaType Type { get; set; }
     public DateTime UploadedAt { get; set; }
     public string UploadedByName { get; set; } = string.Empty;
+    public DateTime? UnlockAt { get; set; }
+    public bool IsLocked => UnlockAt.HasValue && UnlockAt.Value > DateTime.UtcNow;
 }

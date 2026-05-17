@@ -3,222 +3,163 @@
     x:Class="Momentix.Mobile.Views.FriendsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:Momentix.Mobile.Views"
     Title="Friends"
-    BackgroundColor="{DynamicResource PageBackground}">
+    BackgroundColor="{DynamicResource PageBackground}"
+    Shell.TabBarIsVisible="False">
 
-    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
-        <VerticalStackLayout Spacing="2">
-            <Label
-                Text="Friends"
-                FontSize="28"
-                FontAttributes="Bold"
-                TextColor="{DynamicResource TextPrimary}" />
-            <Label
-                Text="Search users, send requests, and accept people who added you"
-                FontSize="13"
-                TextColor="{DynamicResource TextSecondary}" />
-        </VerticalStackLayout>
+    <Grid RowDefinitions="*,Auto">
 
-        <RefreshView
-            Grid.Row="1"
-            Command="{Binding LoadFriendsCommand}"
-            IsRefreshing="{Binding IsLoading}">
-            <ScrollView>
-                <VerticalStackLayout Spacing="16">
-                    <Border
-                        Padding="14"
-                        BackgroundColor="{DynamicResource CardBackground}"
-                        StrokeThickness="1"
-                        Stroke="{DynamicResource BorderColor}">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="16" />
-                        </Border.StrokeShape>
-                        <VerticalStackLayout Spacing="10">
-                            <Label
-                                Text="Find users"
-                                FontSize="18"
-                                FontAttributes="Bold"
-                                TextColor="{DynamicResource TextPrimary}" />
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                <Entry
-                                    Placeholder="Search by name or email"
-                                    Text="{Binding SearchText}"
-                                    BackgroundColor="{DynamicResource PageBackground}"
-                                    TextColor="{DynamicResource TextPrimary}" />
-                                <Button
-                                    Grid.Column="1"
-                                    Text="Search"
-                                    Command="{Binding SearchUsersCommand}"
-                                    BackgroundColor="{DynamicResource Primary}"
-                                    TextColor="White"
-                                    CornerRadius="12" />
-                            </Grid>
+        <Grid Grid.Row="0" RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Friends" FontSize="28" FontAttributes="Bold"
+                       TextColor="{DynamicResource TextPrimary}" />
+                <Label Text="Search users, send requests, and accept people who added you"
+                       FontSize="13" TextColor="{DynamicResource TextSecondary}" />
+            </VerticalStackLayout>
 
-                            <CollectionView x:Name="UsersList" ItemsSource="{Binding Users}">
-                                <CollectionView.EmptyView>
-                                    <Label
-                                        Text="No users found."
-                                        Padding="0,16"
-                                        HorizontalTextAlignment="Center"
-                                        TextColor="{DynamicResource TextSecondary}" />
-                                </CollectionView.EmptyView>
-                                <CollectionView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid
-                                            ColumnDefinitions="*,Auto"
-                                            ColumnSpacing="10"
-                                            Padding="0,8">
-                                            <VerticalStackLayout Spacing="3">
-                                                <Label
-                                                    Text="{Binding FullName}"
-                                                    FontAttributes="Bold"
-                                                    TextColor="{DynamicResource TextPrimary}" />
-                                                <Label
-                                                    Text="{Binding Email}"
-                                                    FontSize="13"
-                                                    TextColor="{DynamicResource TextSecondary}" />
-                                                <Label
-                                                    Text="{Binding StatusText}"
-                                                    FontSize="12"
-                                                    TextColor="{DynamicResource Primary}" />
+            <RefreshView Grid.Row="1" Command="{Binding LoadFriendsCommand}"
+                         IsRefreshing="{Binding IsLoading}">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="16">
+                        <Border Padding="14" BackgroundColor="{DynamicResource CardBackground}"
+                                StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="16" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="10">
+                                <Label Text="Find users" FontSize="18" FontAttributes="Bold"
+                                       TextColor="{DynamicResource TextPrimary}" />
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <Entry Placeholder="Search by name or email"
+                                           Text="{Binding SearchText}"
+                                           BackgroundColor="{DynamicResource PageBackground}"
+                                           TextColor="{DynamicResource TextPrimary}" />
+                                    <Button Grid.Column="1" Text="Search"
+                                            Command="{Binding SearchUsersCommand}"
+                                            BackgroundColor="{DynamicResource Primary}"
+                                            TextColor="White" CornerRadius="12" />
+                                </Grid>
+                                <CollectionView x:Name="UsersList" ItemsSource="{Binding Users}">
+                                    <CollectionView.EmptyView>
+                                        <Label Text="No users found." Padding="0,16"
+                                               HorizontalTextAlignment="Center"
+                                               TextColor="{DynamicResource TextSecondary}" />
+                                    </CollectionView.EmptyView>
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Padding="0,8">
+                                                <VerticalStackLayout Spacing="3">
+                                                    <Label Text="{Binding FullName}" FontAttributes="Bold"
+                                                           TextColor="{DynamicResource TextPrimary}" />
+                                                    <Label Text="{Binding Email}" FontSize="13"
+                                                           TextColor="{DynamicResource TextSecondary}" />
+                                                    <Label Text="{Binding StatusText}" FontSize="12"
+                                                           TextColor="{DynamicResource Primary}" />
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                                                    <Button Text="Request" IsVisible="{Binding CanSendRequest}"
+                                                            Command="{Binding BindingContext.SendRequestCommand, Source={x:Reference UsersList}}"
+                                                            CommandParameter="{Binding .}"
+                                                            BackgroundColor="{DynamicResource PrimaryLight}"
+                                                            TextColor="{DynamicResource PrimaryText}"
+                                                            CornerRadius="12" />
+                                                    <Button Text="Accept" IsVisible="{Binding CanAcceptRequest}"
+                                                            Command="{Binding BindingContext.AcceptSearchRequestCommand, Source={x:Reference UsersList}}"
+                                                            CommandParameter="{Binding .}"
+                                                            BackgroundColor="#386A20" TextColor="White"
+                                                            CornerRadius="12" />
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}" />
+
+                        <Label Text="Incoming requests" FontSize="20" FontAttributes="Bold"
+                               TextColor="{DynamicResource TextPrimary}" />
+
+                        <CollectionView x:Name="IncomingRequestsList" ItemsSource="{Binding IncomingRequests}">
+                            <CollectionView.EmptyView>
+                                <Label Text="No pending requests." Padding="0,12"
+                                       HorizontalTextAlignment="Center"
+                                       TextColor="{DynamicResource TextSecondary}" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14" Margin="0,6"
+                                            BackgroundColor="{DynamicResource CardBackground}"
+                                            StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="16" />
+                                        </Border.StrokeShape>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label Text="{Binding RequesterName}" FontAttributes="Bold"
+                                                       TextColor="{DynamicResource TextPrimary}" />
+                                                <Label Text="{Binding RequesterEmail}" FontSize="13"
+                                                       TextColor="{DynamicResource TextSecondary}" />
                                             </VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="6">
-                                                <Button
-                                                    Text="Request"
-                                                    IsVisible="{Binding CanSendRequest}"
-                                                    Command="{Binding BindingContext.SendRequestCommand, Source={x:Reference UsersList}}"
-                                                    CommandParameter="{Binding .}"
-                                                    BackgroundColor="{DynamicResource PrimaryLight}"
-                                                    TextColor="{DynamicResource PrimaryText}"
-                                                    CornerRadius="12" />
-                                                <Button
-                                                    Text="Accept"
-                                                    IsVisible="{Binding CanAcceptRequest}"
-                                                    Command="{Binding BindingContext.AcceptSearchRequestCommand, Source={x:Reference UsersList}}"
-                                                    CommandParameter="{Binding .}"
-                                                    BackgroundColor="#386A20"
-                                                    TextColor="White"
-                                                    CornerRadius="12" />
-                                            </VerticalStackLayout>
+                                            <HorizontalStackLayout Grid.Column="1" Spacing="6">
+                                                <Button Text="Accept"
+                                                        Command="{Binding BindingContext.AcceptRequestCommand, Source={x:Reference IncomingRequestsList}}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="#386A20" TextColor="White"
+                                                        CornerRadius="12" />
+                                                <Button Text="Decline"
+                                                        Command="{Binding BindingContext.DeclineRequestCommand, Source={x:Reference IncomingRequestsList}}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="Transparent" TextColor="#B3261E" />
+                                            </HorizontalStackLayout>
                                         </Grid>
-                                    </DataTemplate>
-                                </CollectionView.ItemTemplate>
-                            </CollectionView>
-                        </VerticalStackLayout>
-                    </Border>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
 
-                    <Label
-                        Text="{Binding StatusMessage}"
-                        TextColor="{DynamicResource Primary}" />
+                        <Label Text="My friends" FontSize="20" FontAttributes="Bold"
+                               TextColor="{DynamicResource TextPrimary}" />
 
-                    <Label
-                        Text="Incoming requests"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="{DynamicResource TextPrimary}" />
+                        <CollectionView x:Name="FriendsList" ItemsSource="{Binding Friends}">
+                            <CollectionView.EmptyView>
+                                <Label Text="No friends yet." Padding="0,20"
+                                       HorizontalTextAlignment="Center"
+                                       TextColor="{DynamicResource TextSecondary}" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14" Margin="0,6"
+                                            BackgroundColor="{DynamicResource CardBackground}"
+                                            StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="16" />
+                                        </Border.StrokeShape>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Label Text="{Binding FullName}" FontSize="18"
+                                                       FontAttributes="Bold"
+                                                       TextColor="{DynamicResource TextPrimary}" />
+                                                <Label Text="{Binding Email}" FontSize="13"
+                                                       TextColor="{DynamicResource TextSecondary}" />
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="1" Text="Remove"
+                                                    Command="{Binding BindingContext.RemoveFriendCommand, Source={x:Reference FriendsList}}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="Transparent" TextColor="#B3261E" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </RefreshView>
+        </Grid>
 
-                    <CollectionView x:Name="IncomingRequestsList" ItemsSource="{Binding IncomingRequests}">
-                        <CollectionView.EmptyView>
-                            <Label
-                                Text="No pending requests."
-                                Padding="0,12"
-                                HorizontalTextAlignment="Center"
-                                TextColor="{DynamicResource TextSecondary}" />
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Border
-                                    Padding="14"
-                                    Margin="0,6"
-                                    BackgroundColor="{DynamicResource CardBackground}"
-                                    StrokeThickness="1"
-                                    Stroke="{DynamicResource BorderColor}">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="16" />
-                                    </Border.StrokeShape>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                        <VerticalStackLayout Spacing="4">
-                                            <Label
-                                                Text="{Binding RequesterName}"
-                                                FontAttributes="Bold"
-                                                TextColor="{DynamicResource TextPrimary}" />
-                                            <Label
-                                                Text="{Binding RequesterEmail}"
-                                                FontSize="13"
-                                                TextColor="{DynamicResource TextSecondary}" />
-                                        </VerticalStackLayout>
-                                        <HorizontalStackLayout Grid.Column="1" Spacing="6">
-                                            <Button
-                                                Text="Accept"
-                                                Command="{Binding BindingContext.AcceptRequestCommand, Source={x:Reference IncomingRequestsList}}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="#386A20"
-                                                TextColor="White"
-                                                CornerRadius="12" />
-                                            <Button
-                                                Text="Decline"
-                                                Command="{Binding BindingContext.DeclineRequestCommand, Source={x:Reference IncomingRequestsList}}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="Transparent"
-                                                TextColor="#B3261E" />
-                                        </HorizontalStackLayout>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
+        <views:BottomNavBar Grid.Row="1" ActiveTab="Friends"/>
 
-                    <Label
-                        Text="My friends"
-                        FontSize="20"
-                        FontAttributes="Bold"
-                        TextColor="{DynamicResource TextPrimary}" />
-
-                    <CollectionView x:Name="FriendsList" ItemsSource="{Binding Friends}">
-                        <CollectionView.EmptyView>
-                            <Label
-                                Text="No friends yet."
-                                Padding="0,20"
-                                HorizontalTextAlignment="Center"
-                                TextColor="{DynamicResource TextSecondary}" />
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Border
-                                    Padding="14"
-                                    Margin="0,6"
-                                    BackgroundColor="{DynamicResource CardBackground}"
-                                    StrokeThickness="1"
-                                    Stroke="{DynamicResource BorderColor}">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="16" />
-                                    </Border.StrokeShape>
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                        <VerticalStackLayout Spacing="4">
-                                            <Label
-                                                Text="{Binding FullName}"
-                                                FontSize="18"
-                                                FontAttributes="Bold"
-                                                TextColor="{DynamicResource TextPrimary}" />
-                                            <Label
-                                                Text="{Binding Email}"
-                                                FontSize="13"
-                                                TextColor="{DynamicResource TextSecondary}" />
-                                        </VerticalStackLayout>
-                                        <Button
-                                            Grid.Column="1"
-                                            Text="Remove"
-                                            Command="{Binding BindingContext.RemoveFriendCommand, Source={x:Reference FriendsList}}"
-                                            CommandParameter="{Binding .}"
-                                            BackgroundColor="Transparent"
-                                            TextColor="#B3261E" />
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </ScrollView>
-        </RefreshView>
     </Grid>
 </ContentPage>

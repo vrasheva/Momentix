@@ -8,10 +8,10 @@ namespace Momentix.Mobile.ViewModels
     public partial class AlbumsViewModel : BaseViewModel
     {
         private readonly ApiService _apiService;
-        public IRelayCommand CreateAlbumCommand => new AsyncRelayCommand(CreateAlbum);
-        public IRelayCommand GoToCreateAlbumCommand => new AsyncRelayCommand(GoToCreateAlbum);
 
-        public ObservableCollection<AlbumResponseDto> Albums { get; } = new();
+        public ObservableCollection<AlbumResponseDto> MyAlbums { get; } = new();
+        public ObservableCollection<AlbumResponseDto> SharedWithMe { get; } = new();
+        public ObservableCollection<AlbumResponseDto> SharedByMe { get; } = new();
 
         private string _errorMessage = string.Empty;
         public string ErrorMessage
@@ -27,8 +27,11 @@ namespace Momentix.Mobile.ViewModels
             set { _isLoading = value; OnPropertyChanged(); }
         }
 
+        public string UserName => Preferences.Get("user_name", "");
+
         public IRelayCommand LoadAlbumsCommand => new AsyncRelayCommand(LoadAlbums);
         public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
+        public IRelayCommand GoToCreateAlbumCommand => new AsyncRelayCommand(GoToCreateAlbum);
         public IRelayCommand<AlbumResponseDto> OpenAlbumCommand => new AsyncRelayCommand<AlbumResponseDto>(OpenAlbum);
 
         public AlbumsViewModel(ApiService apiService)
@@ -45,12 +48,24 @@ namespace Momentix.Mobile.ViewModels
             {
                 var result = await _apiService.GetAsync<List<AlbumResponseDto>>("Albums");
 
-                Albums.Clear();
+                MyAlbums.Clear();
+                SharedWithMe.Clear();
+                SharedByMe.Clear();
 
                 if (result != null)
                 {
                     foreach (var album in result)
-                        Albums.Add(album);
+                    {
+                        if (album.IsOwner && album.MemberCount == 0)
+                            MyAlbums.Add(album);
+                        else if (album.IsOwner && album.MemberCount > 0)
+                        {
+                            MyAlbums.Add(album);
+                            SharedByMe.Add(album);
+                        }
+                        else if (album.IsSharedWithMe)
+                            SharedWithMe.Add(album);
+                    }
                 }
             }
             catch (Exception ex)
@@ -69,62 +84,23 @@ namespace Momentix.Mobile.ViewModels
             Preferences.Remove("user_name");
             Preferences.Remove("user_id");
             _apiService.ClearToken();
-
             await Shell.Current.GoToAsync("//LoginPage");
         }
-        private async Task CreateAlbum()
-        {
-            try
-            {
-                var newAlbum = await _apiService.PostAsync<CreateAlbumDto, AlbumResponseDto>(
-                    "Albums",
-                    new CreateAlbumDto
-                    {
-                        Title = "New Album",
-                        Description = "Created from mobile"
-                    });
 
-                if (newAlbum != null)
-                {
-                    Albums.Insert(0, newAlbum);
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message;
-            }
-        }
         private async Task GoToCreateAlbum()
         {
-            try
-            {
-                await Shell.Current.GoToAsync("CreateAlbumPage");
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message;
-            }
+            await Shell.Current.GoToAsync("CreateAlbumPage");
         }
 
         private async Task OpenAlbum(AlbumResponseDto? album)
         {
-            if (album == null)
-                return;
-
+            if (album == null) return;
             var parameters = new Dictionary<string, object>
             {
                 ["AlbumId"] = album.Id,
                 ["AlbumTitle"] = album.Title
             };
-
-            try
-            {
-                await Shell.Current.GoToAsync("AlbumDetailsPage", parameters);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = ex.Message;
-            }
+            await Shell.Current.GoToAsync("AlbumDetailsPage", parameters);
         }
     }
 }

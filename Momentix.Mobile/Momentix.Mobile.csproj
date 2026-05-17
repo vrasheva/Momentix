@@ -49,6 +49,9 @@
 		<MauiXaml Update="Views\AlbumsPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="Views\BottomNavBar.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="Views\CreateAlbumPage.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

@@ -44,9 +44,13 @@ namespace Momentix.API.Controllers
                     Title = a.Title,
                     Description = a.Description,
                     CreatedAt = a.CreatedAt,
+                    OwnerId = a.OwnerId,
                     OwnerName = a.Owner.FullName,
                     MemberCount = a.Members.Count,
-                    MediaCount = a.MediaItems.Count
+                    MediaCount = a.MediaItems.Count,
+                    IsOwner = a.OwnerId == userId,
+                    IsSharedWithMe = a.OwnerId != userId &&
+                                     a.Members.Any(m => m.UserId == userId)
                 })
                 .ToListAsync();
 

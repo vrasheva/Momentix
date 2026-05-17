@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Momentix.Data.Data;
 
@@ -10,9 +11,11 @@ using Momentix.Data.Data;
 namespace Momentix.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517112525_AddMediaUnlockAt")]
+    partial class AddMediaUnlockAt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,9 +366,6 @@ namespace Momentix.Data.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<DateTime?>("UnlockAt")
-                        .HasColumnType("datetime(6)");
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("datetime(6)");
