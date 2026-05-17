@@ -69,13 +69,15 @@ namespace Momentix.Mobile.ViewModels
 
                 if (result != null)
                 {
+                    _apiService.ClearToken();
                     _apiService.SetToken(result.Token);
-
                     Preferences.Set("auth_token", result.Token);
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);
 
                     await Shell.Current.GoToAsync("//AlbumsPage");
+                    await Task.Delay(300);
+                    // OnNavigatedTo ще зареди албумите с правилния токен
                 }
                 else
                 {

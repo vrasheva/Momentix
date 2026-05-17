@@ -13,11 +13,9 @@ public partial class AlbumsPage : ContentPage
         _viewModel = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override void OnNavigatedTo(NavigatedToEventArgs args)
     {
-        base.OnAppearing();
-
-        if (_viewModel.LoadAlbumsCommand.CanExecute(null))
-            _viewModel.LoadAlbumsCommand.Execute(null);
+        base.OnNavigatedTo(args);
+        _viewModel.LoadAlbumsCommand.Execute(null);
     }
 }
