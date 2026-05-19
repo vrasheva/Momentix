@@ -1,0 +1,264 @@
+﻿@page "/capsules/{CapsuleId:int}"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Time Capsule</div>
+        <h1 class="page-title">@(capsule?.Title ?? "Time Capsule")</h1>
+        <p class="page-description">@(capsule?.Description ?? "Locked memories for a future moment.")</p>
+    </div>
+    <a class="secondary-button" href="capsules">Back</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+@if (isLoading)
+{
+    <div class="empty-state">Loading capsule...</div>
+}
+else if (capsule == null)
+{
+    <div class="empty-state">Capsule not found.</div>
+}
+else
+{
+    <div class="grid two">
+        <section class="panel">
+            <h2 class="section-title">Unlock status</h2>
+            @if (capsule.IsUnlocked)
+            {
+                <div class="badge-row"><span class="badge">Unlocked</span></div>
+                <p class="muted">The capsule content is visible now.</p>
+            }
+            else
+            {
+                <div class="badge-row"><span class="badge gold">@FormatRemaining(capsule.UnlockAt)</span></div>
+                <p class="muted">Unlocks at @capsule.UnlockAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+            }
+
+            @if (capsule.IsOwner)
+            {
+                <hr />
+                <div class="form-stack">
+                    <div class="field">
+                        <label>Add photo to capsule</label>
+                        <InputFile OnChange="OnPhotoSelected" accept="image/*" />
+                        @if (photoFile != null)
+                        {
+                            <span class="muted">Selected: @photoFile.Name</span>
+                        }
+                    </div>
+                    <button class="primary-button" type="button" @onclick="UploadPhoto" disabled="@(isBusy || photoFile == null)">Upload photo</button>
+                </div>
+            }
+        </section>
+
+        <section class="panel">
+            <h2 class="section-title">People</h2>
+            <div class="item-list">
+                @foreach (var member in members)
+                {
+                    <div class="member-row">
+                        <div class="person">
+                            <strong>@member.FullName</strong>
+                            <span class="muted">@(member.IsOwner ? "Owner" : "Can view")</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (capsule.IsOwner)
+            {
+                <hr />
+                <div class="form-stack">
+                    <div class="field">
+                        <label>Share with friend</label>
+                        <select @bind="selectedFriendEmail">
+                            <option value="">Select friend</option>
+                            @foreach (var friend in friends)
+                            {
+                                <option value="@friend.Email">@friend.FullName (@friend.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="primary-button" type="button" @onclick="ShareCapsule" disabled="@(isBusy || string.IsNullOrWhiteSpace(selectedFriendEmail))">Share capsule</button>
+                </div>
+            }
+        </section>
+    </div>
+
+    <section class="panel" style="margin-top:18px">
+        <h2 class="section-title">Capsule memories</h2>
+        @if (!capsule.IsUnlocked)
+        {
+            <div class="empty-state">Content is hidden until the unlock time.</div>
+        }
+        else if (media.Count == 0)
+        {
+            <div class="empty-state">No photos in this capsule yet.</div>
+        }
+        else
+        {
+            <div class="media-grid">
+                @foreach (var item in media)
+                {
+                    <article class="media-tile">
+                        @if (item.Type == MediaType.Image)
+                        {
+                            <img src="@Api.ToBrowserUrl(item.Url)" alt="Capsule memory" />
+                        }
+                        else
+                        {
+                            <div class="media-body">@item.Url</div>
+                        }
+                        <div class="media-body">
+                            <div class="meta">By @item.UploadedByName</div>
+                            @if (capsule.IsOwner)
+                            {
+                                <div class="actions" style="margin-top:10px">
+                                    <button class="danger-button" type="button" @onclick="() => DeleteMedia(item.Id)">Delete</button>
+                                </div>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public int CapsuleId { get; set; }
+
+    private TimeCapsuleResponseDto? capsule;
+    private List<MediaResponseDto> media = new();
+    private List<AlbumMemberResponseDto> members = new();
+    private List<FriendResponseDto> friends = new();
+    private IBrowserFile? photoFile;
+    private string selectedFriendEmail = string.Empty;
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? error;
+    private string? status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadCapsule();
+    }
+
+    private async Task LoadCapsule()
+    {
+        isLoading = true;
+        error = null;
+
+        capsule = await Api.GetAsync<TimeCapsuleResponseDto>($"TimeCapsule/{CapsuleId}");
+        if (capsule == null)
+        {
+            error = Api.LastError;
+            isLoading = false;
+            return;
+        }
+
+        members = await Api.GetAsync<List<AlbumMemberResponseDto>>($"TimeCapsule/{CapsuleId}/members") ?? new();
+        friends = await Api.GetAsync<List<FriendResponseDto>>("Friends") ?? new();
+
+        if (capsule.IsUnlocked)
+            media = await Api.GetAsync<List<MediaResponseDto>>($"Media/timecapsule/{CapsuleId}") ?? new();
+
+        isLoading = false;
+    }
+
+    private void OnPhotoSelected(InputFileChangeEventArgs e)
+    {
+        photoFile = e.File;
+        error = null;
+        status = null;
+    }
+
+    private async Task UploadPhoto()
+    {
+        if (photoFile == null)
+            return;
+
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var uploaded = await Api.PostFileAsync<MediaResponseDto>($"Media/timecapsule/{CapsuleId}/photo", photoFile);
+        if (uploaded == null)
+        {
+            error = Api.LastError ?? "Could not upload photo.";
+            isBusy = false;
+            return;
+        }
+
+        if (capsule?.IsUnlocked == true)
+            media.Insert(0, uploaded);
+
+        photoFile = null;
+        status = "Photo added to capsule.";
+        isBusy = false;
+    }
+
+    private async Task ShareCapsule()
+    {
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var ok = await Api.PostAsync($"TimeCapsule/{CapsuleId}/members", new AddAlbumMemberDto
+        {
+            UserEmail = selectedFriendEmail,
+            CanUpload = false
+        });
+
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not share capsule.";
+            isBusy = false;
+            return;
+        }
+
+        selectedFriendEmail = string.Empty;
+        status = "Capsule shared.";
+        await LoadCapsule();
+        isBusy = false;
+    }
+
+    private async Task DeleteMedia(int id)
+    {
+        var ok = await Api.DeleteAsync($"Media/{id}");
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not delete media.";
+            return;
+        }
+
+        media.RemoveAll(item => item.Id == id);
+        status = "Media deleted.";
+    }
+
+    private static string FormatRemaining(DateTime unlockAt)
+    {
+        var remaining = unlockAt.ToLocalTime() - DateTime.Now;
+        if (remaining <= TimeSpan.Zero)
+            return "Ready to open";
+
+        return $"{(int)remaining.TotalDays} days, {remaining.Hours} hours, {remaining.Minutes} minutes";
+    }
+}

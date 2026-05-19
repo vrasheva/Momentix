@@ -69,7 +69,7 @@ namespace Momentix.API
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Въведи: Bearer {токен}"
+                    Description = "Enter: Bearer {token}"
                 });
 
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
@@ -89,6 +89,12 @@ namespace Momentix.API
             });
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                dbContext.Database.Migrate();
+            }
 
             if (app.Environment.IsDevelopment())
             {

@@ -67,6 +67,42 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <Frame Padding="14" CornerRadius="8" BackgroundColor="White" BorderColor="#E7E0EC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Invite friends" FontSize="18" FontAttributes="Bold" TextColor="#1D1B20" />
+                    <Label Text="Selected friends will be able to see this capsule." FontSize="13" TextColor="#625B71" />
+
+                    <CollectionView x:Name="FriendsList" ItemsSource="{Binding Friends}" MaximumHeightRequest="220">
+                        <CollectionView.EmptyView>
+                            <Label
+                                Text="No friends yet. Add friends first from the Friends tab."
+                                Padding="0,12"
+                                TextColor="#625B71" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="0,6">
+                                    <CheckBox
+                                        IsChecked="{Binding IsInvited}"
+                                        VerticalOptions="Center"
+                                        Color="#6750A4" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding FullName}"
+                                            FontSize="14"
+                                            FontAttributes="Bold"
+                                            TextColor="#1D1B20" />
+                                        <Label
+                                            Text="{Binding Email}"
+                                            FontSize="12"
+                                            TextColor="#625B71" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Frame>
             <Label Text="{Binding ErrorMessage}" TextColor="#B3261E" />
 
             <ActivityIndicator

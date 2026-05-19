@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,7 @@ public class TimeCapsuleResponseDto
     public DateTime CreatedAt { get; set; }
     public bool IsUnlocked { get; set; }
     public string OwnerName { get; set; } = string.Empty;
+    public bool IsOwner { get; set; }
     public int MemberCount { get; set; }
     public int MediaCount { get; set; }
     public TimeSpan? TimeRemaining { get; set; }

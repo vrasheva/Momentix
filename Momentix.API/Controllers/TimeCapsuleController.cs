@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +48,7 @@ namespace Momentix.API.Controllers
                     CreatedAt = tc.CreatedAt,
                     IsUnlocked = tc.IsUnlocked || tc.UnlockAt <= now,
                     OwnerName = tc.Owner.FullName,
+                    IsOwner = tc.OwnerId == userId,
                     MemberCount = tc.Members.Count,
                     MediaCount = tc.MediaItems.Count,
                     TimeRemaining = (tc.IsUnlocked || tc.UnlockAt <= now) ? null : tc.UnlockAt - now
@@ -88,6 +89,7 @@ namespace Momentix.API.Controllers
                 CreatedAt = capsule.CreatedAt,
                 IsUnlocked = capsule.IsUnlocked || capsule.UnlockAt <= now,
                 OwnerName = capsule.Owner.FullName,
+                IsOwner = capsule.OwnerId == userId,
                 MemberCount = capsule.Members.Count,
                 MediaCount = capsule.MediaItems.Count,
                 TimeRemaining = (capsule.IsUnlocked || capsule.UnlockAt <= now) ? null : capsule.UnlockAt - now
@@ -125,6 +127,7 @@ namespace Momentix.API.Controllers
                 CreatedAt = capsule.CreatedAt,
                 IsUnlocked = false,
                 OwnerName = owner!.FullName,
+                IsOwner = true,
                 MemberCount = 0,
                 MediaCount = 0,
                 TimeRemaining = capsule.UnlockAt - DateTime.UtcNow
@@ -157,6 +160,44 @@ namespace Momentix.API.Controllers
             return Ok("Датата на отключване е обновена успешно.");
         }
 
+        [HttpGet("{id}/members")]
+        public async Task<IActionResult> GetMembers(int id)
+        {
+            var userId = GetUserId();
+
+            var capsule = await _context.TimeCapsules
+                .Include(tc => tc.Owner)
+                .Include(tc => tc.Members)
+                .ThenInclude(m => m.User)
+                .FirstOrDefaultAsync(tc => tc.Id == id);
+
+            if (capsule == null)
+                return NotFound("Capsule was not found.");
+
+            var hasAccess = capsule.OwnerId == userId ||
+                            capsule.Members.Any(m => m.UserId == userId);
+
+            if (!hasAccess)
+                return Forbid();
+
+            var members = capsule.Members.Select(m => new AlbumMemberResponseDto
+            {
+                UserId = m.UserId,
+                FullName = m.User.FullName,
+                CanUpload = false,
+                IsOwner = false
+            }).ToList();
+
+            members.Insert(0, new AlbumMemberResponseDto
+            {
+                UserId = capsule.OwnerId,
+                FullName = capsule.Owner.FullName,
+                CanUpload = true,
+                IsOwner = true
+            });
+
+            return Ok(members);
+        }
         // Добави член към капсула (само собственикът)
         [HttpPost("{id}/members")]
         public async Task<IActionResult> AddMember(int id, [FromBody] AddAlbumMemberDto dto)
@@ -177,6 +218,8 @@ namespace Momentix.API.Controllers
             if (userToAdd == null)
                 return NotFound("Потребителят не е намерен.");
 
+            if (userToAdd.Id == capsule.OwnerId)
+                return BadRequest("Owner already has access to the capsule.");
             bool alreadyMember = capsule.Members.Any(m => m.UserId == userToAdd.Id);
             if (alreadyMember)
                 return BadRequest("Потребителят вече е член на капсулата.");

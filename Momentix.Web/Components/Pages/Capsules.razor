@@ -1,0 +1,245 @@
+﻿@page "/capsules"
+@using System.Globalization
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Time Capsules</h1>
+        <p class="page-description">Lock photos for a future date and share the capsule with friends.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+<div class="grid two">
+    <section class="panel">
+        <h2 class="section-title">Create capsule</h2>
+        <EditForm Model="newCapsule" OnValidSubmit="CreateCapsule" class="form-stack">
+            <div class="field">
+                <label>Title</label>
+                <InputText class="input" @bind-Value="newCapsule.Title" />
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <InputTextArea class="input" @bind-Value="newCapsule.Description" />
+            </div>
+            <div class="grid two">
+                <div class="field">
+                    <label>Unlock date</label>
+                    <input type="date" value="@unlockDate" @onchange="OnUnlockDateChanged" />
+                </div>
+                <div class="field">
+                    <label>Unlock time</label>
+                    <input type="time" value="@unlockTime" @onchange="OnUnlockTimeChanged" />
+                </div>
+            </div>
+            <div class="field">
+                <label>Photos</label>
+                <InputFile OnChange="OnCapsuleFilesSelected" accept="image/*" multiple />
+                @if (selectedFiles.Count > 0)
+                {
+                    <span class="muted">@selectedFiles.Count selected</span>
+                }
+            </div>
+
+            <div class="field">
+                <label>Invite friends</label>
+                @if (friendSelections.Count == 0)
+                {
+                    <div class="empty-state">No friends yet. Add friends from the Friends page.</div>
+                }
+                else
+                {
+                    <div class="item-list">
+                        @foreach (var friend in friendSelections)
+                        {
+                            <label class="member-row card">
+                                <span class="person">
+                                    <strong>@friend.FullName</strong>
+                                    <span class="muted">@friend.Email</span>
+                                </span>
+                                <input type="checkbox" @bind="friend.IsSelected" />
+                            </label>
+                        }
+                    </div>
+                }
+            </div>
+
+            <button class="primary-button" type="submit" disabled="@isBusy">@(isBusy ? "Creating..." : "Create capsule")</button>
+        </EditForm>
+    </section>
+
+    <section class="panel">
+        <h2 class="section-title">Your capsules</h2>
+        @if (isLoading)
+        {
+            <div class="empty-state">Loading capsules...</div>
+        }
+        else if (capsules.Count == 0)
+        {
+            <div class="empty-state">No capsules yet.</div>
+        }
+        else
+        {
+            <div class="item-list">
+                @foreach (var capsule in capsules)
+                {
+                    <article class="card">
+                        <div class="friend-row">
+                            <a class="card-link" href="@($"capsules/{capsule.Id}")">
+                                <div class="person">
+                                    <strong>@capsule.Title</strong>
+                                    <span class="muted truncate">@(capsule.Description ?? "No description")</span>
+                                </div>
+                            </a>
+                            <a class="secondary-button" href="@($"capsules/{capsule.Id}")">Open</a>
+                        </div>
+                        <div class="badge-row">
+                            <span class="badge @(capsule.IsUnlocked ? "" : "gold")">@(capsule.IsUnlocked ? "Unlocked" : FormatRemaining(capsule.UnlockAt))</span>
+                            <span class="badge">@capsule.MediaCount media</span>
+                            <span class="badge coral">@(capsule.IsOwner ? "Owner" : "Shared")</span>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private readonly CreateTimeCapsuleDto newCapsule = new();
+    private List<TimeCapsuleResponseDto> capsules = new();
+    private List<FriendSelection> friendSelections = new();
+    private IReadOnlyList<IBrowserFile> selectedFiles = Array.Empty<IBrowserFile>();
+    private string unlockDate = DateTime.Today.AddDays(1).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    private string unlockTime = "22:00";
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? error;
+    private string? status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        capsules = await Api.GetAsync<List<TimeCapsuleResponseDto>>("TimeCapsule") ?? new();
+        var friends = await Api.GetAsync<List<FriendResponseDto>>("Friends") ?? new();
+        friendSelections = friends.Select(friend => new FriendSelection(friend)).ToList();
+        isLoading = false;
+    }
+
+    private void OnUnlockDateChanged(ChangeEventArgs e)
+    {
+        unlockDate = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void OnUnlockTimeChanged(ChangeEventArgs e)
+    {
+        unlockTime = e.Value?.ToString() ?? string.Empty;
+    }
+    private void OnCapsuleFilesSelected(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles(12);
+        error = null;
+        status = null;
+    }
+
+    private async Task CreateCapsule()
+    {
+        if (string.IsNullOrWhiteSpace(newCapsule.Title))
+        {
+            error = "Capsule title is required.";
+            return;
+        }
+
+        if (!DateTime.TryParseExact($"{unlockDate} {unlockTime}", "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var unlockLocal))
+        {
+            error = "Invalid unlock date or time.";
+            return;
+        }
+
+        isBusy = true;
+        error = null;
+        status = null;
+        newCapsule.UnlockAt = unlockLocal.ToUniversalTime();
+
+        var created = await Api.PostAsync<CreateTimeCapsuleDto, TimeCapsuleResponseDto>("TimeCapsule", newCapsule);
+        if (created == null)
+        {
+            error = Api.LastError ?? "Could not create capsule.";
+            isBusy = false;
+            return;
+        }
+
+        foreach (var friend in friendSelections.Where(friend => friend.IsSelected))
+        {
+            await Api.PostAsync($"TimeCapsule/{created.Id}/members", new AddAlbumMemberDto
+            {
+                UserEmail = friend.Email,
+                CanUpload = false
+            });
+        }
+
+        foreach (var file in selectedFiles)
+        {
+            await Api.PostFileAsync<MediaResponseDto>($"Media/timecapsule/{created.Id}/photo", file);
+        }
+
+        status = "Capsule created.";
+        ResetForm();
+        await LoadData();
+        isBusy = false;
+    }
+
+    private void ResetForm()
+    {
+        newCapsule.Title = string.Empty;
+        newCapsule.Description = string.Empty;
+        selectedFiles = Array.Empty<IBrowserFile>();
+        foreach (var friend in friendSelections)
+            friend.IsSelected = false;
+    }
+
+    private static string FormatRemaining(DateTime unlockAt)
+    {
+        var remaining = unlockAt.ToLocalTime() - DateTime.Now;
+        if (remaining <= TimeSpan.Zero)
+            return "Ready";
+
+        return $"{(int)remaining.TotalDays}d {remaining.Hours}h {remaining.Minutes}m";
+    }
+
+    private sealed class FriendSelection
+    {
+        public FriendSelection(FriendResponseDto friend)
+        {
+            FullName = friend.FullName;
+            Email = friend.Email;
+        }
+
+        public string FullName { get; }
+        public string Email { get; }
+        public bool IsSelected { get; set; }
+    }
+}
+
+

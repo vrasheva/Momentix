@@ -1,4 +1,4 @@
-﻿using Momentix.Mobile.Services;
+using Momentix.Mobile.Services;
 
 namespace Momentix.Mobile
 {
@@ -7,8 +7,12 @@ namespace Momentix.Mobile
         public App()
         {
             InitializeComponent();
-            MainPage = new AppShell();
             ThemeService.Instance.LoadSaved();
+        }
+
+        protected override Window CreateWindow(IActivationState? activationState)
+        {
+            return new Window(new AppShell());
         }
     }
 }

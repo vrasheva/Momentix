@@ -1,0 +1,185 @@
+﻿@page "/challenges"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Challenges</h1>
+        <p class="page-description">Upload a photo for the daily challenge and vote on other submissions.</p>
+    </div>
+    <button class="secondary-button" type="button" @onclick="LoadChallenge">Refresh</button>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+@if (isLoading)
+{
+    <div class="empty-state">Loading challenge...</div>
+}
+else if (challenge == null)
+{
+    <div class="empty-state">No active challenge.</div>
+}
+else
+{
+    <div class="grid two">
+        <section class="panel">
+            <div class="eyebrow">Daily challenge</div>
+            <h2 class="section-title">@challenge.Description</h2>
+            <p class="muted">Reveal time: @challenge.RevealAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</p>
+
+            <div class="form-stack">
+                <div class="field">
+                    <label>Upload your challenge photo</label>
+                    <InputFile OnChange="OnChallengePhotoSelected" accept="image/*" />
+                    @if (challengePhoto != null)
+                    {
+                        <span class="muted">Selected: @challengePhoto.Name</span>
+                    }
+                </div>
+                <button class="primary-button" type="button" @onclick="SubmitPhoto" disabled="@(isBusy || challengePhoto == null)">Submit photo</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2 class="section-title">Voting options</h2>
+            <p class="muted">Pick what you think the photo challenge was.</p>
+            <div class="badge-row">
+                @foreach (var option in voteOptions)
+                {
+                    <span class="badge">@option</span>
+                }
+            </div>
+        </section>
+    </div>
+
+    <section class="panel" style="margin-top:18px">
+        <h2 class="section-title">Feed</h2>
+        @if (submissions.Count == 0)
+        {
+            <div class="empty-state">No submissions yet.</div>
+        }
+        else
+        {
+            <div class="media-grid">
+                @foreach (var submission in submissions)
+                {
+                    <article class="media-tile">
+                        @if (!string.IsNullOrWhiteSpace(submission.MediaUrl))
+                        {
+                            <img src="@Api.ToBrowserUrl(submission.MediaUrl)" alt="Challenge submission" />
+                        }
+                        <div class="media-body">
+                            <strong>@submission.UserName</strong>
+                            <div class="meta">@submission.VoteCount votes</div>
+                            <div class="actions" style="margin-top:10px">
+                                @foreach (var option in voteOptions)
+                                {
+                                    <button class="secondary-button" type="button" @onclick="() => Vote(submission.Id, option)">@option</button>
+                                }
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    private readonly string[] voteOptions = { "Green", "Shiny", "Animal", "Favorite detail" };
+    private ChallengeResponseDto? challenge;
+    private List<ChallengeSubmissionResponseDto> submissions = new();
+    private IBrowserFile? challengePhoto;
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? error;
+    private string? status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadChallenge();
+    }
+
+    private async Task LoadChallenge()
+    {
+        isLoading = true;
+        error = null;
+        status = null;
+
+        challenge = await Api.GetAsync<ChallengeResponseDto>("Challenges/active");
+        if (challenge != null)
+            submissions = await Api.GetAsync<List<ChallengeSubmissionResponseDto>>($"Challenges/{challenge.Id}/submissions") ?? new();
+        else
+            error = Api.LastError;
+
+        isLoading = false;
+    }
+
+    private void OnChallengePhotoSelected(InputFileChangeEventArgs e)
+    {
+        challengePhoto = e.File;
+        error = null;
+        status = null;
+    }
+
+    private async Task SubmitPhoto()
+    {
+        if (challenge == null || challengePhoto == null)
+            return;
+
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var result = await Api.PostFileAsync<ChallengeSubmissionResponseDto>($"Challenges/{challenge.Id}/submissions/photo", challengePhoto);
+        if (result == null)
+        {
+            error = Api.LastError ?? "Could not submit photo.";
+            isBusy = false;
+            return;
+        }
+
+        challengePhoto = null;
+        status = "Challenge photo submitted.";
+        await LoadChallenge();
+        isBusy = false;
+    }
+
+    private async Task Vote(int submissionId, string option)
+    {
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var ok = await Api.PostAsync($"Challenges/submissions/{submissionId}/vote", new CreateChallengeVoteDto
+        {
+            SelectedOption = option
+        });
+
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not vote.";
+            isBusy = false;
+            return;
+        }
+
+        status = "Vote saved.";
+        await LoadChallenge();
+        isBusy = false;
+    }
+}

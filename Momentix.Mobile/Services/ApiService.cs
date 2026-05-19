@@ -8,6 +8,33 @@ public class ApiService
     private readonly HttpClient _httpClient;
 
     public string LastErrorMessage { get; private set; } = string.Empty;
+    public static string ToDeviceUrl(string url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return url;
+
+        if (url.StartsWith("/", StringComparison.Ordinal))
+            return $"http://10.0.2.2:5036{url}";
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return url;
+
+        var shouldRewrite = string.Equals(uri.Host, "localhost", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(uri.Host, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(uri.Host, "0.0.0.0", StringComparison.OrdinalIgnoreCase);
+
+        if (!shouldRewrite)
+            return url;
+
+        var builder = new UriBuilder(uri)
+        {
+            Scheme = "http",
+            Host = "10.0.2.2",
+            Port = 5036
+        };
+
+        return builder.Uri.ToString();
+    }
 
     public ApiService()
     {
@@ -111,3 +138,4 @@ public class ApiService
         return response.IsSuccessStatusCode;
     }
 }
+

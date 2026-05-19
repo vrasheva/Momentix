@@ -10,6 +10,7 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     private readonly ApiService _apiService;
 
     public ObservableCollection<SelectedPhotoItemViewModel> SelectedPhotos { get; } = new();
+    public ObservableCollection<FriendInviteViewModel> Friends { get; } = new();
 
     private string _title = string.Empty;
     public string Title
@@ -54,6 +55,7 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     }
 
     public IRelayCommand SaveCommand => new AsyncRelayCommand(Save);
+    public IRelayCommand LoadFriendsCommand => new AsyncRelayCommand(LoadFriends);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand<SelectedPhotoItemViewModel> RemovePhotoCommand => new RelayCommand<SelectedPhotoItemViewModel>(RemovePhoto);
     public IRelayCommand CancelCommand => new AsyncRelayCommand(Cancel);
@@ -65,6 +67,45 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     public CreateTimeCapsuleViewModel(ApiService apiService)
     {
         _apiService = apiService;
+    }
+
+    public void OnAppearing()
+    {
+        LoadFriendsCommand.Execute(null);
+    }
+
+    private async Task LoadFriends()
+    {
+        try
+        {
+            var invitedIds = Friends
+                .Where(f => f.IsInvited)
+                .Select(f => f.UserId)
+                .ToHashSet();
+
+            var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
+            Friends.Clear();
+
+            if (result == null)
+                return;
+
+            foreach (var friend in result
+                .GroupBy(f => f.UserId)
+                .Select(g => g.First())
+                .OrderBy(f => f.FullName))
+            {
+                var item = new FriendInviteViewModel(friend)
+                {
+                    IsInvited = invitedIds.Contains(friend.UserId)
+                };
+
+                Friends.Add(item);
+            }
+        }
+        catch
+        {
+            // Friend invites are optional while creating the capsule.
+        }
     }
 
     private async Task PickPhoto()
@@ -143,6 +184,25 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
                 return;
             }
 
+            foreach (var friend in Friends.Where(f => f.IsInvited))
+            {
+                var success = await _apiService.PostAsync(
+                    $"TimeCapsule/{result.Id}/members",
+                    new AddAlbumMemberDto
+                    {
+                        UserEmail = friend.Email,
+                        CanUpload = false
+                    });
+
+                if (!success)
+                {
+                    ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                        ? "Capsule was created, but a friend was not added."
+                        : _apiService.LastErrorMessage;
+                    return;
+                }
+            }
+
             foreach (var photo in SelectedPhotos.ToList())
             {
                 await using var stream = await photo.File.OpenReadAsync();
@@ -168,6 +228,9 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             Title = string.Empty;
             Description = string.Empty;
             SelectedPhotos.Clear();
+            foreach (var friend in Friends)
+                friend.IsInvited = false;
+
             OnPropertyChanged(nameof(SelectedPhotoCountText));
             await Shell.Current.GoToAsync("..");
         }

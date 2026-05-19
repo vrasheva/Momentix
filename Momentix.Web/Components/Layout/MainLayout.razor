@@ -1,0 +1,57 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject AuthSession Auth
+
+<div class="app-shell">
+    <aside class="app-sidebar">
+        <NavMenu />
+    </aside>
+
+    <main class="app-main">
+        <header class="app-topbar">
+            <div>
+                <div class="eyebrow">Memory workspace</div>
+                <div class="top-title">Momentix</div>
+            </div>
+
+            @if (Auth.IsLoggedIn)
+            {
+                <div class="user-chip">
+                    <span class="avatar" style="background:@Auth.ThemeColor">@Initials</span>
+                    <span>@Auth.FullName</span>
+                </div>
+            }
+        </header>
+
+        <section class="app-content">
+            @Body
+        </section>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">x</span>
+</div>
+
+@code {
+    private string Initials => string.IsNullOrWhiteSpace(Auth.FullName)
+        ? "?"
+        : string.Join(string.Empty, Auth.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => char.ToUpperInvariant(part[0])));
+
+    protected override void OnInitialized()
+    {
+        Auth.Changed += OnAuthChanged;
+    }
+
+    private void OnAuthChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Auth.Changed -= OnAuthChanged;
+    }
+}

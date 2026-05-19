@@ -13,14 +13,30 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     private IDispatcherTimer? _timer;
     private TimeCapsuleResponseDto? _capsule;
     private bool _mediaLoaded;
+    private bool _isPageVisible;
 
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
+    public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
+    public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
 
     private int _timeCapsuleId;
     public int TimeCapsuleId
     {
         get => _timeCapsuleId;
-        set { _timeCapsuleId = value; OnPropertyChanged(); }
+        set
+        {
+            if (_timeCapsuleId == value)
+                return;
+
+            _timeCapsuleId = value;
+            _mediaLoaded = false;
+            MediaItems.Clear();
+            Members.Clear();
+            Friends.Clear();
+            SelectedFriend = null;
+            OnPropertyChanged();
+            LoadIfReady();
+        }
     }
 
     private string _capsuleTitle = string.Empty;
@@ -37,6 +53,17 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         set { _description = value; OnPropertyChanged(); }
     }
 
+    private FriendItemViewModel? _selectedFriend;
+    public FriendItemViewModel? SelectedFriend
+    {
+        get => _selectedFriend;
+        set
+        {
+            _selectedFriend = value;
+            OnPropertyChanged();
+        }
+    }
+
     private string _statusMessage = string.Empty;
     public string StatusMessage
     {
@@ -51,6 +78,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         set { _isLoading = value; OnPropertyChanged(); }
     }
 
+    public bool IsOwner => _capsule?.IsOwner == true;
     public bool IsUnlocked => _capsule != null && (_capsule.IsUnlocked || DateTime.UtcNow >= _capsule.UnlockAt);
     public bool IsLocked => !IsUnlocked;
     public string StatusText => IsUnlocked ? "Unlocked" : "Locked";
@@ -77,6 +105,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     }
 
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
+    public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
 
     public TimeCapsuleDetailsViewModel(ApiService apiService)
@@ -86,15 +115,23 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
 
     public void PageAppeared()
     {
-        if (LoadCommand.CanExecute(null))
-            LoadCommand.Execute(null);
-
+        _isPageVisible = true;
+        LoadIfReady();
         StartCountdown();
     }
 
     public void PageDisappeared()
     {
+        _isPageVisible = false;
         _timer?.Stop();
+    }
+
+    private void LoadIfReady()
+    {
+        if (!_isPageVisible || TimeCapsuleId <= 0 || IsLoading)
+            return;
+
+        LoadCommand.Execute(null);
     }
 
     private void StartCountdown()
@@ -139,8 +176,92 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
             Description = _capsule.Description ?? string.Empty;
             RefreshState();
 
+            await LoadMembers();
+
+            if (IsOwner)
+                await LoadFriends();
+            else
+                Friends.Clear();
+
             if (IsUnlocked)
                 await LoadMedia();
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadMembers()
+    {
+        var result = await _apiService.GetAsync<List<AlbumMemberResponseDto>>($"TimeCapsule/{TimeCapsuleId}/members");
+        Members.Clear();
+
+        if (result == null)
+            return;
+
+        foreach (var member in result)
+            Members.Add(member);
+    }
+
+    private async Task LoadFriends()
+    {
+        var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
+        Friends.Clear();
+
+        if (result == null)
+            return;
+
+        var existingMemberIds = Members.Select(m => m.UserId).ToHashSet();
+
+        foreach (var friend in result
+            .GroupBy(f => f.UserId)
+            .Select(g => g.First())
+            .Where(f => !existingMemberIds.Contains(f.UserId))
+            .OrderBy(f => f.FullName))
+            Friends.Add(new FriendItemViewModel(friend));
+
+        if (SelectedFriend != null && !Friends.Any(f => f.UserId == SelectedFriend.UserId))
+            SelectedFriend = null;
+    }
+
+    private async Task AddSelectedFriend()
+    {
+        if (SelectedFriend == null)
+        {
+            StatusMessage = "Choose a friend first.";
+            return;
+        }
+
+        IsLoading = true;
+        StatusMessage = string.Empty;
+
+        try
+        {
+            var success = await _apiService.PostAsync(
+                $"TimeCapsule/{TimeCapsuleId}/members",
+                new AddAlbumMemberDto
+                {
+                    UserEmail = SelectedFriend.Email,
+                    CanUpload = false
+                });
+
+            if (!success)
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Capsule was not shared."
+                    : _apiService.LastErrorMessage;
+                return;
+            }
+
+            SelectedFriend = null;
+            await LoadMembers();
+            await LoadFriends();
+            StatusMessage = "Capsule shared.";
         }
         catch (Exception ex)
         {
@@ -173,6 +294,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
 
     private void RefreshState()
     {
+        OnPropertyChanged(nameof(IsOwner));
         OnPropertyChanged(nameof(IsUnlocked));
         OnPropertyChanged(nameof(IsLocked));
         OnPropertyChanged(nameof(StatusText));

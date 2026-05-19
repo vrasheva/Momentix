@@ -1,0 +1,276 @@
+﻿@page "/albums/{AlbumId:int}"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <div class="eyebrow">Album</div>
+        <h1 class="page-title">@(album?.Title ?? "Album")</h1>
+        <p class="page-description">@(album?.Description ?? "Photos and letters shared in this album.")</p>
+    </div>
+    <a class="secondary-button" href="albums">Back</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+@if (isLoading)
+{
+    <div class="empty-state">Loading album...</div>
+}
+else if (album == null)
+{
+    <div class="empty-state">Album not found.</div>
+}
+else
+{
+    <div class="grid two">
+        <section class="panel">
+            <h2 class="section-title">Add memory</h2>
+            <div class="form-stack">
+                <div class="field">
+                    <label>Photo</label>
+                    <InputFile OnChange="OnPhotoSelected" accept="image/*" />
+                    @if (photoFile != null)
+                    {
+                        <span class="muted">Selected: @photoFile.Name</span>
+                    }
+                </div>
+                <button class="primary-button" type="button" @onclick="UploadPhoto" disabled="@(isBusy || photoFile == null)">Upload photo</button>
+
+                <hr />
+
+                <div class="field">
+                    <label>Letter</label>
+                    <InputTextArea class="input" @bind-Value="letter.Text" />
+                </div>
+                <button class="secondary-button" type="button" @onclick="AddLetter" disabled="@isBusy">Add letter</button>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2 class="section-title">People</h2>
+            <div class="item-list">
+                @foreach (var member in members)
+                {
+                    <div class="member-row">
+                        <div class="person">
+                            <strong>@member.FullName</strong>
+                            <span class="muted">@member.RoleText</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (CanShare)
+            {
+                <hr />
+                <div class="form-stack">
+                    <div class="field">
+                        <label>Share with friend</label>
+                        <select @bind="selectedFriendEmail">
+                            <option value="">Select friend</option>
+                            @foreach (var friend in friends)
+                            {
+                                <option value="@friend.Email">@friend.FullName (@friend.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <label class="actions">
+                        <input type="checkbox" @bind="shareCanUpload" />
+                        <span>Can upload photos</span>
+                    </label>
+                    <button class="primary-button" type="button" @onclick="ShareAlbum" disabled="@(isBusy || string.IsNullOrWhiteSpace(selectedFriendEmail))">Share album</button>
+                </div>
+            }
+        </section>
+    </div>
+
+    <section class="panel" style="margin-top:18px">
+        <h2 class="section-title">Memories</h2>
+        @if (media.Count == 0)
+        {
+            <div class="empty-state">No photos or letters yet.</div>
+        }
+        else
+        {
+            <div class="media-grid">
+                @foreach (var item in media)
+                {
+                    <article class="media-tile">
+                        @if (item.Type == MediaType.Image)
+                        {
+                            <img src="@Api.ToBrowserUrl(item.Url)" alt="Album memory" />
+                        }
+                        else if (item.Type == MediaType.Letter)
+                        {
+                            <div class="media-body">
+                                <div class="letter-box">@item.Url</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="media-body">Unsupported media type: @item.Type</div>
+                        }
+                        <div class="media-body">
+                            <div class="meta">By @item.UploadedByName</div>
+                            <div class="actions" style="margin-top:10px">
+                                <button class="danger-button" type="button" @onclick="() => DeleteMedia(item.Id)">Delete</button>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter] public int AlbumId { get; set; }
+
+    private AlbumResponseDto? album;
+    private List<MediaResponseDto> media = new();
+    private List<AlbumMemberResponseDto> members = new();
+    private List<FriendResponseDto> friends = new();
+    private readonly CreateLetterMediaDto letter = new();
+    private IBrowserFile? photoFile;
+    private string selectedFriendEmail = string.Empty;
+    private bool shareCanUpload = true;
+    private bool isLoading = true;
+    private bool isBusy;
+    private string? error;
+    private string? status;
+
+    private bool CanShare => members.Any(member => member.IsOwner && member.UserId == Auth.UserId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAlbum();
+    }
+
+    private async Task LoadAlbum()
+    {
+        isLoading = true;
+        error = null;
+
+        album = await Api.GetAsync<AlbumResponseDto>($"Albums/{AlbumId}");
+        if (album == null)
+        {
+            error = Api.LastError;
+            isLoading = false;
+            return;
+        }
+
+        media = await Api.GetAsync<List<MediaResponseDto>>($"Media/album/{AlbumId}") ?? new();
+        members = await Api.GetAsync<List<AlbumMemberResponseDto>>($"Albums/{AlbumId}/members") ?? new();
+        friends = await Api.GetAsync<List<FriendResponseDto>>("Friends") ?? new();
+        isLoading = false;
+    }
+
+    private void OnPhotoSelected(InputFileChangeEventArgs e)
+    {
+        photoFile = e.File;
+        status = null;
+        error = null;
+    }
+
+    private async Task UploadPhoto()
+    {
+        if (photoFile == null)
+            return;
+
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var uploaded = await Api.PostFileAsync<MediaResponseDto>($"Media/album/{AlbumId}/photo", photoFile);
+        if (uploaded == null)
+        {
+            error = Api.LastError ?? "Could not upload photo.";
+            isBusy = false;
+            return;
+        }
+
+        media.Insert(0, uploaded);
+        photoFile = null;
+        status = "Photo uploaded.";
+        isBusy = false;
+    }
+
+    private async Task AddLetter()
+    {
+        if (string.IsNullOrWhiteSpace(letter.Text))
+        {
+            error = "Letter text is required.";
+            return;
+        }
+
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var created = await Api.PostAsync<CreateLetterMediaDto, MediaResponseDto>($"Media/album/{AlbumId}/letter", letter);
+        if (created == null)
+        {
+            error = Api.LastError ?? "Could not add letter.";
+            isBusy = false;
+            return;
+        }
+
+        media.Insert(0, created);
+        letter.Text = string.Empty;
+        status = "Letter added.";
+        isBusy = false;
+    }
+
+    private async Task ShareAlbum()
+    {
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var ok = await Api.PostAsync($"Albums/{AlbumId}/members", new AddAlbumMemberDto
+        {
+            UserEmail = selectedFriendEmail,
+            CanUpload = shareCanUpload
+        });
+
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not share album.";
+            isBusy = false;
+            return;
+        }
+
+        selectedFriendEmail = string.Empty;
+        status = "Album shared.";
+        await LoadAlbum();
+        isBusy = false;
+    }
+
+    private async Task DeleteMedia(int id)
+    {
+        var ok = await Api.DeleteAsync($"Media/{id}");
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not delete media.";
+            return;
+        }
+
+        media.RemoveAll(item => item.Id == id);
+        status = "Media deleted.";
+    }
+}

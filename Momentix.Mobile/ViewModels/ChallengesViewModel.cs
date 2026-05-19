@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using Momentix.Data.DTOs;
 using Momentix.Mobile.Services;
 using System.Collections.ObjectModel;
@@ -151,7 +151,7 @@ public partial class ChallengesViewModel : BaseViewModel
             .GroupBy(s => s.Id)
             .Select(g => g.First())
             .OrderByDescending(s => s.SubmittedAt))
-            Submissions.Add(submission);
+            Submissions.Add(NormalizeSubmission(submission));
     }
 
     private async Task Submit()
@@ -196,7 +196,7 @@ public partial class ChallengesViewModel : BaseViewModel
             }
 
             if (!Submissions.Any(s => s.Id == result.Id))
-                Submissions.Insert(0, result);
+                Submissions.Insert(0, NormalizeSubmission(result));
 
             SubmissionText = string.Empty;
             SelectedPhoto = null;
@@ -212,6 +212,11 @@ public partial class ChallengesViewModel : BaseViewModel
         }
     }
 
+    private static ChallengeSubmissionResponseDto NormalizeSubmission(ChallengeSubmissionResponseDto submission)
+    {
+        submission.MediaUrl = ApiService.ToDeviceUrl(submission.MediaUrl);
+        return submission;
+    }
     private async Task Vote(ChallengeSubmissionResponseDto? submission)
     {
         if (submission == null)
@@ -227,3 +232,4 @@ public partial class ChallengesViewModel : BaseViewModel
             await LoadSubmissions();
     }
 }
+

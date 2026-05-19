@@ -1,0 +1,196 @@
+﻿@page "/friends"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Friends</h1>
+        <p class="page-description">Find users, send requests and accept incoming friend requests.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+<div class="grid two">
+    <section class="panel">
+        <h2 class="section-title">Find users</h2>
+        <div class="form-stack">
+            <div class="actions">
+                <input class="input" placeholder="Search by name or email" @bind="search" @bind:event="oninput" />
+                <button class="primary-button" type="button" @onclick="SearchUsers" disabled="@isBusy">Search</button>
+            </div>
+
+            @if (users.Count == 0)
+            {
+                <div class="empty-state">No users found.</div>
+            }
+            else
+            {
+                <div class="item-list">
+                    @foreach (var user in users)
+                    {
+                        <article class="card friend-row">
+                            <div class="person">
+                                <strong>@user.FullName</strong>
+                                <span class="muted">@user.Email</span>
+                            </div>
+                            <div class="actions">
+                                @if (user.IsFriend)
+                                {
+                                    <span class="badge">Friend</span>
+                                }
+                                else if (user.HasPendingOutgoingRequest)
+                                {
+                                    <span class="badge gold">Pending</span>
+                                }
+                                else if (user.HasPendingIncomingRequest && user.IncomingRequestId.HasValue)
+                                {
+                                    <button class="primary-button" type="button" @onclick="() => AcceptRequest(user.IncomingRequestId.Value)">Accept</button>
+                                }
+                                else
+                                {
+                                    <button class="secondary-button" type="button" @onclick="() => SendRequest(user.UserId)">Add friend</button>
+                                }
+                            </div>
+                        </article>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2 class="section-title">Incoming requests</h2>
+        @if (incomingRequests.Count == 0)
+        {
+            <div class="empty-state">No pending requests.</div>
+        }
+        else
+        {
+            <div class="item-list">
+                @foreach (var request in incomingRequests)
+                {
+                    <article class="card friend-row">
+                        <div class="person">
+                            <strong>@request.RequesterName</strong>
+                            <span class="muted">@request.RequesterEmail</span>
+                        </div>
+                        <div class="actions">
+                            <button class="primary-button" type="button" @onclick="() => AcceptRequest(request.Id)">Accept</button>
+                            <button class="secondary-button" type="button" @onclick="() => DeclineRequest(request.Id)">Decline</button>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+
+        <hr />
+
+        <h2 class="section-title">My friends</h2>
+        @if (friends.Count == 0)
+        {
+            <div class="empty-state">You do not have friends yet.</div>
+        }
+        else
+        {
+            <div class="item-list">
+                @foreach (var friend in friends)
+                {
+                    <article class="card friend-row">
+                        <div class="person">
+                            <strong>@friend.FullName</strong>
+                            <span class="muted">@friend.Email</span>
+                        </div>
+                        <button class="danger-button" type="button" @onclick="() => RemoveFriend(friend.UserId)">Remove</button>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private List<FriendResponseDto> friends = new();
+    private List<FriendRequestResponseDto> incomingRequests = new();
+    private List<UserSearchResponseDto> users = new();
+    private string search = string.Empty;
+    private bool isBusy;
+    private string? error;
+    private string? status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAll();
+    }
+
+    private async Task LoadAll()
+    {
+        error = null;
+        friends = await Api.GetAsync<List<FriendResponseDto>>("Friends") ?? new();
+        incomingRequests = await Api.GetAsync<List<FriendRequestResponseDto>>("Friends/requests/incoming") ?? new();
+        await SearchUsers();
+    }
+
+    private async Task SearchUsers()
+    {
+        isBusy = true;
+        error = null;
+        users = await Api.GetAsync<List<UserSearchResponseDto>>($"Friends/users?search={Uri.EscapeDataString(search)}") ?? new();
+        if (Api.LastError != null)
+            error = Api.LastError;
+        isBusy = false;
+    }
+
+    private async Task SendRequest(string userId)
+    {
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{userId}"), "Friend request sent.");
+    }
+
+    private async Task AcceptRequest(int requestId)
+    {
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/accept"), "Friend request accepted.");
+    }
+
+    private async Task DeclineRequest(int requestId)
+    {
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/decline"), "Friend request declined.");
+    }
+
+    private async Task RemoveFriend(string userId)
+    {
+        await RunAction(async () => await Api.DeleteAsync($"Friends/{userId}"), "Friend removed.");
+    }
+
+    private async Task RunAction(Func<Task<bool>> action, string successMessage)
+    {
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var ok = await action();
+        if (!ok)
+        {
+            error = Api.LastError ?? "Action failed.";
+            isBusy = false;
+            return;
+        }
+
+        status = successMessage;
+        await LoadAll();
+        isBusy = false;
+    }
+}

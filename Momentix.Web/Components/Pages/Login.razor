@@ -1,0 +1,59 @@
+﻿@page "/login"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="auth-wrap">
+    <section class="auth-panel">
+        <h1 class="page-title">Login</h1>
+        <p class="page-description">Open your Momentix account in the web app.</p>
+
+        <EditForm Model="model" OnValidSubmit="DoLogin" class="form-stack">
+            <div class="field">
+                <label>Email</label>
+                <InputText class="input" @bind-Value="model.Email" type="email" />
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <InputText class="input" @bind-Value="model.Password" type="password" />
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="error-message">@error</div>
+            }
+
+            <button class="primary-button full-width" type="submit" disabled="@isBusy">@(isBusy ? "Logging in..." : "Login")</button>
+            <a class="secondary-button full-width" href="register">Create account</a>
+        </EditForm>
+    </section>
+</div>
+
+@code {
+    private readonly LoginDto model = new();
+    private bool isBusy;
+    private string? error;
+
+    protected override void OnInitialized()
+    {
+        if (Auth.IsLoggedIn)
+            Nav.NavigateTo("/albums");
+    }
+
+    private async Task DoLogin()
+    {
+        isBusy = true;
+        error = null;
+
+        var response = await Api.PostAsync<LoginDto, AuthResponseDto>("Auth/login", model);
+        if (response == null)
+        {
+            error = Api.LastError ?? "Login failed.";
+            isBusy = false;
+            return;
+        }
+
+        Auth.SignIn(response);
+        Nav.NavigateTo("/albums");
+    }
+}

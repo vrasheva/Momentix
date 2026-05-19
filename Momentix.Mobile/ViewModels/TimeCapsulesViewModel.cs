@@ -119,13 +119,8 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
         try
         {
-            var parameters = new Dictionary<string, object>
-            {
-                ["TimeCapsuleId"] = capsule.Id,
-                ["CapsuleTitle"] = capsule.Title
-            };
-
-            await Shell.Current.GoToAsync("TimeCapsuleDetailsPage", parameters);
+            await Shell.Current.GoToAsync(
+                $"TimeCapsuleDetailsPage?TimeCapsuleId={capsule.Id}&CapsuleTitle={Uri.EscapeDataString(capsule.Title)}");
         }
         catch (Exception ex)
         {
@@ -185,3 +180,4 @@ public class TimeCapsuleItemViewModel : BaseViewModel
         OnPropertyChanged(nameof(CountdownText));
     }
 }
+

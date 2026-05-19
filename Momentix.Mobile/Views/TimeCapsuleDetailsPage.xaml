@@ -52,7 +52,94 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Label
+
+            <VerticalStackLayout
+                Spacing="10"
+                IsVisible="{Binding IsOwner}">
+                <Label
+                    Text="Share capsule"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{DynamicResource TextPrimary}" />
+                <Border
+                    Padding="10,0"
+                    BackgroundColor="{DynamicResource CardBackground}"
+                    StrokeThickness="1"
+                    Stroke="{DynamicResource BorderColor}">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Picker
+                        Title="Choose friend"
+                        ItemsSource="{Binding Friends}"
+                        SelectedItem="{Binding SelectedFriend}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        HeightRequest="46"
+                        TextColor="{DynamicResource TextPrimary}"
+                        TitleColor="{DynamicResource TextSecondary}"
+                        BackgroundColor="Transparent" />
+                </Border>
+                <Button
+                    Text="Share with friend"
+                    Command="{Binding AddSelectedFriendCommand}"
+                    BackgroundColor="{DynamicResource Primary}"
+                    TextColor="White"
+                    HeightRequest="46"
+                    CornerRadius="12"
+                    FontAttributes="Bold" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="8">
+                <Label
+                    Text="People"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="{DynamicResource TextPrimary}" />
+                <VerticalStackLayout
+                    Spacing="0"
+                    BindableLayout.ItemsSource="{Binding Members}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
+                                <Border
+                                    WidthRequest="36"
+                                    HeightRequest="36"
+                                    BackgroundColor="{DynamicResource PrimaryLight}"
+                                    StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="18" />
+                                    </Border.StrokeShape>
+                                    <Label
+                                        Text="{Binding Initials}"
+                                        FontSize="12"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryText}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label
+                                        Text="{Binding FullName}"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource TextPrimary}" />
+                                    <Label
+                                        Text="{Binding RoleText}"
+                                        FontSize="12"
+                                        TextColor="{DynamicResource TextSecondary}" />
+                                </VerticalStackLayout>
+                                <Label
+                                    Grid.Column="2"
+                                    Text="Owner"
+                                    FontSize="12"
+                                    TextColor="{DynamicResource Primary}"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding IsOwner}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>            <Label
                 Text="{Binding StatusMessage}"
                 TextColor="{DynamicResource Primary}" />
 

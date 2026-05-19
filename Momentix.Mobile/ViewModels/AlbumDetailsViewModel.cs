@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
 using Momentix.Mobile.Services;
@@ -15,6 +15,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
     public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
+    public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> PhotoItems { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> RestPhotos { get; } = new();
     public bool HasPhotos => PhotoItems.Count > 0;
@@ -47,6 +48,20 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         set { _memberEmail = value; OnPropertyChanged(); }
     }
 
+    private FriendItemViewModel? _selectedFriend;
+    public FriendItemViewModel? SelectedFriend
+    {
+        get => _selectedFriend;
+        set
+        {
+            _selectedFriend = value;
+            OnPropertyChanged();
+
+            if (value != null)
+                MemberEmail = value.Email;
+        }
+    }
+
     private string _letterText = string.Empty;
     public string LetterText
     {
@@ -70,6 +85,8 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
     public IRelayCommand AddMemberCommand => new AsyncRelayCommand(AddMember);
+    public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
+    public IRelayCommand LoadFriendsCommand => new AsyncRelayCommand(LoadFriends);
     public IRelayCommand AddLetterCommand => new AsyncRelayCommand(AddLetter);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
@@ -128,6 +145,8 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             if (members != null)
                 foreach (var m in members)
                     Members.Add(m);
+
+            await LoadFriends();
         }
         catch (Exception ex)
         {
@@ -139,11 +158,48 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         }
     }
 
+    private async Task LoadFriends()
+    {
+        var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
+        Friends.Clear();
+
+        if (result == null)
+            return;
+
+        var existingMemberIds = Members.Select(m => m.UserId).ToHashSet();
+
+        foreach (var friend in result
+            .GroupBy(f => f.UserId)
+            .Select(g => g.First())
+            .Where(f => !existingMemberIds.Contains(f.UserId))
+            .OrderBy(f => f.FullName))
+            Friends.Add(new FriendItemViewModel(friend));
+
+        if (SelectedFriend != null && !Friends.Any(f => f.UserId == SelectedFriend.UserId))
+            SelectedFriend = null;
+    }
+
+    private async Task AddSelectedFriend()
+    {
+        if (SelectedFriend == null)
+        {
+            StatusMessage = "Ð˜Ð·Ð±ÐµÑ€Ð¸ Ð¿Ñ€Ð¸ÑÑ‚ÐµÐ» Ð¿ÑŠÑ€Ð²Ð¾.";
+            return;
+        }
+
+        await AddMemberByEmail(SelectedFriend.Email);
+    }
+
     private async Task AddMember()
     {
-        if (string.IsNullOrWhiteSpace(MemberEmail))
+        await AddMemberByEmail(MemberEmail);
+    }
+
+    private async Task AddMemberByEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
         {
-            StatusMessage = "Имейлът е задължителен.";
+            StatusMessage = "Ð˜Ð¼ÐµÐ¹Ð»ÑŠÑ‚ Ðµ Ð·Ð°Ð´ÑŠÐ»Ð¶Ð¸Ñ‚ÐµÐ»ÐµÐ½.";
             return;
         }
 
@@ -156,20 +212,21 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 $"Albums/{AlbumId}/members",
                 new AddAlbumMemberDto
                 {
-                    UserEmail = MemberEmail.Trim(),
+                    UserEmail = email.Trim(),
                     CanUpload = true
                 });
 
             if (success)
             {
-                StatusMessage = "Членът е добавен.";
                 MemberEmail = string.Empty;
+                SelectedFriend = null;
                 await Load();
+                StatusMessage = "Ð§Ð»ÐµÐ½ÑŠÑ‚ Ðµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½.";
             }
             else
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Членът не беше добавен."
+                    ? "Ð§Ð»ÐµÐ½ÑŠÑ‚ Ð½Ðµ Ð±ÐµÑˆÐµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½."
                     : _apiService.LastErrorMessage;
             }
         }
@@ -187,7 +244,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(LetterText))
         {
-            StatusMessage = "Текстът е задължителен.";
+            StatusMessage = "Ð¢ÐµÐºÑÑ‚ÑŠÑ‚ Ðµ Ð·Ð°Ð´ÑŠÐ»Ð¶Ð¸Ñ‚ÐµÐ»ÐµÐ½.";
             return;
         }
 
@@ -204,7 +261,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             {
                 MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
                 LetterText = string.Empty;
-                StatusMessage = "Спомена е добавен.";
+                StatusMessage = "Ð¡Ð¿Ð¾Ð¼ÐµÐ½Ð° Ðµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½.";
             }
         }
         catch (Exception ex)
@@ -228,7 +285,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         {
             var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Избери снимка"
+                Title = "Ð˜Ð·Ð±ÐµÑ€Ð¸ ÑÐ½Ð¸Ð¼ÐºÐ°"
             });
 
             if (file == null) return;
@@ -244,22 +301,22 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             if (result != null)
             {
                 MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
-                StatusMessage = "Снимката е качена.";
+                StatusMessage = "Ð¡Ð½Ð¸Ð¼ÐºÐ°Ñ‚Ð° Ðµ ÐºÐ°Ñ‡ÐµÐ½Ð°.";
             }
             else
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Снимката не беше качена."
+                    ? "Ð¡Ð½Ð¸Ð¼ÐºÐ°Ñ‚Ð° Ð½Ðµ Ð±ÐµÑˆÐµ ÐºÐ°Ñ‡ÐµÐ½Ð°."
                     : _apiService.LastErrorMessage;
             }
         }
         catch (FeatureNotSupportedException)
         {
-            StatusMessage = "Камерата не се поддържа на това устройство.";
+            StatusMessage = "ÐšÐ°Ð¼ÐµÑ€Ð°Ñ‚Ð° Ð½Ðµ ÑÐµ Ð¿Ð¾Ð´Ð´ÑŠÑ€Ð¶Ð° Ð½Ð° Ñ‚Ð¾Ð²Ð° ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð¾.";
         }
         catch (PermissionException)
         {
-            StatusMessage = "Нямаш разрешение за достъп до снимките.";
+            StatusMessage = "ÐÑÐ¼Ð°Ñˆ Ñ€Ð°Ð·Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ Ð·Ð° Ð´Ð¾ÑÑ‚ÑŠÐ¿ Ð´Ð¾ ÑÐ½Ð¸Ð¼ÐºÐ¸Ñ‚Ðµ.";
         }
         catch (Exception ex)
         {
@@ -282,7 +339,7 @@ public class AlbumMediaItemViewModel
     private readonly MediaResponseDto _media;
 
     public int Id => _media.Id;
-    public string Url => _media.Url;
+    public string Url => ApiService.ToDeviceUrl(_media.Url);
     public MediaType Type => _media.Type;
     public DateTime UploadedAt => _media.UploadedAt;
     public string UploadedByName => _media.UploadedByName;
@@ -298,7 +355,7 @@ public class AlbumMediaItemViewModel
             if (!_media.UnlockAt.HasValue) return string.Empty;
             var diff = _media.UnlockAt.Value.ToLocalTime() - DateTime.Now;
             if (diff <= TimeSpan.Zero) return string.Empty;
-            return $"{(int)diff.TotalDays}Д {diff.Hours}Ч {diff.Minutes}М";
+            return $"{(int)diff.TotalDays}Ð” {diff.Hours}Ð§ {diff.Minutes}Ðœ";
         }
     }
 
@@ -307,12 +364,12 @@ public class AlbumMediaItemViewModel
         get
         {
             if (!_media.UnlockAt.HasValue) return string.Empty;
-            return $"Отваря се на {_media.UnlockAt.Value.ToLocalTime():dd.MM.yyyy} в {_media.UnlockAt.Value.ToLocalTime():HH:mm}";
+            return $"ÐžÑ‚Ð²Ð°Ñ€Ñ ÑÐµ Ð½Ð° {_media.UnlockAt.Value.ToLocalTime():dd.MM.yyyy} Ð² {_media.UnlockAt.Value.ToLocalTime():HH:mm}";
         }
     }
 
     public string UploadedAtText =>
-        $"Написано на {UploadedAt.ToLocalTime():dd MMM yyyy}";
+        $"ÐÐ°Ð¿Ð¸ÑÐ°Ð½Ð¾ Ð½Ð° {UploadedAt.ToLocalTime():dd MMM yyyy}";
 
     public AlbumMediaItemViewModel(MediaResponseDto media)
     {

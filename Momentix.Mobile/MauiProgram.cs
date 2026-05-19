@@ -16,7 +16,7 @@ namespace Momentix.Mobile
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                    fonts.AddFont("MaterialIconsOutlined-Regular.otf", "MaterialIcons"); // <- добави това
+                    fonts.AddFont("MaterialIconsOutlined-Regular.otf", "MaterialIcons"); 
                 });
 
             builder.Services.AddSingleton<ApiService>();

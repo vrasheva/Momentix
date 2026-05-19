@@ -287,6 +287,27 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
+                            <Picker Title="Избери приятел"
+                                    ItemsSource="{Binding Friends}"
+                                    SelectedItem="{Binding SelectedFriend}"
+                                    ItemDisplayBinding="{Binding DisplayName}"
+                                    HeightRequest="44"
+                                    Margin="10,0"
+                                    TextColor="#111"
+                                    TitleColor="#888"
+                                    BackgroundColor="Transparent"/>
+                        </Border>
+                        <Button Text="Сподели с приятел" Command="{Binding AddSelectedFriendCommand}"
+                                BackgroundColor="{DynamicResource Primary}"
+                                TextColor="White"
+                                HeightRequest="46" CornerRadius="12"
+                                FontAttributes="Bold" FontSize="14"/>
+                        <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0" Margin="0,4"/>
+                        <Border BackgroundColor="White" StrokeThickness="1"
+                                Stroke="#E0E0E0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
                             <Entry Placeholder="Имейл на приятел..."
                                    Text="{Binding MemberEmail}"
                                    Keyboard="Email" Margin="10,0"
@@ -303,7 +324,6 @@
                                TextColor="#E24B4A" FontSize="12"
                                HorizontalOptions="Center"/>
                     </VerticalStackLayout>
-
                     <!-- Членове списък -->
                     <CollectionView ItemsSource="{Binding Members}">
                         <CollectionView.ItemTemplate>

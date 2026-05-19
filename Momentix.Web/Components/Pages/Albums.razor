@@ -1,0 +1,151 @@
+﻿@page "/albums"
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Albums</h1>
+        <p class="page-description">Create albums, open shared albums and upload photos.</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <p class="error-message">@error</p>
+}
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status-message">@status</p>
+}
+
+<div class="grid two">
+    <section class="panel">
+        <h2 class="section-title">Create album</h2>
+        <EditForm Model="newAlbum" OnValidSubmit="CreateAlbum" class="form-stack">
+            <div class="field">
+                <label>Title</label>
+                <InputText class="input" @bind-Value="newAlbum.Title" />
+            </div>
+            <div class="field">
+                <label>Description</label>
+                <InputTextArea class="input" @bind-Value="newAlbum.Description" />
+            </div>
+            <button class="primary-button" type="submit" disabled="@isSaving">@(isSaving ? "Creating..." : "Create album")</button>
+        </EditForm>
+    </section>
+
+    <section class="panel">
+        <h2 class="section-title">Your albums</h2>
+        @if (isLoading)
+        {
+            <div class="empty-state">Loading albums...</div>
+        }
+        else if (albums.Count == 0)
+        {
+            <div class="empty-state">No albums yet.</div>
+        }
+        else
+        {
+            <div class="item-list">
+                @foreach (var album in albums)
+                {
+                    <article class="card">
+                        <div class="friend-row">
+                            <a class="card-link" href="@($"albums/{album.Id}")">
+                                <div class="person">
+                                    <strong>@album.Title</strong>
+                                    <span class="muted truncate">@(album.Description ?? "No description")</span>
+                                </div>
+                            </a>
+                            <div class="actions">
+                                <a class="secondary-button" href="@($"albums/{album.Id}")">Open</a>
+                                @if (album.IsOwner)
+                                {
+                                    <button class="danger-button" type="button" @onclick="() => DeleteAlbum(album.Id)">Delete</button>
+                                }
+                            </div>
+                        </div>
+                        <div class="badge-row">
+                            <span class="badge">@album.MediaCount media</span>
+                            <span class="badge gold">@album.MemberCount members</span>
+                            <span class="badge coral">@(album.IsOwner ? "Owner" : "Shared")</span>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </section>
+</div>
+
+@code {
+    private readonly CreateAlbumDto newAlbum = new();
+    private List<AlbumResponseDto> albums = new();
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? error;
+    private string? status;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await LoadAlbums();
+    }
+
+    private async Task LoadAlbums()
+    {
+        isLoading = true;
+        error = null;
+        albums = await Api.GetAsync<List<AlbumResponseDto>>("Albums") ?? new();
+        if (Api.LastError != null)
+            error = Api.LastError;
+        isLoading = false;
+    }
+
+    private async Task CreateAlbum()
+    {
+        if (string.IsNullOrWhiteSpace(newAlbum.Title))
+        {
+            error = "Album title is required.";
+            return;
+        }
+
+        isSaving = true;
+        error = null;
+        status = null;
+
+        var created = await Api.PostAsync<CreateAlbumDto, AlbumResponseDto>("Albums", newAlbum);
+        if (created == null)
+        {
+            error = Api.LastError ?? "Could not create album.";
+            isSaving = false;
+            return;
+        }
+
+        newAlbum.Title = string.Empty;
+        newAlbum.Description = string.Empty;
+        status = "Album created.";
+        await LoadAlbums();
+        isSaving = false;
+    }
+
+    private async Task DeleteAlbum(int id)
+    {
+        error = null;
+        status = null;
+        var ok = await Api.DeleteAsync($"Albums/{id}");
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not delete album.";
+            return;
+        }
+
+        status = "Album deleted.";
+        await LoadAlbums();
+    }
+}
