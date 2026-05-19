@@ -35,7 +35,8 @@ namespace Momentix.API.Controllers
             {
                 FullName = dto.FullName,
                 Email = dto.Email,
-                UserName = dto.Email
+                UserName = dto.Email,
+                ThemeColor = dto.ThemeColor
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -50,7 +51,8 @@ namespace Momentix.API.Controllers
                 Token = token,
                 UserId = user.Id,
                 FullName = user.FullName,
-                Email = user.Email ?? string.Empty
+                Email = user.Email ?? string.Empty,
+                ThemeColor = user.ThemeColor
             });
         }
 
@@ -72,7 +74,8 @@ namespace Momentix.API.Controllers
                 Token = token,
                 UserId = user.Id,
                 FullName = user.FullName,
-                Email = user.Email ?? string.Empty
+                Email = user.Email ?? string.Empty,
+                ThemeColor = user.ThemeColor
             });
         }
     }

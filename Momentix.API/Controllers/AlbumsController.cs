@@ -200,5 +200,50 @@ namespace Momentix.API.Controllers
 
             return Ok("Членът е премахнат успешно.");
         }
+
+        [HttpGet("{id}/members")]
+        public async Task<IActionResult> GetMembers(int id)
+        {
+            var userId = GetUserId();
+
+            var album = await _context.Albums
+                .Include(a => a.Members)
+                .ThenInclude(m => m.User)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (album == null)
+                return NotFound("Албумът не е намерен.");
+
+            bool hasAccess = album.OwnerId == userId ||
+                             album.Members.Any(m => m.UserId == userId);
+
+            if (!hasAccess)
+                return Forbid();
+
+            var members = album.Members.Select(m => new AlbumMemberResponseDto
+            {
+                UserId = m.UserId,
+                FullName = m.User.FullName,
+                CanUpload = m.CanUpload,
+                IsOwner = m.UserId == album.OwnerId
+            }).ToList();
+
+            // Добави собственика ако не е в Members
+            bool ownerInList = members.Any(m => m.UserId == album.OwnerId);
+            if (!ownerInList)
+            {
+                var owner = await _context.Users.FindAsync(album.OwnerId);
+                if (owner != null)
+                    members.Insert(0, new AlbumMemberResponseDto
+                    {
+                        UserId = owner.Id,
+                        FullName = owner.FullName,
+                        CanUpload = true,
+                        IsOwner = true
+                    });
+            }
+
+            return Ok(members);
+        }
     }
 }

@@ -14,7 +14,11 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     private bool _isPageVisible;
 
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
-    public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
+    public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
+    public ObservableCollection<AlbumMediaItemViewModel> PhotoItems { get; } = new();
+    public ObservableCollection<AlbumMediaItemViewModel> RestPhotos { get; } = new();
+    public bool HasPhotos => PhotoItems.Count > 0;
+    public AlbumMediaItemViewModel? FirstPhoto => PhotoItems.Count > 0 ? PhotoItems[0] : null;
 
     private int _albumId;
     public int AlbumId
@@ -22,9 +26,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         get => _albumId;
         set
         {
-            if (_albumId == value)
-                return;
-
+            if (_albumId == value) return;
             _albumId = value;
             OnPropertyChanged();
             LoadIfReady();
@@ -43,27 +45,6 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         get => _memberEmail;
         set { _memberEmail = value; OnPropertyChanged(); }
-    }
-
-    private bool _canUpload = true;
-    public bool CanUpload
-    {
-        get => _canUpload;
-        set { _canUpload = value; OnPropertyChanged(); }
-    }
-
-    private FriendItemViewModel? _selectedFriend;
-    public FriendItemViewModel? SelectedFriend
-    {
-        get => _selectedFriend;
-        set
-        {
-            _selectedFriend = value;
-            OnPropertyChanged();
-
-            if (value != null)
-                MemberEmail = value.Email;
-        }
     }
 
     private string _letterText = string.Empty;
@@ -88,9 +69,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     }
 
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
-    public IRelayCommand LoadFriendsCommand => new AsyncRelayCommand(LoadFriends);
     public IRelayCommand AddMemberCommand => new AsyncRelayCommand(AddMember);
-    public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
     public IRelayCommand AddLetterCommand => new AsyncRelayCommand(AddLetter);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
@@ -104,40 +83,51 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         _isPageVisible = true;
         LoadIfReady();
-
-        if (LoadFriendsCommand.CanExecute(null))
-            LoadFriendsCommand.Execute(null);
     }
 
     private void LoadIfReady()
     {
         if (!_isPageVisible || AlbumId <= 0 || IsLoading)
             return;
-
         LoadCommand.Execute(null);
     }
 
     private async Task Load()
     {
-        if (AlbumId <= 0)
-        {
-            StatusMessage = "Album was not opened correctly.";
-            return;
-        }
+        if (AlbumId <= 0) return;
 
         IsLoading = true;
         StatusMessage = string.Empty;
 
         try
         {
-            var result = await _apiService.GetAsync<List<MediaResponseDto>>($"Media/album/{AlbumId}");
-            MediaItems.Clear();
+            var media = await _apiService.GetAsync<List<MediaResponseDto>>($"Media/album/{AlbumId}");
 
-            if (result != null)
+            MediaItems.Clear();
+            PhotoItems.Clear();
+            RestPhotos.Clear();
+
+            if (media != null)
             {
-                foreach (var item in result)
+                foreach (var item in media)
                     MediaItems.Add(new AlbumMediaItemViewModel(item));
+
+                var photos = media.Where(m => m.Type == MediaType.Image).ToList();
+                foreach (var item in photos)
+                    PhotoItems.Add(new AlbumMediaItemViewModel(item));
+
+                foreach (var item in photos.Skip(1))
+                    RestPhotos.Add(new AlbumMediaItemViewModel(item));
+
+                OnPropertyChanged(nameof(HasPhotos));
+                OnPropertyChanged(nameof(FirstPhoto));
             }
+
+            var members = await _apiService.GetAsync<List<AlbumMemberResponseDto>>($"Albums/{AlbumId}/members");
+            Members.Clear();
+            if (members != null)
+                foreach (var m in members)
+                    Members.Add(m);
         }
         catch (Exception ex)
         {
@@ -149,55 +139,11 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         }
     }
 
-    private async Task LoadFriends()
-    {
-        try
-        {
-            var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
-            Friends.Clear();
-
-            if (result == null)
-                return;
-
-            foreach (var friend in result
-                .GroupBy(f => f.UserId)
-                .Select(g => g.First())
-                .OrderBy(f => f.FullName))
-                Friends.Add(new FriendItemViewModel(friend));
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = ex.Message;
-        }
-    }
-
     private async Task AddMember()
     {
         if (string.IsNullOrWhiteSpace(MemberEmail))
         {
-            StatusMessage = "Email is required.";
-            return;
-        }
-
-        await AddMemberByEmail(MemberEmail.Trim());
-    }
-
-    private async Task AddSelectedFriend()
-    {
-        if (SelectedFriend == null)
-        {
-            StatusMessage = "Select a friend first.";
-            return;
-        }
-
-        await AddMemberByEmail(SelectedFriend.Email);
-    }
-
-    private async Task AddMemberByEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            StatusMessage = "Email is required.";
+            StatusMessage = "Имейлът е задължителен.";
             return;
         }
 
@@ -210,19 +156,21 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 $"Albums/{AlbumId}/members",
                 new AddAlbumMemberDto
                 {
-                    UserEmail = email,
-                    CanUpload = CanUpload
+                    UserEmail = MemberEmail.Trim(),
+                    CanUpload = true
                 });
 
-            StatusMessage = success
-                ? "Member added."
-                : string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Member was not added."
-                    : _apiService.LastErrorMessage;
             if (success)
             {
+                StatusMessage = "Членът е добавен.";
                 MemberEmail = string.Empty;
-                SelectedFriend = null;
+                await Load();
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Членът не беше добавен."
+                    : _apiService.LastErrorMessage;
             }
         }
         catch (Exception ex)
@@ -239,7 +187,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(LetterText))
         {
-            StatusMessage = "Memory text is required.";
+            StatusMessage = "Текстът е задължителен.";
             return;
         }
 
@@ -252,15 +200,12 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 $"Media/album/{AlbumId}/letter",
                 new CreateLetterMediaDto { Text = LetterText });
 
-            if (result == null)
+            if (result != null)
             {
-                StatusMessage = "Memory was not added.";
-                return;
+                MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
+                LetterText = string.Empty;
+                StatusMessage = "Спомена е добавен.";
             }
-
-            MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
-            LetterText = string.Empty;
-            StatusMessage = "Memory added.";
         }
         catch (Exception ex)
         {
@@ -274,8 +219,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
     private async Task PickPhoto()
     {
-        if (AlbumId <= 0)
-            return;
+        if (AlbumId <= 0) return;
 
         IsLoading = true;
         StatusMessage = string.Empty;
@@ -284,41 +228,38 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         {
             var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Select album photo"
+                Title = "Избери снимка"
             });
 
-            if (file == null)
-                return;
+            if (file == null) return;
 
             await using var stream = await file.OpenReadAsync();
             var contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? "image/jpeg"
-                : file.ContentType;
+                ? "image/jpeg" : file.ContentType;
 
             var result = await _apiService.PostFileAsync<MediaResponseDto>(
                 $"Media/album/{AlbumId}/photo",
-                stream,
-                file.FileName,
-                contentType);
+                stream, file.FileName, contentType);
 
-            if (result == null)
+            if (result != null)
+            {
+                MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
+                StatusMessage = "Снимката е качена.";
+            }
+            else
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Photo was not uploaded."
+                    ? "Снимката не беше качена."
                     : _apiService.LastErrorMessage;
-                return;
             }
-
-            MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
-            StatusMessage = "Photo uploaded.";
         }
         catch (FeatureNotSupportedException)
         {
-            StatusMessage = "Photo picker is not supported on this device.";
+            StatusMessage = "Камерата не се поддържа на това устройство.";
         }
         catch (PermissionException)
         {
-            StatusMessage = "Photo permission was denied.";
+            StatusMessage = "Нямаш разрешение за достъп до снимките.";
         }
         catch (Exception ex)
         {
@@ -347,9 +288,42 @@ public class AlbumMediaItemViewModel
     public string UploadedByName => _media.UploadedByName;
     public bool IsImage => _media.Type == MediaType.Image;
     public bool IsLetter => _media.Type == MediaType.Letter;
+    public bool IsLockedLetter => IsLetter && _media.IsLocked;
+    public bool IsUnlockedLetter => IsLetter && !_media.IsLocked;
+
+    public string CountdownText
+    {
+        get
+        {
+            if (!_media.UnlockAt.HasValue) return string.Empty;
+            var diff = _media.UnlockAt.Value.ToLocalTime() - DateTime.Now;
+            if (diff <= TimeSpan.Zero) return string.Empty;
+            return $"{(int)diff.TotalDays}Д {diff.Hours}Ч {diff.Minutes}М";
+        }
+    }
+
+    public string UnlockDateText
+    {
+        get
+        {
+            if (!_media.UnlockAt.HasValue) return string.Empty;
+            return $"Отваря се на {_media.UnlockAt.Value.ToLocalTime():dd.MM.yyyy} в {_media.UnlockAt.Value.ToLocalTime():HH:mm}";
+        }
+    }
+
+    public string UploadedAtText =>
+        $"Написано на {UploadedAt.ToLocalTime():dd MMM yyyy}";
 
     public AlbumMediaItemViewModel(MediaResponseDto media)
     {
         _media = media;
+    }
+
+    public class AddPhotoPlaceholderViewModel
+    {
+        public bool IsAddButton => true;
+        public bool IsImage => false;
+        public bool IsLockedLetter => false;
+        public bool IsUnlockedLetter => false;
     }
 }

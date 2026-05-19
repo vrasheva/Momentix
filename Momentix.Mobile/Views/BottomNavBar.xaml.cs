@@ -1,3 +1,5 @@
+using Momentix.Mobile.Services;
+
 namespace Momentix.Mobile.Views;
 
 public enum NavTab { Albums, Friends, Capsules, Challenge }
@@ -5,12 +7,13 @@ public enum NavTab { Albums, Friends, Capsules, Challenge }
 public partial class BottomNavBar : ContentView
 {
     private static readonly Color Inactive = Color.FromArgb("#AAAAAA");
-    private Color _activeColor = Color.FromArgb("#6750A4");
 
-    public Color ActiveColor
+    private Color GetActiveColor()
     {
-        get => _activeColor;
-        set { _activeColor = value; UpdateVisuals(); }
+        var theme = ThemeService.Instance.CurrentTheme;
+        if (ThemeService.Themes.ContainsKey(theme))
+            return ThemeService.Themes[theme]["Primary"];
+        return Color.FromArgb("#6750A4");
     }
 
     public NavTab ActiveTab
@@ -28,8 +31,6 @@ public partial class BottomNavBar : ContentView
     {
         base.OnParentSet();
         UpdateVisuals();
-
-        // Слушаме за промени в навигацията
         Shell.Current.Navigated += OnShellNavigated;
     }
 
@@ -41,7 +42,6 @@ public partial class BottomNavBar : ContentView
     private NavTab GetCurrentTab()
     {
         var location = Shell.Current?.CurrentState?.Location?.ToString() ?? "";
-
         if (location.Contains("FriendsPage")) return NavTab.Friends;
         if (location.Contains("TimeCapsulesPage")) return NavTab.Capsules;
         if (location.Contains("ChallengesPage")) return NavTab.Challenge;
@@ -53,7 +53,8 @@ public partial class BottomNavBar : ContentView
         if (FntAlbums == null) return;
 
         var tab = GetCurrentTab();
-        var activeBrush = new SolidColorBrush(_activeColor);
+        var activeColor = GetActiveColor();
+        var activeBrush = new SolidColorBrush(activeColor);
 
         FntAlbums.Color = Inactive;
         FntFriends.Color = Inactive;
@@ -68,22 +69,22 @@ public partial class BottomNavBar : ContentView
         switch (tab)
         {
             case NavTab.Albums:
-                FntAlbums.Color = _activeColor;
+                FntAlbums.Color = activeColor;
                 DotAlbums.IsVisible = true;
                 DotAlbums.Fill = activeBrush;
                 break;
             case NavTab.Friends:
-                FntFriends.Color = _activeColor;
+                FntFriends.Color = activeColor;
                 DotFriends.IsVisible = true;
                 DotFriends.Fill = activeBrush;
                 break;
             case NavTab.Capsules:
-                FntCapsules.Color = _activeColor;
+                FntCapsules.Color = activeColor;
                 DotCapsules.IsVisible = true;
                 DotCapsules.Fill = activeBrush;
                 break;
             case NavTab.Challenge:
-                FntChallenge.Color = _activeColor;
+                FntChallenge.Color = activeColor;
                 DotChallenge.IsVisible = true;
                 DotChallenge.Fill = activeBrush;
                 break;

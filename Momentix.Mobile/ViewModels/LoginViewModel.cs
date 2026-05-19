@@ -74,6 +74,8 @@ namespace Momentix.Mobile.ViewModels
                     Preferences.Set("auth_token", result.Token);
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);
+                    Preferences.Set("theme_name", result.ThemeColor);
+                    ThemeService.Instance.ApplyTheme(result.ThemeColor, false);
 
                     await Shell.Current.GoToAsync("//AlbumsPage");
                     await Task.Delay(300);

@@ -94,7 +94,8 @@ namespace Momentix.Mobile.ViewModels
                     {
                         FullName = FullName,
                         Email = UserEmail,
-                        Password = UserPassword
+                        Password = UserPassword,
+                        ThemeColor = SelectedTheme
                     });
 
                 if (result != null)
@@ -104,6 +105,7 @@ namespace Momentix.Mobile.ViewModels
                     Preferences.Set("user_name", result.FullName);
                     Preferences.Set("user_id", result.UserId);
                     Preferences.Set("user_xp", 0);
+                    Preferences.Set("theme_name", result.ThemeColor);
                     ThemeService.Instance.ApplyTheme(SelectedTheme, false);
                     await Shell.Current.GoToAsync("//AlbumsPage");
                 }
