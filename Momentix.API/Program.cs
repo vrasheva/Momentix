@@ -11,6 +11,10 @@ namespace Momentix.API
 {
     public class Program
     {
+        private const string AdminRole = "Admin";
+        private const string TestAdminUserName = "admin";
+        private const string TestAdminPassword = "admin";
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +60,8 @@ namespace Momentix.API
 
             // Services
             builder.Services.AddScoped<TokenService>();
+            builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddHttpClient<ChallengeVisionService>();
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
@@ -94,6 +100,10 @@ namespace Momentix.API
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 dbContext.Database.Migrate();
+
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                SeedTestAdminUser(userManager, roleManager).GetAwaiter().GetResult();
             }
 
             if (app.Environment.IsDevelopment())
@@ -108,6 +118,61 @@ namespace Momentix.API
             app.MapControllers();
 
             app.Run();
+        }
+
+        private static async Task SeedTestAdminUser(
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager)
+        {
+            if (!await roleManager.RoleExistsAsync(AdminRole))
+            {
+                var roleResult = await roleManager.CreateAsync(new IdentityRole(AdminRole));
+                ThrowIfFailed(roleResult, "Could not create Admin role.");
+            }
+
+            var admin = await userManager.FindByNameAsync(TestAdminUserName)
+                ?? await userManager.FindByEmailAsync(TestAdminUserName);
+
+            if (admin == null)
+            {
+                admin = new User
+                {
+                    UserName = TestAdminUserName,
+                    Email = TestAdminUserName,
+                    EmailConfirmed = true,
+                    FullName = "Admin",
+                    ThemeColor = "#111111"
+                };
+
+                var createResult = await userManager.CreateAsync(admin);
+                ThrowIfFailed(createResult, "Could not create test admin user.");
+            }
+
+            admin.UserName = TestAdminUserName;
+            admin.Email = TestAdminUserName;
+            admin.EmailConfirmed = true;
+            admin.FullName = "Admin";
+            admin.ThemeColor = string.IsNullOrWhiteSpace(admin.ThemeColor) ? "#111111" : admin.ThemeColor;
+            admin.PasswordHash = userManager.PasswordHasher.HashPassword(admin, TestAdminPassword);
+            admin.SecurityStamp = Guid.NewGuid().ToString();
+
+            var updateResult = await userManager.UpdateAsync(admin);
+            ThrowIfFailed(updateResult, "Could not update test admin user.");
+
+            if (!await userManager.IsInRoleAsync(admin, AdminRole))
+            {
+                var addRoleResult = await userManager.AddToRoleAsync(admin, AdminRole);
+                ThrowIfFailed(addRoleResult, "Could not add test admin user to Admin role.");
+            }
+        }
+
+        private static void ThrowIfFailed(IdentityResult result, string message)
+        {
+            if (result.Succeeded)
+                return;
+
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"{message} {errors}");
         }
     }
 }

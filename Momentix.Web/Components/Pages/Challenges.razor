@@ -1,4 +1,4 @@
-﻿@page "/challenges"
+@page "/challenges"
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
@@ -8,7 +8,13 @@
         <h1 class="page-title">Challenges</h1>
         <p class="page-description">Upload a photo for the daily challenge and vote on other submissions.</p>
     </div>
-    <button class="secondary-button" type="button" @onclick="LoadChallenge">Refresh</button>
+    <div class="actions">
+        <button class="secondary-button" type="button" @onclick="LoadChallenge">Refresh</button>
+        @if (Auth.IsAdmin)
+        {
+            <button class="danger-button" type="button" @onclick="ResetChallenge" disabled="@isBusy">Reset challenge</button>
+        }
+    </div>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(error))
@@ -45,7 +51,9 @@ else
                         <span class="muted">Selected: @challengePhoto.Name</span>
                     }
                 </div>
-                <button class="primary-button" type="button" @onclick="SubmitPhoto" disabled="@(isBusy || challengePhoto == null)">Submit photo</button>
+                <button class="primary-button" type="button" @onclick="SubmitPhoto" disabled="@(isBusy || challengePhoto == null)">
+                    @(isBusy ? "Checking..." : "Submit photo")
+                </button>
             </div>
         </section>
 
@@ -80,6 +88,13 @@ else
                         <div class="media-body">
                             <strong>@submission.UserName</strong>
                             <div class="meta">@submission.VoteCount votes</div>
+                            <div class="badge-row">
+                                <span class="@GetAiBadgeClass(submission)">@GetAiLabel(submission)</span>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(submission.AiFeedback))
+                            {
+                                <div class="meta" style="margin-top:8px">@submission.AiFeedback</div>
+                            }
                             <div class="actions" style="margin-top:10px">
                                 @foreach (var option in voteOptions)
                                 {
@@ -117,9 +132,17 @@ else
 
     private async Task LoadChallenge()
     {
+        await LoadChallenge(clearMessages: true);
+    }
+
+    private async Task LoadChallenge(bool clearMessages)
+    {
         isLoading = true;
-        error = null;
-        status = null;
+        if (clearMessages)
+        {
+            error = null;
+            status = null;
+        }
 
         challenge = await Api.GetAsync<ChallengeResponseDto>("Challenges/active");
         if (challenge != null)
@@ -144,19 +167,45 @@ else
 
         isBusy = true;
         error = null;
-        status = null;
+        status = "Uploading photo and checking it with AI...";
+        StateHasChanged();
 
         var result = await Api.PostFileAsync<ChallengeSubmissionResponseDto>($"Challenges/{challenge.Id}/submissions/photo", challengePhoto);
         if (result == null)
         {
             error = Api.LastError ?? "Could not submit photo.";
+            status = null;
             isBusy = false;
             return;
         }
 
         challengePhoto = null;
-        status = "Challenge photo submitted.";
-        await LoadChallenge();
+        status = BuildSubmitStatus(result);
+        await LoadChallenge(clearMessages: false);
+        isBusy = false;
+    }
+
+    private async Task ResetChallenge()
+    {
+        if (!Auth.IsAdmin)
+            return;
+
+        isBusy = true;
+        error = null;
+        status = null;
+
+        var ok = await Api.PostAsync("Challenges/admin/reset-active");
+        if (!ok)
+        {
+            error = Api.LastError ?? "Could not reset challenge.";
+            isBusy = false;
+            return;
+        }
+
+        challengePhoto = null;
+        submissions.Clear();
+        status = "Challenge reset. All challenge photos were removed.";
+        await LoadChallenge(clearMessages: false);
         isBusy = false;
     }
 
@@ -179,7 +228,47 @@ else
         }
 
         status = "Vote saved.";
-        await LoadChallenge();
+        await LoadChallenge(clearMessages: false);
         isBusy = false;
     }
+
+    private static string BuildSubmitStatus(ChallengeSubmissionResponseDto submission)
+    {
+        if (submission.AiIsSatisfied == true)
+            return $"Challenge photo submitted. AI thinks it matches ({FormatConfidence(submission)}).";
+
+        if (submission.AiIsSatisfied == false)
+            return $"Challenge photo submitted. AI thinks it does not match ({FormatConfidence(submission)}).";
+
+        return string.IsNullOrWhiteSpace(submission.AiFeedback)
+            ? "Challenge photo submitted. AI check was not available."
+            : $"Challenge photo submitted. {submission.AiFeedback}";
+    }
+
+    private static string GetAiLabel(ChallengeSubmissionResponseDto submission)
+    {
+        if (submission.AiIsSatisfied == true)
+            return $"AI matched {FormatConfidence(submission)}";
+
+        if (submission.AiIsSatisfied == false)
+            return $"AI not matched {FormatConfidence(submission)}";
+
+        return submission.AiEvaluatedAt.HasValue || !string.IsNullOrWhiteSpace(submission.AiFeedback)
+            ? "AI unavailable"
+            : "AI not checked";
+    }
+
+    private static string GetAiBadgeClass(ChallengeSubmissionResponseDto submission)
+    {
+        if (submission.AiIsSatisfied == true)
+            return "badge";
+
+        if (submission.AiIsSatisfied == false)
+            return "badge coral";
+
+        return "badge gold";
+    }
+
+    private static string FormatConfidence(ChallengeSubmissionResponseDto submission) =>
+        submission.AiConfidence.HasValue ? $"{submission.AiConfidence.Value}%" : "no score";
 }

@@ -82,6 +82,14 @@ public class ApiService
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> PostAsync(string endpoint)
+    {
+        LastErrorMessage = string.Empty;
+        var response = await _httpClient.PostAsync(endpoint, null);
+        if (!response.IsSuccessStatusCode)
+            LastErrorMessage = await response.Content.ReadAsStringAsync();
+        return response.IsSuccessStatusCode;
+    }
     public async Task<T?> GetAsync<T>(string endpoint)
     {
         LastErrorMessage = string.Empty;
@@ -138,4 +146,5 @@ public class ApiService
         return response.IsSuccessStatusCode;
     }
 }
+
 

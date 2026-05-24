@@ -1,4 +1,4 @@
-﻿@page "/login"
+@page "/login"
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
@@ -10,8 +10,8 @@
 
         <EditForm Model="model" OnValidSubmit="DoLogin" class="form-stack">
             <div class="field">
-                <label>Email</label>
-                <InputText class="input" @bind-Value="model.Email" type="email" />
+                <label>Email or username</label>
+                <InputText class="input" @bind-Value="model.Email" type="text" />
             </div>
             <div class="field">
                 <label>Password</label>
@@ -57,3 +57,4 @@
         Nav.NavigateTo("/albums");
     }
 }
+

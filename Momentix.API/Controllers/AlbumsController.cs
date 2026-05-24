@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Momentix.Data.Data;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
+using Momentix.API.Services;
 using System.Security.Claims;
 
 namespace Momentix.API.Controllers
@@ -16,11 +17,13 @@ namespace Momentix.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly NotificationService _notificationService;
 
-        public AlbumsController(AppDbContext context, UserManager<User> userManager)
+        public AlbumsController(AppDbContext context, UserManager<User> userManager, NotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         private string GetUserId() =>
@@ -170,6 +173,21 @@ namespace Momentix.API.Controllers
             };
 
             _context.AlbumMembers.Add(member);
+
+            var ownerName = await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.FullName)
+                .FirstOrDefaultAsync() ?? "Someone";
+
+            _notificationService.Add(
+                userToAdd.Id,
+                "Album shared",
+                $"{ownerName} shared album \"{album.Title}\" with you.",
+                NotificationType.AlbumShared,
+                "Album",
+                album.Id,
+                userId);
+
             await _context.SaveChangesAsync();
 
             return Ok("Членът е добавен успешно.");
@@ -247,3 +265,5 @@ namespace Momentix.API.Controllers
         }
     }
 }
+
+

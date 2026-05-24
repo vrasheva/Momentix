@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.NotificationsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:Momentix.Mobile.Views"
+    Title="Notifications"
+    BackgroundColor="{DynamicResource PageBackground}"
+    Shell.TabBarIsVisible="False">
+
+    <Grid RowDefinitions="*,Auto">
+        <Grid Grid.Row="0" RowDefinitions="Auto,*" Padding="20" RowSpacing="16">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Notifications" FontSize="28" FontAttributes="Bold"
+                           TextColor="{DynamicResource TextPrimary}" />
+                    <Label Text="{Binding HeaderText}" FontSize="13"
+                           TextColor="{DynamicResource TextSecondary}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Read all"
+                        Command="{Binding MarkAllAsReadCommand}"
+                        BackgroundColor="{DynamicResource PrimaryLight}"
+                        TextColor="{DynamicResource PrimaryText}"
+                        CornerRadius="12" />
+            </Grid>
+
+            <RefreshView Grid.Row="1" Command="{Binding LoadCommand}" IsRefreshing="{Binding IsLoading}">
+                <ScrollView>
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}" />
+
+                        <CollectionView x:Name="NotificationsList" ItemsSource="{Binding Notifications}">
+                            <CollectionView.EmptyView>
+                                <Label Text="No notifications yet." Padding="0,48"
+                                       HorizontalTextAlignment="Center"
+                                       TextColor="{DynamicResource TextSecondary}" />
+                            </CollectionView.EmptyView>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="14" Margin="0,6"
+                                            BackgroundColor="{DynamicResource CardBackground}"
+                                            StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="16" />
+                                        </Border.StrokeShape>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding BindingContext.OpenNotificationCommand, Source={x:Reference NotificationsList}}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                                            <Border WidthRequest="12" HeightRequest="12" VerticalOptions="Start"
+                                                    BackgroundColor="{DynamicResource Primary}"
+                                                    StrokeThickness="0" IsVisible="{Binding IsRead, Converter={StaticResource InverseBoolConverter}}">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="6" />
+                                                </Border.StrokeShape>
+                                            </Border>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                                <Label Text="{Binding Title}" FontSize="16" FontAttributes="Bold"
+                                                       TextColor="{DynamicResource TextPrimary}" />
+                                                <Label Text="{Binding Message}" FontSize="13"
+                                                       TextColor="{DynamicResource TextSecondary}" />
+                                                <Label Text="{Binding TimeText}" FontSize="12"
+                                                       TextColor="{DynamicResource TextSecondary}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </RefreshView>
+        </Grid>
+
+        <views:BottomNavBar Grid.Row="1" ActiveTab="Notifications"/>
+    </Grid>
+</ContentPage>

@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Momentix.Data.Data;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
+using Momentix.API.Services;
 using System.Security.Claims;
 
 namespace Momentix.API.Controllers;
@@ -19,11 +20,13 @@ public class FriendsController : ControllerBase
 
     private readonly AppDbContext _context;
     private readonly UserManager<User> _userManager;
+    private readonly NotificationService _notificationService;
 
-    public FriendsController(AppDbContext context, UserManager<User> userManager)
+    public FriendsController(AppDbContext context, UserManager<User> userManager, NotificationService notificationService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
     }
 
     private string GetUserId() =>
@@ -240,6 +243,14 @@ public class FriendsController : ControllerBase
         request.RespondedAt = DateTime.UtcNow;
 
         await AddMutualFriendship(request.RequesterId, request.AddresseeId);
+        _notificationService.Add(
+            request.RequesterId,
+            "Friend request accepted",
+            $"{request.Addressee.FullName} accepted your friend request.",
+            NotificationType.FriendAccepted,
+            "Friend",
+            null,
+            request.AddresseeId);
         await _context.SaveChangesAsync();
 
         return Ok(ToRequestDto(request));
@@ -335,6 +346,14 @@ public class FriendsController : ControllerBase
             existingRequest.Status = FriendRequestStatus.Pending;
             existingRequest.CreatedAt = DateTime.UtcNow;
             existingRequest.RespondedAt = null;
+            _notificationService.Add(
+                targetUserId,
+                "Friend request",
+                $"{existingRequest.Requester.FullName} sent you a friend request.",
+                NotificationType.FriendRequest,
+                "FriendRequest",
+                existingRequest.Id,
+                userId);
             await _context.SaveChangesAsync();
 
             return Ok(ToRequestDto(existingRequest));
@@ -354,6 +373,16 @@ public class FriendsController : ControllerBase
             .Include(fr => fr.Requester)
             .Include(fr => fr.Addressee)
             .FirstAsync(fr => fr.Id == request.Id);
+
+        _notificationService.Add(
+            targetUserId,
+            "Friend request",
+            $"{request.Requester.FullName} sent you a friend request.",
+            NotificationType.FriendRequest,
+            "FriendRequest",
+            request.Id,
+            userId);
+        await _context.SaveChangesAsync();
 
         return Ok(ToRequestDto(request));
     }
@@ -401,3 +430,5 @@ public class FriendsController : ControllerBase
             CreatedAt = request.CreatedAt
         };
 }
+
+

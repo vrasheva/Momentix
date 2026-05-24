@@ -9,6 +9,8 @@
             Routing.RegisterRoute("CreateAlbumPage", typeof(Views.CreateAlbumPage));
             Routing.RegisterRoute("CreateTimeCapsulePage", typeof(Views.CreateTimeCapsulePage));
             Routing.RegisterRoute("TimeCapsuleDetailsPage", typeof(Views.TimeCapsuleDetailsPage));
+            Routing.RegisterRoute("NotificationsPage", typeof(Views.NotificationsPage));
         }
     }
 }
+

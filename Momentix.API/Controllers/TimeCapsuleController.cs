@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Momentix.Data.Data;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
+using Momentix.API.Services;
 using System.Security.Claims;
 
 namespace Momentix.API.Controllers
@@ -16,20 +17,24 @@ namespace Momentix.API.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly NotificationService _notificationService;
 
-        public TimeCapsuleController(AppDbContext context, UserManager<User> userManager)
+        public TimeCapsuleController(AppDbContext context, UserManager<User> userManager, NotificationService notificationService)
         {
             _context = context;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         private string GetUserId() =>
             User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-        // Вземи всички времеви капсули на потребителя
+        // Ð’Ð·ÐµÐ¼Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð²Ñ€ÐµÐ¼ÐµÐ²Ð¸ ÐºÐ°Ð¿ÑÑƒÐ»Ð¸ Ð½Ð° Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ñ
         [HttpGet]
         public async Task<IActionResult> GetMyCapsules()
         {
+            await UnlockDueCapsules();
+
             var userId = GetUserId();
             var now = DateTime.UtcNow;
 
@@ -58,10 +63,12 @@ namespace Momentix.API.Controllers
             return Ok(capsules);
         }
 
-        // Вземи конкретна капсула
+        // Ð’Ð·ÐµÐ¼Ð¸ ÐºÐ¾Ð½ÐºÑ€ÐµÑ‚Ð½Ð° ÐºÐ°Ð¿ÑÑƒÐ»Ð°
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCapsule(int id)
         {
+            await UnlockDueCapsules();
+
             var userId = GetUserId();
             var now = DateTime.UtcNow;
 
@@ -72,7 +79,7 @@ namespace Momentix.API.Controllers
                 .FirstOrDefaultAsync(tc => tc.Id == id);
 
             if (capsule == null)
-                return NotFound("Капсулата не е намерена.");
+                return NotFound("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð°.");
 
             bool hasAccess = capsule.OwnerId == userId ||
                              capsule.Members.Any(m => m.UserId == userId);
@@ -96,14 +103,14 @@ namespace Momentix.API.Controllers
             });
         }
 
-        // Създай времева капсула
+        // Ð¡ÑŠÐ·Ð´Ð°Ð¹ Ð²Ñ€ÐµÐ¼ÐµÐ²Ð° ÐºÐ°Ð¿ÑÑƒÐ»Ð°
         [HttpPost]
         public async Task<IActionResult> CreateCapsule([FromBody] CreateTimeCapsuleDto dto)
         {
             var userId = GetUserId();
 
             if (dto.UnlockAt <= DateTime.UtcNow)
-                return BadRequest("Датата на отключване трябва да е в бъдещето.");
+                return BadRequest("Ð”Ð°Ñ‚Ð°Ñ‚Ð° Ð½Ð° Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð²Ð°Ð½Ðµ Ñ‚Ñ€ÑÐ±Ð²Ð° Ð´Ð° Ðµ Ð² Ð±ÑŠÐ´ÐµÑ‰ÐµÑ‚Ð¾.");
 
             var capsule = new TimeCapsule
             {
@@ -134,7 +141,7 @@ namespace Momentix.API.Controllers
             });
         }
 
-        // Промени датата на отключване (само собственикът)
+        // ÐŸÑ€Ð¾Ð¼ÐµÐ½Ð¸ Ð´Ð°Ñ‚Ð°Ñ‚Ð° Ð½Ð° Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð²Ð°Ð½Ðµ (ÑÐ°Ð¼Ð¾ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð¸ÐºÑŠÑ‚)
         [HttpPut("{id}/unlock-date")]
         public async Task<IActionResult> UpdateUnlockDate(int id, [FromBody] UpdateUnlockDateDto dto)
         {
@@ -143,21 +150,21 @@ namespace Momentix.API.Controllers
             var capsule = await _context.TimeCapsules.FirstOrDefaultAsync(tc => tc.Id == id);
 
             if (capsule == null)
-                return NotFound("Капсулата не е намерена.");
+                return NotFound("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð°.");
 
             if (capsule.OwnerId != userId)
                 return Forbid();
 
             if (capsule.IsUnlocked)
-                return BadRequest("Капсулата вече е отключена.");
+                return BadRequest("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð²ÐµÑ‡Ðµ Ðµ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð°.");
 
             if (dto.NewUnlockAt <= DateTime.UtcNow)
-                return BadRequest("Датата на отключване трябва да е в бъдещето.");
+                return BadRequest("Ð”Ð°Ñ‚Ð°Ñ‚Ð° Ð½Ð° Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð²Ð°Ð½Ðµ Ñ‚Ñ€ÑÐ±Ð²Ð° Ð´Ð° Ðµ Ð² Ð±ÑŠÐ´ÐµÑ‰ÐµÑ‚Ð¾.");
 
             capsule.UnlockAt = dto.NewUnlockAt;
             await _context.SaveChangesAsync();
 
-            return Ok("Датата на отключване е обновена успешно.");
+            return Ok("Ð”Ð°Ñ‚Ð°Ñ‚Ð° Ð½Ð° Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð²Ð°Ð½Ðµ Ðµ Ð¾Ð±Ð½Ð¾Ð²ÐµÐ½Ð° ÑƒÑÐ¿ÐµÑˆÐ½Ð¾.");
         }
 
         [HttpGet("{id}/members")]
@@ -198,7 +205,7 @@ namespace Momentix.API.Controllers
 
             return Ok(members);
         }
-        // Добави член към капсула (само собственикът)
+        // Ð”Ð¾Ð±Ð°Ð²Ð¸ Ñ‡Ð»ÐµÐ½ ÐºÑŠÐ¼ ÐºÐ°Ð¿ÑÑƒÐ»Ð° (ÑÐ°Ð¼Ð¾ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð¸ÐºÑŠÑ‚)
         [HttpPost("{id}/members")]
         public async Task<IActionResult> AddMember(int id, [FromBody] AddAlbumMemberDto dto)
         {
@@ -209,20 +216,20 @@ namespace Momentix.API.Controllers
                 .FirstOrDefaultAsync(tc => tc.Id == id);
 
             if (capsule == null)
-                return NotFound("Капсулата не е намерена.");
+                return NotFound("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð°.");
 
             if (capsule.OwnerId != userId)
                 return Forbid();
 
             var userToAdd = await _userManager.FindByEmailAsync(dto.UserEmail);
             if (userToAdd == null)
-                return NotFound("Потребителят не е намерен.");
+                return NotFound("ÐŸÐ¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»ÑÑ‚ Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½.");
 
             if (userToAdd.Id == capsule.OwnerId)
                 return BadRequest("Owner already has access to the capsule.");
             bool alreadyMember = capsule.Members.Any(m => m.UserId == userToAdd.Id);
             if (alreadyMember)
-                return BadRequest("Потребителят вече е член на капсулата.");
+                return BadRequest("ÐŸÐ¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»ÑÑ‚ Ð²ÐµÑ‡Ðµ Ðµ Ñ‡Ð»ÐµÐ½ Ð½Ð° ÐºÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð°.");
 
             var member = new TimeCapsuleMember
             {
@@ -231,12 +238,27 @@ namespace Momentix.API.Controllers
             };
 
             _context.TimeCapsuleMembers.Add(member);
+
+            var ownerName = await _context.Users
+                .Where(u => u.Id == userId)
+                .Select(u => u.FullName)
+                .FirstOrDefaultAsync() ?? "Someone";
+
+            _notificationService.Add(
+                userToAdd.Id,
+                "Time capsule shared",
+                $"{ownerName} shared time capsule \"{capsule.Title}\" with you.",
+                NotificationType.CapsuleShared,
+                "TimeCapsule",
+                capsule.Id,
+                userId);
+
             await _context.SaveChangesAsync();
 
-            return Ok("Членът е добавен успешно.");
+            return Ok("Ð§Ð»ÐµÐ½ÑŠÑ‚ Ðµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾.");
         }
 
-        // Ръчно отключване (само за тестове)
+        // Ð ÑŠÑ‡Ð½Ð¾ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð²Ð°Ð½Ðµ (ÑÐ°Ð¼Ð¾ Ð·Ð° Ñ‚ÐµÑÑ‚Ð¾Ð²Ðµ)
         [HttpPost("{id}/unlock")]
         public async Task<IActionResult> UnlockCapsule(int id)
         {
@@ -245,24 +267,52 @@ namespace Momentix.API.Controllers
             var capsule = await _context.TimeCapsules.FirstOrDefaultAsync(tc => tc.Id == id);
 
             if (capsule == null)
-                return NotFound("Капсулата не е намерена.");
+                return NotFound("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð°.");
 
             if (capsule.OwnerId != userId)
                 return Forbid();
 
             if (capsule.IsUnlocked)
-                return BadRequest("Капсулата вече е отключена.");
+                return BadRequest("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð²ÐµÑ‡Ðµ Ðµ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð°.");
 
             if (capsule.UnlockAt > DateTime.UtcNow)
-                return BadRequest($"Капсулата ще се отключи на {capsule.UnlockAt:dd.MM.yyyy HH:mm}.");
+                return BadRequest($"ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ñ‰Ðµ ÑÐµ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð¸ Ð½Ð° {capsule.UnlockAt:dd.MM.yyyy HH:mm}.");
 
             capsule.IsUnlocked = true;
             await _context.SaveChangesAsync();
 
-            return Ok("Капсулата е отключена успешно!");
+            return Ok("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ðµ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½Ð° ÑƒÑÐ¿ÐµÑˆÐ½Ð¾!");
         }
 
-        // Изтрий капсула (само собственикът)
+        // Ð˜Ð·Ñ‚Ñ€Ð¸Ð¹ ÐºÐ°Ð¿ÑÑƒÐ»Ð° (ÑÐ°Ð¼Ð¾ ÑÐ¾Ð±ÑÑ‚Ð²ÐµÐ½Ð¸ÐºÑŠÑ‚)
+        private async Task UnlockDueCapsules()
+        {
+            var now = DateTime.UtcNow;
+            var capsules = await _context.TimeCapsules
+                .Include(tc => tc.Members)
+                .Where(tc => !tc.IsUnlocked && tc.UnlockAt <= now)
+                .ToListAsync();
+
+            foreach (var capsule in capsules)
+            {
+                capsule.IsUnlocked = true;
+                var recipients = capsule.Members
+                    .Select(m => m.UserId)
+                    .Append(capsule.OwnerId);
+
+                _notificationService.AddForUsers(
+                    recipients,
+                    "Time capsule unlocked",
+                    $"Time capsule \"{capsule.Title}\" is now open.",
+                    NotificationType.CapsuleUnlocked,
+                    "TimeCapsule",
+                    capsule.Id,
+                    capsule.OwnerId);
+            }
+
+            if (capsules.Count > 0)
+                await _context.SaveChangesAsync();
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCapsule(int id)
         {
@@ -271,7 +321,7 @@ namespace Momentix.API.Controllers
             var capsule = await _context.TimeCapsules.FirstOrDefaultAsync(tc => tc.Id == id);
 
             if (capsule == null)
-                return NotFound("Капсулата не е намерена.");
+                return NotFound("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð°.");
 
             if (capsule.OwnerId != userId)
                 return Forbid();
@@ -279,7 +329,11 @@ namespace Momentix.API.Controllers
             _context.TimeCapsules.Remove(capsule);
             await _context.SaveChangesAsync();
 
-            return Ok("Капсулата е изтрита успешно.");
+            return Ok("ÐšÐ°Ð¿ÑÑƒÐ»Ð°Ñ‚Ð° Ðµ Ð¸Ð·Ñ‚Ñ€Ð¸Ñ‚Ð° ÑƒÑÐ¿ÐµÑˆÐ½Ð¾.");
         }
     }
 }
+
+
+
+

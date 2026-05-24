@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Momentix.API.Services;
 using Momentix.Data.Data;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
@@ -14,21 +15,41 @@ namespace Momentix.API.Controllers;
 [Authorize]
 public class ChallengesController : ControllerBase
 {
+    private const string AdminRole = "Admin";
+
     private readonly AppDbContext _context;
     private readonly UserManager<User> _userManager;
+    private readonly NotificationService _notificationService;
+    private readonly ChallengeVisionService _challengeVisionService;
 
     private static readonly string[] DailyPrompts =
     {
         "Capture something green",
         "Capture something shiny",
-        "Capture a favorite detail from today",
+        "Capture something round",
+        "Capture something blue",
+        "Capture something tiny",
+        "Capture something made of metal",
+        "Capture something with letters",
+        "Capture something soft",
+        "Capture something old",
+        "Capture something with a reflection",
+        "Capture something from nature",
+        "Capture something you use every day",
+        "Capture something handmade",
         "Capture something that made you smile"
     };
 
-    public ChallengesController(AppDbContext context, UserManager<User> userManager)
+    public ChallengesController(
+        AppDbContext context,
+        UserManager<User> userManager,
+        NotificationService notificationService,
+        ChallengeVisionService challengeVisionService)
     {
         _context = context;
         _userManager = userManager;
+        _notificationService = notificationService;
+        _challengeVisionService = challengeVisionService;
     }
 
     private string GetUserId() =>
@@ -44,8 +65,12 @@ public class ChallengesController : ControllerBase
     [HttpGet("{challengeId}/submissions")]
     public async Task<IActionResult> GetSubmissions(int challengeId)
     {
+        var userId = GetUserId();
+        var allowedUserIds = await GetFriendIds(userId);
+        allowedUserIds.Add(userId);
+
         var submissions = await _context.ChallengeSubmissions
-            .Where(s => s.ChallengeId == challengeId)
+            .Where(s => s.ChallengeId == challengeId && allowedUserIds.Contains(s.UserId))
             .Include(s => s.User)
             .Include(s => s.Votes)
             .OrderByDescending(s => s.SubmittedAt)
@@ -56,7 +81,12 @@ public class ChallengesController : ControllerBase
                 UserName = s.User.FullName,
                 MediaUrl = s.MediaUrl,
                 SubmittedAt = s.SubmittedAt,
-                VoteCount = s.Votes.Count
+                VoteCount = s.Votes.Count,
+                AiIsSatisfied = s.AiIsSatisfied,
+                AiConfidence = s.AiConfidence,
+                AiFeedback = s.AiFeedback,
+                AiModel = s.AiModel,
+                AiEvaluatedAt = s.AiEvaluatedAt
             })
             .ToListAsync();
 
@@ -95,16 +125,10 @@ public class ChallengesController : ControllerBase
             user.Streak += 1;
 
         await _context.SaveChangesAsync();
+        await NotifyChallengeFriends(submission.Id, userId, user?.FullName ?? "A friend");
+        await _context.SaveChangesAsync();
 
-        return Ok(new ChallengeSubmissionResponseDto
-        {
-            Id = submission.Id,
-            ChallengeId = submission.ChallengeId,
-            UserName = user?.FullName ?? string.Empty,
-            MediaUrl = submission.MediaUrl,
-            SubmittedAt = submission.SubmittedAt,
-            VoteCount = 0
-        });
+        return Ok(ToSubmissionDto(submission, user?.FullName ?? string.Empty, 0));
     }
 
     [HttpPost("{challengeId}/submissions/photo")]
@@ -113,9 +137,9 @@ public class ChallengesController : ControllerBase
     public async Task<IActionResult> SubmitPhoto(int challengeId, IFormFile file)
     {
         var userId = GetUserId();
-        var challengeExists = await _context.Challenges.AnyAsync(c => c.Id == challengeId);
+        var challenge = await _context.Challenges.FindAsync(challengeId);
 
-        if (!challengeExists)
+        if (challenge == null)
             return NotFound("Challenge was not found.");
 
         var alreadySubmitted = await _context.ChallengeSubmissions
@@ -158,17 +182,23 @@ public class ChallengesController : ControllerBase
         }
 
         submission.MediaUrl = $"{Request.Scheme}://{Request.Host}/api/Challenges/submissions/{submission.Id}/content";
+
+        var evaluation = await _challengeVisionService.EvaluateAsync(
+            challenge.Description,
+            storedPath,
+            file.ContentType,
+            HttpContext.RequestAborted);
+
+        submission.AiIsSatisfied = evaluation.IsSatisfied;
+        submission.AiConfidence = evaluation.Confidence;
+        submission.AiFeedback = evaluation.Feedback;
+        submission.AiModel = evaluation.Model;
+        submission.AiEvaluatedAt = evaluation.EvaluatedAt;
+
+        await NotifyChallengeFriends(submission.Id, userId, user?.FullName ?? "A friend");
         await _context.SaveChangesAsync();
 
-        return Ok(new ChallengeSubmissionResponseDto
-        {
-            Id = submission.Id,
-            ChallengeId = submission.ChallengeId,
-            UserName = user?.FullName ?? string.Empty,
-            MediaUrl = submission.MediaUrl,
-            SubmittedAt = submission.SubmittedAt,
-            VoteCount = 0
-        });
+        return Ok(ToSubmissionDto(submission, user?.FullName ?? string.Empty, 0));
     }
 
     [HttpGet("submissions/{submissionId}/content")]
@@ -210,6 +240,12 @@ public class ChallengesController : ControllerBase
         if (submission.UserId == userId)
             return BadRequest("You cannot vote for your own submission.");
 
+        var canVote = await _context.Friends
+            .AnyAsync(f => f.UserId == userId && f.FriendUserId == submission.UserId);
+
+        if (!canVote)
+            return Forbid();
+
         var vote = await _context.ChallengeVotes
             .FirstOrDefaultAsync(v => v.SubmissionId == submissionId && v.VotedByUserId == userId);
 
@@ -231,9 +267,39 @@ public class ChallengesController : ControllerBase
         return Ok("Vote saved.");
     }
 
+    [HttpPost("admin/reset-active")]
+    public async Task<IActionResult> ResetActiveChallenge()
+    {
+        var adminCheck = await RequireAdmin();
+        if (adminCheck != null)
+            return adminCheck;
+
+        var today = DateTime.Today;
+        var challenge = await _context.Challenges
+            .Include(c => c.Submissions)
+            .ThenInclude(s => s.Votes)
+            .FirstOrDefaultAsync(c => c.Type == ChallengeType.Daily && c.StartDate == today);
+
+        if (challenge == null)
+            return Ok("No active challenge to reset.");
+
+        var submissions = challenge.Submissions.ToList();
+        var submissionIds = submissions.Select(s => s.Id).ToList();
+        var votes = submissions.SelectMany(s => s.Votes).ToList();
+
+        foreach (var submissionId in submissionIds)
+            DeleteChallengeFile(submissionId);
+
+        _context.ChallengeVotes.RemoveRange(votes);
+        _context.ChallengeSubmissions.RemoveRange(submissions);
+        await _context.SaveChangesAsync();
+
+        return Ok($"Challenge reset. Removed {submissionIds.Count} submissions.");
+    }
+
     private async Task<Challenge> GetOrCreateDailyChallenge()
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.Today;
         var challenge = await _context.Challenges
             .Where(c => c.Type == ChallengeType.Daily && c.StartDate == today)
             .FirstOrDefaultAsync();
@@ -241,7 +307,7 @@ public class ChallengesController : ControllerBase
         if (challenge != null)
             return challenge;
 
-        var prompt = DailyPrompts[Math.Abs(today.DayOfYear) % DailyPrompts.Length];
+        var prompt = DailyPrompts[(today.DayOfYear - 1) % DailyPrompts.Length];
         challenge = new Challenge
         {
             Description = prompt,
@@ -256,6 +322,40 @@ public class ChallengesController : ControllerBase
         return challenge;
     }
 
+    private async Task<HashSet<string>> GetFriendIds(string userId)
+    {
+        var friendIds = await _context.Friends
+            .Where(f => f.UserId == userId)
+            .Select(f => f.FriendUserId)
+            .ToListAsync();
+
+        return friendIds.ToHashSet();
+    }
+
+    private async Task NotifyChallengeFriends(int submissionId, string userId, string userName)
+    {
+        var friendIds = await GetFriendIds(userId);
+        _notificationService.AddForUsers(
+            friendIds,
+            "New challenge photo",
+            $"{userName} posted a challenge photo.",
+            NotificationType.ChallengeSubmission,
+            "ChallengeSubmission",
+            submissionId,
+            userId);
+    }
+
+    private async Task<IActionResult?> RequireAdmin()
+    {
+        var user = await _userManager.FindByIdAsync(GetUserId());
+        if (user == null)
+            return Unauthorized();
+
+        return await _userManager.IsInRoleAsync(user, AdminRole)
+            ? null
+            : Forbid();
+    }
+
     private static ChallengeResponseDto ToDto(Challenge challenge) =>
         new()
         {
@@ -264,7 +364,26 @@ public class ChallengesController : ControllerBase
             Type = challenge.Type,
             StartDate = challenge.StartDate,
             RevealAt = challenge.RevealAt,
-            IsRevealed = DateTime.UtcNow >= challenge.RevealAt
+            IsRevealed = DateTime.Now >= challenge.RevealAt
+        };
+
+    private static ChallengeSubmissionResponseDto ToSubmissionDto(
+        ChallengeSubmission submission,
+        string userName,
+        int voteCount) =>
+        new()
+        {
+            Id = submission.Id,
+            ChallengeId = submission.ChallengeId,
+            UserName = userName,
+            MediaUrl = submission.MediaUrl,
+            SubmittedAt = submission.SubmittedAt,
+            VoteCount = voteCount,
+            AiIsSatisfied = submission.AiIsSatisfied,
+            AiConfidence = submission.AiConfidence,
+            AiFeedback = submission.AiFeedback,
+            AiModel = submission.AiModel,
+            AiEvaluatedAt = submission.AiEvaluatedAt
         };
 
     private static (bool IsValid, string Extension, string ErrorMessage) GetImageExtension(IFormFile file)
@@ -292,6 +411,31 @@ public class ChallengesController : ControllerBase
         return allowedExtensions.Contains(extension)
             ? (true, extension, string.Empty)
             : (false, string.Empty, "Allowed image types: jpg, jpeg, png, webp, gif.");
+    }
+
+    private static void DeleteChallengeFile(int submissionId)
+    {
+        var uploadsFolder = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "uploads",
+            "challenges");
+
+        if (!Directory.Exists(uploadsFolder))
+            return;
+
+        foreach (var filePath in Directory.EnumerateFiles(uploadsFolder, $"{submissionId}.*"))
+        {
+            try
+            {
+                System.IO.File.Delete(filePath);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+        }
     }
 
     private static string GetContentType(string extension) =>

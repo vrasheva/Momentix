@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Momentix.Data.Data;
 
@@ -10,9 +11,11 @@ using Momentix.Data.Data;
 namespace Momentix.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260521185056_AddNotifications")]
+    partial class AddNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,21 +235,6 @@ namespace Momentix.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    b.Property<int?>("AiConfidence")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("AiEvaluatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("AiFeedback")
-                        .HasColumnType("longtext");
-
-                    b.Property<bool?>("AiIsSatisfied")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("AiModel")
-                        .HasColumnType("longtext");
 
                     b.Property<int>("ChallengeId")
                         .HasColumnType("int");

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentView
     x:Class="Momentix.Mobile.Views.BottomNavBar"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -12,88 +12,66 @@
             <Shadow Brush="Black" Offset="0,-2" Radius="12" Opacity="0.07"/>
         </Border.Shadow>
 
-        <Grid ColumnDefinitions="*,*,*,*" Padding="0,4,0,16">
-
-            <!-- Albums -->
+        <Grid ColumnDefinitions="*,*,*,*,*" Padding="0,4,0,16">
             <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnAlbumsTapped"/>
                 </VerticalStackLayout.GestureRecognizers>
-                <Image x:Name="ImgAlbums" WidthRequest="26" HeightRequest="26"
-                       HorizontalOptions="Center">
+                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
                     <Image.Source>
-                        <FontImageSource x:Name="FntAlbums"
-                            FontFamily="MaterialIcons"
-                            Glyph="&#xE413;"
-                            Size="26"
-                            Color="#AAAAAA"/>
+                        <FontImageSource x:Name="FntAlbums" FontFamily="MaterialIcons" Glyph="&#xE413;" Size="26" Color="#AAAAAA"/>
                     </Image.Source>
                 </Image>
-                <Ellipse x:Name="DotAlbums" Fill="#6750A4"
-                         WidthRequest="5" HeightRequest="5"
-                         HorizontalOptions="Center" IsVisible="False"/>
+                <Ellipse x:Name="DotAlbums" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
             </VerticalStackLayout>
 
-            <!-- Friends -->
             <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnFriendsTapped"/>
                 </VerticalStackLayout.GestureRecognizers>
-                <Image x:Name="ImgFriends" WidthRequest="26" HeightRequest="26"
-                       HorizontalOptions="Center">
+                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
                     <Image.Source>
-                        <FontImageSource x:Name="FntFriends"
-                            FontFamily="MaterialIcons"
-                            Glyph="&#xE7EF;"
-                            Size="26"
-                            Color="#AAAAAA"/>
+                        <FontImageSource x:Name="FntFriends" FontFamily="MaterialIcons" Glyph="&#xE7EF;" Size="26" Color="#AAAAAA"/>
                     </Image.Source>
                 </Image>
-                <Ellipse x:Name="DotFriends" Fill="#6750A4"
-                         WidthRequest="5" HeightRequest="5"
-                         HorizontalOptions="Center" IsVisible="False"/>
+                <Ellipse x:Name="DotFriends" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
             </VerticalStackLayout>
 
-            <!-- Capsules (hourglass) -->
             <VerticalStackLayout Grid.Column="2" Spacing="4" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnCapsulesTapped"/>
                 </VerticalStackLayout.GestureRecognizers>
-                <Image x:Name="ImgCapsules" WidthRequest="26" HeightRequest="26"
-                       HorizontalOptions="Center">
+                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
                     <Image.Source>
-                        <FontImageSource x:Name="FntCapsules"
-                            FontFamily="MaterialIcons"
-                            Glyph="&#xE422;"
-                            Size="26"
-                            Color="#AAAAAA"/>
+                        <FontImageSource x:Name="FntCapsules" FontFamily="MaterialIcons" Glyph="&#xE422;" Size="26" Color="#AAAAAA"/>
                     </Image.Source>
                 </Image>
-                <Ellipse x:Name="DotCapsules" Fill="#6750A4"
-                         WidthRequest="5" HeightRequest="5"
-                         HorizontalOptions="Center" IsVisible="False"/>
+                <Ellipse x:Name="DotCapsules" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
             </VerticalStackLayout>
 
-            <!-- Challenge (star) -->
             <VerticalStackLayout Grid.Column="3" Spacing="4" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnChallengeTapped"/>
                 </VerticalStackLayout.GestureRecognizers>
-                <Image x:Name="ImgChallenge" WidthRequest="26" HeightRequest="26"
-                       HorizontalOptions="Center">
+                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
                     <Image.Source>
-                        <FontImageSource x:Name="FntChallenge"
-                            FontFamily="MaterialIcons"
-                            Glyph="&#xE838;"
-                            Size="26"
-                            Color="#AAAAAA"/>
+                        <FontImageSource x:Name="FntChallenge" FontFamily="MaterialIcons" Glyph="&#xE838;" Size="26" Color="#AAAAAA"/>
                     </Image.Source>
                 </Image>
-                <Ellipse x:Name="DotChallenge" Fill="#6750A4"
-                         WidthRequest="5" HeightRequest="5"
-                         HorizontalOptions="Center" IsVisible="False"/>
+                <Ellipse x:Name="DotChallenge" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
             </VerticalStackLayout>
 
+            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
+                <VerticalStackLayout.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnNotificationsTapped"/>
+                </VerticalStackLayout.GestureRecognizers>
+                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
+                    <Image.Source>
+                        <FontImageSource x:Name="FntNotifications" FontFamily="MaterialIcons" Glyph="&#xE7F4;" Size="26" Color="#AAAAAA"/>
+                    </Image.Source>
+                </Image>
+                <Ellipse x:Name="DotNotifications" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
+            </VerticalStackLayout>
         </Grid>
     </Border>
 </ContentView>

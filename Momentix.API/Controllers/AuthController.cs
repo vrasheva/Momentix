@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
@@ -10,6 +10,8 @@ namespace Momentix.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
+        private const string AdminRole = "Admin";
+
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly TokenService _tokenService;
@@ -29,7 +31,7 @@ namespace Momentix.API.Controllers
         {
             var existingUser = await _userManager.FindByEmailAsync(dto.Email);
             if (existingUser != null)
-                return BadRequest("Потребител с този имейл вече съществува.");
+                return BadRequest("?????????? ? ???? ????? ???? ??????????.");
 
             var user = new User
             {
@@ -52,22 +54,27 @@ namespace Momentix.API.Controllers
                 UserId = user.Id,
                 FullName = user.FullName,
                 Email = user.Email ?? string.Empty,
-                ThemeColor = user.ThemeColor
+                ThemeColor = user.ThemeColor,
+                IsAdmin = false
             });
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            var login = dto.Email.Trim();
+            var user = await _userManager.FindByEmailAsync(login)
+                ?? await _userManager.FindByNameAsync(login);
+
             if (user == null)
-                return Unauthorized("Невалиден имейл или парола.");
+                return Unauthorized("????????? ?????????? ??? ??????.");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, dto.Password, false);
             if (!result.Succeeded)
-                return Unauthorized("Невалиден имейл или парола.");
+                return Unauthorized("????????? ?????????? ??? ??????.");
 
             var token = _tokenService.GenerateToken(user);
+            var isAdmin = await _userManager.IsInRoleAsync(user, AdminRole);
 
             return Ok(new AuthResponseDto
             {
@@ -75,7 +82,8 @@ namespace Momentix.API.Controllers
                 UserId = user.Id,
                 FullName = user.FullName,
                 Email = user.Email ?? string.Empty,
-                ThemeColor = user.ThemeColor
+                ThemeColor = user.ThemeColor,
+                IsAdmin = isAdmin
             });
         }
     }

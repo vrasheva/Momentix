@@ -41,6 +41,8 @@ namespace Momentix.Mobile
             builder.Services.AddTransient<TimeCapsuleDetailsPage>();
             builder.Services.AddTransient<ChallengesViewModel>();
             builder.Services.AddTransient<ChallengesPage>();
+            builder.Services.AddTransient<NotificationsViewModel>();
+            builder.Services.AddTransient<NotificationsPage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -48,3 +50,4 @@ namespace Momentix.Mobile
         }
     }
 }
+

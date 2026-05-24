@@ -1,4 +1,4 @@
-﻿using Momentix.Data.DTOs;
+using Momentix.Data.DTOs;
 
 namespace Momentix.Web.Services;
 
@@ -9,6 +9,7 @@ public class AuthSession
     public string? FullName { get; private set; }
     public string? Email { get; private set; }
     public string ThemeColor { get; private set; } = "#111111";
+    public bool IsAdmin { get; private set; }
 
     public bool IsLoggedIn => !string.IsNullOrWhiteSpace(Token);
 
@@ -21,6 +22,7 @@ public class AuthSession
         FullName = response.FullName;
         Email = response.Email;
         ThemeColor = string.IsNullOrWhiteSpace(response.ThemeColor) ? "#111111" : response.ThemeColor;
+        IsAdmin = response.IsAdmin;
         Changed?.Invoke();
     }
 
@@ -31,6 +33,7 @@ public class AuthSession
         FullName = null;
         Email = null;
         ThemeColor = "#111111";
+        IsAdmin = false;
         Changed?.Invoke();
     }
 }

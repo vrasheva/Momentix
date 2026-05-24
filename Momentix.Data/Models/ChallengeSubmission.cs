@@ -1,4 +1,4 @@
-﻿namespace Momentix.Data.Models
+namespace Momentix.Data.Models
 {
     public class ChallengeSubmission
     {
@@ -11,6 +11,12 @@
 
         public string MediaUrl { get; set; } = string.Empty;
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+
+        public bool? AiIsSatisfied { get; set; }
+        public int? AiConfidence { get; set; }
+        public string? AiFeedback { get; set; }
+        public string? AiModel { get; set; }
+        public DateTime? AiEvaluatedAt { get; set; }
 
         public ICollection<ChallengeVote> Votes { get; set; } = new List<ChallengeVote>();
     }

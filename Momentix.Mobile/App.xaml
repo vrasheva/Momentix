@@ -7,6 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
             <converters:ThemeToStrokeConverter x:Key="ThemeToStrokeConverter"/>
             <Color x:Key="PageBackground">#F7F6F2</Color>
             <Color x:Key="CardBackground">#FFFFFF</Color>
