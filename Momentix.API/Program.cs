@@ -61,7 +61,10 @@ namespace Momentix.API
             // Services
             builder.Services.AddScoped<TokenService>();
             builder.Services.AddScoped<NotificationService>();
-            builder.Services.AddHttpClient<ChallengeVisionService>();
+            builder.Services.AddHttpClient<ChallengeVisionService>(client =>
+            {
+                client.Timeout = TimeSpan.FromMinutes(10);
+            });
 
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
