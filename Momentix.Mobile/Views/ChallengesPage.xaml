@@ -4,82 +4,181 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Momentix.Mobile.Views"
-    Title="Challenge"
-    BackgroundColor="{DynamicResource PageBackground}"
+    Title=""
+    BackgroundColor="White"
     Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">
 
-        <RefreshView Grid.Row="0" Command="{Binding LoadCommand}" IsRefreshing="{Binding IsLoading}">
-            <ScrollView>
-                <VerticalStackLayout Padding="20" Spacing="16">
-                    <Label Text="Daily Challenge" FontSize="28" FontAttributes="Bold"
-                           TextColor="{DynamicResource TextPrimary}" />
-                    <Border Padding="16" BackgroundColor="{DynamicResource CardBackground}"
-                            StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="0">
+
+                <!-- Topbar -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,10" BackgroundColor="White">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Momentix" FontSize="22" FontAttributes="Bold,Italic"
+                               TextColor="#111111" CharacterSpacing="-0.5"/>
+                        <Label Text="Предизвикателства" FontSize="13" FontAttributes="Bold"
+                               TextColor="#111111"/>
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="#F3F4F6" StrokeThickness="0">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="16"/>
+                            <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
-                        <VerticalStackLayout Spacing="10">
-                            <Label Text="{Binding ChallengeTitle}" FontSize="22"
-                                   FontAttributes="Bold" TextColor="{DynamicResource TextPrimary}" />
-                            <Label Text="{Binding RevealText}" FontSize="14"
-                                   TextColor="{DynamicResource TextSecondary}" />
-                            <Label Text="{Binding SelectedPhotoName}" FontSize="13"
-                                   TextColor="{DynamicResource TextSecondary}" />
-                            <Button Text="Pick Photo" Command="{Binding PickPhotoCommand}"
-                                    BackgroundColor="{DynamicResource PrimaryLight}"
-                                    TextColor="{DynamicResource PrimaryText}" CornerRadius="12" />
-                            <Editor Placeholder="Optional caption..."
-                                    Text="{Binding SubmissionText}" AutoSize="TextChanges"
-                                    HeightRequest="80"
-                                    BackgroundColor="{DynamicResource PageBackground}"
-                                    TextColor="{DynamicResource TextPrimary}"/>
-                            <Button Text="Submit" Command="{Binding SubmitCommand}"
-                                    BackgroundColor="{DynamicResource Primary}"
-                                    TextColor="White" CornerRadius="12" />
-                        </VerticalStackLayout>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToProfileCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Image Source="person.svg" WidthRequest="22" HeightRequest="22"
+                               HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
-                    <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}" />
-                    <Label Text="Feed" FontSize="20" FontAttributes="Bold"
-                           TextColor="{DynamicResource TextPrimary}" />
-                    <CollectionView ItemsSource="{Binding Submissions}">
-                        <CollectionView.EmptyView>
-                            <Label Text="No submissions yet." Padding="0,24"
-                                   HorizontalTextAlignment="Center"
-                                   TextColor="{DynamicResource TextSecondary}" />
-                        </CollectionView.EmptyView>
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate>
-                                <Border Padding="14" Margin="0,6"
-                                        BackgroundColor="{DynamicResource CardBackground}"
-                                        StrokeThickness="1" Stroke="{DynamicResource BorderColor}">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="16"/>
-                                    </Border.StrokeShape>
-                                    <VerticalStackLayout Spacing="8">
-                                        <Label Text="{Binding UserName}" FontAttributes="Bold"
-                                               TextColor="{DynamicResource TextPrimary}" />
-                                        <Image Source="{Binding MediaUrl}" Aspect="AspectFill"
-                                               HeightRequest="240"
-                                               BackgroundColor="{DynamicResource PageBackground}" />
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-                                            <Label Text="{Binding VoteCount, StringFormat='Votes: {0}'}"
-                                                   FontSize="13" TextColor="{DynamicResource TextSecondary}" />
-                                            <Button Grid.Column="1" Text="Vote"
-                                                    Command="{Binding BindingContext.VoteCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                                    CommandParameter="{Binding .}"
-                                                    BackgroundColor="{DynamicResource PrimaryDark}"
-                                                    TextColor="White" CornerRadius="8" />
-                                        </Grid>
+                </Grid>
+
+                <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="{DynamicResource Primary}"
+                                   Margin="0,8"/>
+
+                <!-- Challenge карта -->
+                <Border Margin="16,16,16,0" Padding="20"
+                        BackgroundColor="#1A2744" StrokeThickness="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="20"/>
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Border Grid.Column="0" BackgroundColor="#FFFFFF22"
+                                    Padding="10,4" HorizontalOptions="Start">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="20"/>
+                                </Border.StrokeShape>
+                                <Label Text="Дневно предизвикателство" FontSize="11"
+                                       FontAttributes="Bold" TextColor="White"/>
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding RevealText}"
+                                   FontSize="11" TextColor="#FFFFFFAA"
+                                   VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Label Text="{Binding ChallengeTitle}" FontSize="22"
+                               FontAttributes="Bold" TextColor="White"/>
+
+                        <!-- Снимка избрана -->
+                        <Border BackgroundColor="#FFFFFF15" Padding="12"
+                                StrokeThickness="0"
+                                IsVisible="{Binding HasSelectedPhoto}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding SelectedPhotoName}" FontSize="12"
+                                   TextColor="White" LineBreakMode="TailTruncation"/>
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Grid.Column="0" Text="📷 Снимка"
+                                    Command="{Binding PickPhotoCommand}"
+                                    BackgroundColor="#FFFFFF22" TextColor="White"
+                                    FontSize="13" CornerRadius="12" HeightRequest="44"/>
+                            <Button Grid.Column="1" Text="Изпрати"
+                                    Command="{Binding SubmitCommand}"
+                                    BackgroundColor="#60A5FA" TextColor="White"
+                                    FontSize="13" FontAttributes="Bold"
+                                    CornerRadius="12" HeightRequest="44"/>
+                        </Grid>
+
+                        <Label Text="{Binding StatusMessage}"
+                               TextColor="#FFFFFFCC" FontSize="12"
+                               IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,16"/>
+
+                <!-- Feed -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,0,16,12">
+                    <Label Text="Публикации" FontSize="13" FontAttributes="Bold"
+                           TextColor="#111111" VerticalOptions="Center"/>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding Submissions}" Margin="16,0,16,16">
+                    <CollectionView.EmptyView>
+                        <Label Text="Няма публикации все още." Padding="0,24"
+                               HorizontalTextAlignment="Center"
+                               TextColor="#888" FontSize="13"/>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <VerticalStackLayout Spacing="0" Margin="0,0,0,16">
+                                <!-- Header -->
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
+                                      Margin="0,0,0,8">
+                                    <Border Grid.Column="0" BackgroundColor="#E8F1FD"
+                                            WidthRequest="36" HeightRequest="36">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="18"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding UserInitials}"
+                                               FontSize="13" FontAttributes="Bold"
+                                               TextColor="#60A5FA"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                        <Label Text="{Binding UserName}" FontSize="13"
+                                               FontAttributes="Bold" TextColor="#111111"/>
+                                        <Label Text="{Binding SubmittedAtText}" FontSize="11"
+                                               TextColor="#888888"/>
                                     </VerticalStackLayout>
+                                    <!-- AI badge -->
+                                    <Border Grid.Column="2"
+                                            BackgroundColor="{Binding AiBadgeColor}"
+                                            Padding="8,4" VerticalOptions="Center">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="10"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding AiBadgeText}"
+                                               FontSize="10" FontAttributes="Bold"
+                                               TextColor="White"/>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Снимка -->
+                                <Border HeightRequest="240" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="14"/>
+                                    </Border.StrokeShape>
+                                    <Image Source="{Binding MediaUrl}" Aspect="AspectFill"/>
                                 </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-            </ScrollView>
-        </RefreshView>
+
+                                <!-- AI feedback -->
+                                <Label Text="{Binding AiFeedback}"
+                                       FontSize="12" TextColor="#888888"
+                                       Margin="0,6,0,0"
+                                       IsVisible="{Binding HasAiFeedback}"/>
+
+                                <!-- Vote -->
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                                    <Label Text="{Binding VoteCount, StringFormat='❤️ {0} гласа'}"
+                                           FontSize="13" TextColor="#111111"
+                                           VerticalOptions="Center"/>
+                                    <Button Grid.Column="1" Text="Гласувай"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.VoteCommand}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#60A5FA" TextColor="White"
+                                            FontSize="12" CornerRadius="10"
+                                            Padding="14,6"/>
+                                </Grid>
+
+                                <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0" Margin="0,12,0,0"/>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
 
         <views:BottomNavBar Grid.Row="1" ActiveTab="Challenge"/>
 

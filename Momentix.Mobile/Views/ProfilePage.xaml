@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="Momentix.Mobile.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title=""
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False"
+    Shell.TabBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Padding="16,14" BackgroundColor="White">
+            <Grid WidthRequest="36" HeightRequest="36">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                </Grid.GestureRecognizers>
+                <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5" Fill="Transparent"
+                         WidthRequest="36" HeightRequest="36"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+                <Path Data="M 20,18 L 15,12 L 20,6"
+                      Stroke="#111" StrokeThickness="2"
+                      StrokeLineCap="Round" StrokeLineJoin="Round"
+                      WidthRequest="24" HeightRequest="24"
+                      HorizontalOptions="Start" VerticalOptions="Center">
+                    <Path.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                    </Path.GestureRecognizers>
+                </Path>
+            </Grid>
+            <Label Grid.Column="1" Text="Профил" FontSize="15" FontAttributes="Bold"
+                   TextColor="#111" HorizontalOptions="Center" VerticalOptions="Center"/>
+        </Grid>
+
+        <BoxView Grid.Row="0" HeightRequest="0.5" BackgroundColor="#F0F0F0" VerticalOptions="End"/>
+
+        <!-- Content -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0" Padding="0,24,0,0">
+
+                <!-- Avatar -->
+                <VerticalStackLayout HorizontalOptions="Center" Spacing="12" Margin="0,0,0,32">
+                    <Border BackgroundColor="#F3F4F6"
+                            WidthRequest="100" HeightRequest="100"
+                            HorizontalOptions="Center">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="50"/>
+                        </Border.StrokeShape>
+                        <Grid>
+                            <!-- Placeholder икона -->
+                            <Image Source="person.svg"
+                                   WidthRequest="52" HeightRequest="52"
+                                   HorizontalOptions="Center" VerticalOptions="Center"
+                                   IsVisible="{Binding HasNoProfilePicture}"/>
+                            <!-- Профилна снимка -->
+                            <Image Source="{Binding ProfilePictureUrl}"
+                                   Aspect="AspectFill"
+                                   IsVisible="{Binding HasProfilePicture}"/>
+                        </Grid>
+                    </Border>
+                    <!-- Бутон за смяна на снимка -->
+                    <Border BackgroundColor="#F3F4F6" StrokeThickness="0"
+                            Padding="16,8" HorizontalOptions="Center">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding PickProfilePictureCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="Смени снимка" FontSize="13" TextColor="#60A5FA"
+                               FontAttributes="Bold"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Info -->
+                <VerticalStackLayout Spacing="0" Margin="16,0">
+
+                    <!-- Име -->
+                    <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="0,16">
+                        <Label Text="Име" FontSize="13" TextColor="#888888"
+                               VerticalOptions="Center" WidthRequest="80"/>
+                        <Label Grid.Column="1" Text="{Binding FullName}"
+                               FontSize="14" FontAttributes="Bold" TextColor="#111111"
+                               VerticalOptions="Center"/>
+                    </Grid>
+
+                    <!-- Имейл -->
+                    <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="0,16">
+                        <Label Text="Имейл" FontSize="13" TextColor="#888888"
+                               VerticalOptions="Center" WidthRequest="80"/>
+                        <Label Grid.Column="1" Text="{Binding Email}"
+                               FontSize="14" TextColor="#111111"
+                               VerticalOptions="Center"/>
+                    </Grid>
+                    <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
+
+                </VerticalStackLayout>
+
+                <!-- Logout -->
+                <Border BackgroundColor="#FEF2F2" StrokeThickness="1"
+                        Stroke="#FECACA" Margin="16,32,16,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14"/>
+                    </Border.StrokeShape>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                    </Border.GestureRecognizers>
+                    <Label Text="Изход" FontSize="15" FontAttributes="Bold"
+                           TextColor="#EF4444" HorizontalOptions="Center"
+                           Padding="0,16"/>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

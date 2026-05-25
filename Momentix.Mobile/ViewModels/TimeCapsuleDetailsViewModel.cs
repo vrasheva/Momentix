@@ -25,9 +25,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         get => _timeCapsuleId;
         set
         {
-            if (_timeCapsuleId == value)
-                return;
-
+            if (_timeCapsuleId == value) return;
             _timeCapsuleId = value;
             _mediaLoaded = false;
             MediaItems.Clear();
@@ -57,11 +55,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     public FriendItemViewModel? SelectedFriend
     {
         get => _selectedFriend;
-        set
-        {
-            _selectedFriend = value;
-            OnPropertyChanged();
-        }
+        set { _selectedFriend = value; OnPropertyChanged(); }
     }
 
     private string _statusMessage = string.Empty;
@@ -78,35 +72,90 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         set { _isLoading = value; OnPropertyChanged(); }
     }
 
+    private bool _isAddMemberPopupVisible;
+    public bool IsAddMemberPopupVisible
+    {
+        get => _isAddMemberPopupVisible;
+        set { _isAddMemberPopupVisible = value; OnPropertyChanged(); }
+    }
+
     public bool IsOwner => _capsule?.IsOwner == true;
     public bool IsUnlocked => _capsule != null && (_capsule.IsUnlocked || DateTime.UtcNow >= _capsule.UnlockAt);
     public bool IsLocked => !IsUnlocked;
-    public string StatusText => IsUnlocked ? "Unlocked" : "Locked";
+    public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
+    public string StatusText => IsUnlocked ? "Отключена" : "Заключена";
+    public string CountdownCardColor => IsUnlocked ? "#1B4D3E" : "#1A2744";
+
     public string UnlockDateText => _capsule == null
         ? string.Empty
-        : $"Unlocks: {_capsule.UnlockAt.ToLocalTime():dd.MM.yyyy HH:mm}";
+        : $"Отключва се на {_capsule.UnlockAt.ToLocalTime():dd.MM.yyyy} в {_capsule.UnlockAt.ToLocalTime():HH:mm}";
 
     public string CountdownText
     {
         get
         {
-            if (_capsule == null)
-                return string.Empty;
-
-            if (IsUnlocked)
-                return "Ready to open";
-
+            if (_capsule == null) return string.Empty;
+            if (IsUnlocked) return "Ready to open";
             var remaining = _capsule.UnlockAt - DateTime.UtcNow;
-            if (remaining < TimeSpan.Zero)
-                remaining = TimeSpan.Zero;
-
-            return $"{remaining.Days}d {remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+            if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
+            if (remaining.TotalDays >= 1)
+                return $"{(int)remaining.TotalDays}д {remaining.Hours}ч {remaining.Minutes:00}м";
+            return $"{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
         }
     }
 
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
-    public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
+
+    public IRelayCommand OpenAddMemberPopupCommand => new RelayCommand(() =>
+        IsAddMemberPopupVisible = true);
+
+    public IRelayCommand CloseAddMemberPopupCommand => new RelayCommand(() =>
+    {
+        IsAddMemberPopupVisible = false;
+        StatusMessage = string.Empty;
+    });
+
+    public IRelayCommand<FriendItemViewModel> AddSelectedFriendCommand =>
+        new AsyncRelayCommand<FriendItemViewModel>(async friend =>
+        {
+            if (friend == null) return;
+
+            IsLoading = true;
+            StatusMessage = string.Empty;
+
+            try
+            {
+                var success = await _apiService.PostAsync(
+                    $"TimeCapsule/{TimeCapsuleId}/members",
+                    new AddAlbumMemberDto
+                    {
+                        UserEmail = friend.Email,
+                        CanUpload = false
+                    });
+
+                if (!success)
+                {
+                    StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                        ? "Капсулата не беше споделена."
+                        : _apiService.LastErrorMessage;
+                    return;
+                }
+
+                IsAddMemberPopupVisible = false;
+                await LoadMembers();
+                await LoadFriends();
+                StatusMessage = "Капсулата е споделена.";
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = ex.Message;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        });
 
     public TimeCapsuleDetailsViewModel(ApiService apiService)
     {
@@ -130,7 +179,6 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     {
         if (!_isPageVisible || TimeCapsuleId <= 0 || IsLoading)
             return;
-
         LoadCommand.Execute(null);
     }
 
@@ -145,7 +193,6 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         _timer.Tick += (_, _) =>
         {
             RefreshState();
-
             if (IsUnlocked && !_mediaLoaded && TimeCapsuleId > 0)
                 LoadCommand.Execute(null);
         };
@@ -154,8 +201,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
 
     private async Task Load()
     {
-        if (TimeCapsuleId <= 0 || IsLoading)
-            return;
+        if (TimeCapsuleId <= 0 || IsLoading) return;
 
         IsLoading = true;
         StatusMessage = string.Empty;
@@ -167,7 +213,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
             if (_capsule == null)
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Capsule could not be loaded."
+                    ? "Капсулата не можа да се зареди."
                     : _apiService.LastErrorMessage;
                 return;
             }
@@ -200,10 +246,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     {
         var result = await _apiService.GetAsync<List<AlbumMemberResponseDto>>($"TimeCapsule/{TimeCapsuleId}/members");
         Members.Clear();
-
-        if (result == null)
-            return;
-
+        if (result == null) return;
         foreach (var member in result)
             Members.Add(member);
     }
@@ -212,9 +255,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     {
         var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
         Friends.Clear();
-
-        if (result == null)
-            return;
+        if (result == null) return;
 
         var existingMemberIds = Members.Select(m => m.UserId).ToHashSet();
 
@@ -229,50 +270,6 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
             SelectedFriend = null;
     }
 
-    private async Task AddSelectedFriend()
-    {
-        if (SelectedFriend == null)
-        {
-            StatusMessage = "Choose a friend first.";
-            return;
-        }
-
-        IsLoading = true;
-        StatusMessage = string.Empty;
-
-        try
-        {
-            var success = await _apiService.PostAsync(
-                $"TimeCapsule/{TimeCapsuleId}/members",
-                new AddAlbumMemberDto
-                {
-                    UserEmail = SelectedFriend.Email,
-                    CanUpload = false
-                });
-
-            if (!success)
-            {
-                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Capsule was not shared."
-                    : _apiService.LastErrorMessage;
-                return;
-            }
-
-            SelectedFriend = null;
-            await LoadMembers();
-            await LoadFriends();
-            StatusMessage = "Capsule shared.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
-
     private async Task LoadMedia()
     {
         var result = await _apiService.GetAsync<List<MediaResponseDto>>($"Media/timecapsule/{TimeCapsuleId}");
@@ -281,7 +278,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         if (result == null)
         {
             StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                ? "Capsule photos could not be loaded."
+                ? "Снимките не можаха да се заредят."
                 : _apiService.LastErrorMessage;
             return;
         }
@@ -300,6 +297,8 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(UnlockDateText));
         OnPropertyChanged(nameof(CountdownText));
+        OnPropertyChanged(nameof(HasDescription));
+        OnPropertyChanged(nameof(CountdownCardColor));
     }
 
     private async Task Back()

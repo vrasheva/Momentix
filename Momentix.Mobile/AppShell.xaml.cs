@@ -1,4 +1,6 @@
-﻿namespace Momentix.Mobile
+﻿using Momentix.Mobile.Views;
+
+namespace Momentix.Mobile
 {
     public partial class AppShell : Shell
     {
@@ -10,6 +12,7 @@
             Routing.RegisterRoute("CreateTimeCapsulePage", typeof(Views.CreateTimeCapsulePage));
             Routing.RegisterRoute("TimeCapsuleDetailsPage", typeof(Views.TimeCapsuleDetailsPage));
             Routing.RegisterRoute("NotificationsPage", typeof(Views.NotificationsPage));
+            Routing.RegisterRoute("ProfilePage", typeof(ProfilePage));
         }
     }
 }

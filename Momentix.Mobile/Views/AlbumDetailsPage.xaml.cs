@@ -63,8 +63,7 @@ public partial class AlbumDetailsPage : ContentPage
     private void OnMemoriesTapped(object sender, EventArgs e) => SetActiveTab(1);
     private void OnMembersTapped(object sender, EventArgs e) => SetActiveTab(2);
 
-    private void OnAddMemberTapped(object sender, EventArgs e)
+    private void OnPopupContentTapped(object sender, TappedEventArgs e)
     {
-        AddMemberPanel.IsVisible = !AddMemberPanel.IsVisible;
     }
 }

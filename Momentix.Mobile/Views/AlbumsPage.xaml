@@ -23,16 +23,15 @@
                                TextColor="#111111"/>
                     </VerticalStackLayout>
                     <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
-                            BackgroundColor="#F3F4F6" StrokeThickness="0">
+                        BackgroundColor="#F3F4F6" StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
+                            <TapGestureRecognizer Command="{Binding GoToProfileCommand}"/>
                         </Border.GestureRecognizers>
-                        <Label Text="TU" FontSize="11" FontAttributes="Bold"
-                               TextColor="#111111" HorizontalOptions="Center"
-                               VerticalOptions="Center"/>
+                        <Image Source="person.svg" WidthRequest="22" HeightRequest="22"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
                     </Border>
                 </Grid>
 

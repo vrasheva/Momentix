@@ -16,10 +16,19 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
     public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
     public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
+    public ObservableCollection<FriendItemViewModel> FilteredFriends { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> PhotoItems { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> RestPhotos { get; } = new();
+    public ObservableCollection<AlbumMediaItemViewModel> LetterItems { get; } = new();
+    public ObservableCollection<AlbumMediaItemViewModel> RestLetters { get; } = new();
+    public ObservableCollection<AlbumMemberResponseDto> RestMembers { get; } = new();
+
     public bool HasPhotos => PhotoItems.Count > 0;
     public AlbumMediaItemViewModel? FirstPhoto => PhotoItems.Count > 0 ? PhotoItems[0] : null;
+    public bool HasFirstLetter => LetterItems.Count > 0;
+    public AlbumMediaItemViewModel? FirstLetter => LetterItems.Count > 0 ? LetterItems[0] : null;
+    public bool HasFirstMember => Members.Count > 0;
+    public AlbumMemberResponseDto? FirstMember => Members.Count > 0 ? Members[0] : null;
 
     private int _albumId;
     public int AlbumId
@@ -48,6 +57,13 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         set { _memberEmail = value; OnPropertyChanged(); }
     }
 
+    private string _memberSearchText = string.Empty;
+    public string MemberSearchText
+    {
+        get => _memberSearchText;
+        set { _memberSearchText = value; OnPropertyChanged(); FilterFriends(); }
+    }
+
     private FriendItemViewModel? _selectedFriend;
     public FriendItemViewModel? SelectedFriend
     {
@@ -56,7 +72,6 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         {
             _selectedFriend = value;
             OnPropertyChanged();
-
             if (value != null)
                 MemberEmail = value.Email;
         }
@@ -83,6 +98,48 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         set { _isLoading = value; OnPropertyChanged(); }
     }
 
+    private bool _isAddMemoryPopupVisible;
+    public bool IsAddMemoryPopupVisible
+    {
+        get => _isAddMemoryPopupVisible;
+        set { _isAddMemoryPopupVisible = value; OnPropertyChanged(); }
+    }
+
+    private bool _isAddMemberPopupVisible;
+    public bool IsAddMemberPopupVisible
+    {
+        get => _isAddMemberPopupVisible;
+        set { _isAddMemberPopupVisible = value; OnPropertyChanged(); }
+    }
+
+    private bool _isLetterPopupVisible;
+    public bool IsLetterPopupVisible
+    {
+        get => _isLetterPopupVisible;
+        set { _isLetterPopupVisible = value; OnPropertyChanged(); }
+    }
+
+    private string _openedLetterText = string.Empty;
+    public string OpenedLetterText
+    {
+        get => _openedLetterText;
+        set { _openedLetterText = value; OnPropertyChanged(); }
+    }
+
+    private string _openedLetterAuthor = string.Empty;
+    public string OpenedLetterAuthor
+    {
+        get => _openedLetterAuthor;
+        set { _openedLetterAuthor = value; OnPropertyChanged(); }
+    }
+
+    private string _openedLetterDate = string.Empty;
+    public string OpenedLetterDate
+    {
+        get => _openedLetterDate;
+        set { _openedLetterDate = value; OnPropertyChanged(); }
+    }
+
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
     public IRelayCommand AddMemberCommand => new AsyncRelayCommand(AddMember);
     public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
@@ -90,6 +147,60 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     public IRelayCommand AddLetterCommand => new AsyncRelayCommand(AddLetter);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
+
+    public IRelayCommand OpenAddMemoryPopupCommand => new RelayCommand(() =>
+    {
+        StatusMessage = string.Empty;
+        IsAddMemoryPopupVisible = true;
+    });
+
+    public IRelayCommand CloseAddMemoryPopupCommand => new RelayCommand(() =>
+    {
+        IsAddMemoryPopupVisible = false;
+        LetterText = string.Empty;
+        StatusMessage = string.Empty;
+    });
+
+    public IRelayCommand OpenAddMemberPopupCommand => new RelayCommand(() =>
+    {
+        MemberSearchText = string.Empty;
+        FilterFriends();
+        StatusMessage = string.Empty;
+        IsAddMemberPopupVisible = true;
+    });
+
+    public IRelayCommand CloseAddMemberPopupCommand => new RelayCommand(() =>
+    {
+        IsAddMemberPopupVisible = false;
+        MemberSearchText = string.Empty;
+        MemberEmail = string.Empty;
+        StatusMessage = string.Empty;
+    });
+
+    public IRelayCommand<AlbumMediaItemViewModel> OpenLetterCommand =>
+        new RelayCommand<AlbumMediaItemViewModel>(letter =>
+        {
+            if (letter == null || !letter.IsUnlockedLetter) return;
+            OpenedLetterText = letter.LetterContent;
+            OpenedLetterAuthor = letter.UploadedByName;
+            OpenedLetterDate = letter.UploadedAtText;
+            IsLetterPopupVisible = true;
+        });
+
+    public IRelayCommand CloseLetterPopupCommand => new RelayCommand(() =>
+        IsLetterPopupVisible = false);
+
+    public IRelayCommand<FriendItemViewModel> AddFriendAsMemberCommand =>
+        new AsyncRelayCommand<FriendItemViewModel>(async friend =>
+        {
+            if (friend == null) return;
+            await AddMemberByEmail(friend.Email);
+            if (StatusMessage == "Членът е добавен.")
+            {
+                IsAddMemberPopupVisible = false;
+                MemberSearchText = string.Empty;
+            }
+        });
 
     public AlbumDetailsViewModel(ApiService apiService)
     {
@@ -109,6 +220,19 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         LoadCommand.Execute(null);
     }
 
+    private void FilterFriends()
+    {
+        FilteredFriends.Clear();
+        var search = MemberSearchText.Trim().ToLower();
+        foreach (var f in Friends)
+        {
+            if (string.IsNullOrEmpty(search) ||
+                f.FullName.ToLower().Contains(search) ||
+                f.Email.ToLower().Contains(search))
+                FilteredFriends.Add(f);
+        }
+    }
+
     private async Task Load()
     {
         if (AlbumId <= 0) return;
@@ -123,6 +247,8 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             MediaItems.Clear();
             PhotoItems.Clear();
             RestPhotos.Clear();
+            LetterItems.Clear();
+            RestLetters.Clear();
 
             if (media != null)
             {
@@ -132,19 +258,34 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 var photos = media.Where(m => m.Type == MediaType.Image).ToList();
                 foreach (var item in photos)
                     PhotoItems.Add(new AlbumMediaItemViewModel(item));
-
                 foreach (var item in photos.Skip(1))
                     RestPhotos.Add(new AlbumMediaItemViewModel(item));
 
+                var letters = media.Where(m => m.Type == MediaType.Letter && !m.IsLocked).ToList();
+                foreach (var item in letters)
+                    LetterItems.Add(new AlbumMediaItemViewModel(item));
+                foreach (var item in letters.Skip(1))
+                    RestLetters.Add(new AlbumMediaItemViewModel(item));
+
                 OnPropertyChanged(nameof(HasPhotos));
                 OnPropertyChanged(nameof(FirstPhoto));
+                OnPropertyChanged(nameof(HasFirstLetter));
+                OnPropertyChanged(nameof(FirstLetter));
             }
 
             var members = await _apiService.GetAsync<List<AlbumMemberResponseDto>>($"Albums/{AlbumId}/members");
             Members.Clear();
+            RestMembers.Clear();
             if (members != null)
+            {
                 foreach (var m in members)
                     Members.Add(m);
+                foreach (var m in members.Skip(1))
+                    RestMembers.Add(m);
+            }
+
+            OnPropertyChanged(nameof(HasFirstMember));
+            OnPropertyChanged(nameof(FirstMember));
 
             await LoadFriends();
         }
@@ -177,16 +318,17 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
         if (SelectedFriend != null && !Friends.Any(f => f.UserId == SelectedFriend.UserId))
             SelectedFriend = null;
+
+        FilterFriends();
     }
 
     private async Task AddSelectedFriend()
     {
         if (SelectedFriend == null)
         {
-            StatusMessage = "Ð˜Ð·Ð±ÐµÑ€Ð¸ Ð¿Ñ€Ð¸ÑÑ‚ÐµÐ» Ð¿ÑŠÑ€Ð²Ð¾.";
+            StatusMessage = "Избери приятел първо.";
             return;
         }
-
         await AddMemberByEmail(SelectedFriend.Email);
     }
 
@@ -199,7 +341,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            StatusMessage = "Ð˜Ð¼ÐµÐ¹Ð»ÑŠÑ‚ Ðµ Ð·Ð°Ð´ÑŠÐ»Ð¶Ð¸Ñ‚ÐµÐ»ÐµÐ½.";
+            StatusMessage = "Имейлът е задължителен.";
             return;
         }
 
@@ -221,12 +363,12 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 MemberEmail = string.Empty;
                 SelectedFriend = null;
                 await Load();
-                StatusMessage = "Ð§Ð»ÐµÐ½ÑŠÑ‚ Ðµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½.";
+                StatusMessage = "Членът е добавен.";
             }
             else
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Ð§Ð»ÐµÐ½ÑŠÑ‚ Ð½Ðµ Ð±ÐµÑˆÐµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½."
+                    ? "Членът не беше добавен."
                     : _apiService.LastErrorMessage;
             }
         }
@@ -244,7 +386,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(LetterText))
         {
-            StatusMessage = "Ð¢ÐµÐºÑÑ‚ÑŠÑ‚ Ðµ Ð·Ð°Ð´ÑŠÐ»Ð¶Ð¸Ñ‚ÐµÐ»ÐµÐ½.";
+            StatusMessage = "Текстът е задължителен.";
             return;
         }
 
@@ -259,9 +401,26 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
             if (result != null)
             {
-                MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
+                var vm = new AlbumMediaItemViewModel(result);
+                MediaItems.Insert(0, vm);
+
+                // Старата първа буква отива в RestLetters
+                if (LetterItems.Count > 0)
+                    RestLetters.Insert(0, LetterItems[0]);
+                LetterItems.Insert(0, vm);
+
+                OnPropertyChanged(nameof(HasFirstLetter));
+                OnPropertyChanged(nameof(FirstLetter));
+
                 LetterText = string.Empty;
-                StatusMessage = "Ð¡Ð¿Ð¾Ð¼ÐµÐ½Ð° Ðµ Ð´Ð¾Ð±Ð°Ð²ÐµÐ½.";
+                IsAddMemoryPopupVisible = false;
+                StatusMessage = "Споменът е добавен.";
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Споменът не беше добавен."
+                    : _apiService.LastErrorMessage;
             }
         }
         catch (Exception ex)
@@ -285,7 +444,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         {
             var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Ð˜Ð·Ð±ÐµÑ€Ð¸ ÑÐ½Ð¸Ð¼ÐºÐ°"
+                Title = "Избери снимка"
             });
 
             if (file == null) return;
@@ -300,23 +459,32 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
             if (result != null)
             {
-                MediaItems.Insert(0, new AlbumMediaItemViewModel(result));
-                StatusMessage = "Ð¡Ð½Ð¸Ð¼ÐºÐ°Ñ‚Ð° Ðµ ÐºÐ°Ñ‡ÐµÐ½Ð°.";
+                var vm = new AlbumMediaItemViewModel(result);
+                MediaItems.Insert(0, vm);
+
+                if (PhotoItems.Count > 0)
+                    RestPhotos.Insert(0, PhotoItems[0]);
+                PhotoItems.Insert(0, vm);
+
+                OnPropertyChanged(nameof(HasPhotos));
+                OnPropertyChanged(nameof(FirstPhoto));
+
+                StatusMessage = "Снимката е качена.";
             }
             else
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Ð¡Ð½Ð¸Ð¼ÐºÐ°Ñ‚Ð° Ð½Ðµ Ð±ÐµÑˆÐµ ÐºÐ°Ñ‡ÐµÐ½Ð°."
+                    ? "Снимката не беше качена."
                     : _apiService.LastErrorMessage;
             }
         }
         catch (FeatureNotSupportedException)
         {
-            StatusMessage = "ÐšÐ°Ð¼ÐµÑ€Ð°Ñ‚Ð° Ð½Ðµ ÑÐµ Ð¿Ð¾Ð´Ð´ÑŠÑ€Ð¶Ð° Ð½Ð° Ñ‚Ð¾Ð²Ð° ÑƒÑÑ‚Ñ€Ð¾Ð¹ÑÑ‚Ð²Ð¾.";
+            StatusMessage = "Камерата не се поддържа на това устройство.";
         }
         catch (PermissionException)
         {
-            StatusMessage = "ÐÑÐ¼Ð°Ñˆ Ñ€Ð°Ð·Ñ€ÐµÑˆÐµÐ½Ð¸Ðµ Ð·Ð° Ð´Ð¾ÑÑ‚ÑŠÐ¿ Ð´Ð¾ ÑÐ½Ð¸Ð¼ÐºÐ¸Ñ‚Ðµ.";
+            StatusMessage = "Нямаш разрешение за достъп до снимките.";
         }
         catch (Exception ex)
         {
@@ -340,6 +508,7 @@ public class AlbumMediaItemViewModel
 
     public int Id => _media.Id;
     public string Url => ApiService.ToDeviceUrl(_media.Url);
+    public string LetterContent => _media.LetterText ?? string.Empty;
     public MediaType Type => _media.Type;
     public DateTime UploadedAt => _media.UploadedAt;
     public string UploadedByName => _media.UploadedByName;
@@ -355,7 +524,7 @@ public class AlbumMediaItemViewModel
             if (!_media.UnlockAt.HasValue) return string.Empty;
             var diff = _media.UnlockAt.Value.ToLocalTime() - DateTime.Now;
             if (diff <= TimeSpan.Zero) return string.Empty;
-            return $"{(int)diff.TotalDays}Ð” {diff.Hours}Ð§ {diff.Minutes}Ðœ";
+            return $"{(int)diff.TotalDays}д {diff.Hours}ч {diff.Minutes}м";
         }
     }
 
@@ -364,23 +533,15 @@ public class AlbumMediaItemViewModel
         get
         {
             if (!_media.UnlockAt.HasValue) return string.Empty;
-            return $"ÐžÑ‚Ð²Ð°Ñ€Ñ ÑÐµ Ð½Ð° {_media.UnlockAt.Value.ToLocalTime():dd.MM.yyyy} Ð² {_media.UnlockAt.Value.ToLocalTime():HH:mm}";
+            return $"Отваря се на {_media.UnlockAt.Value.ToLocalTime():dd.MM.yyyy} в {_media.UnlockAt.Value.ToLocalTime():HH:mm}";
         }
     }
 
     public string UploadedAtText =>
-        $"ÐÐ°Ð¿Ð¸ÑÐ°Ð½Ð¾ Ð½Ð° {UploadedAt.ToLocalTime():dd MMM yyyy}";
+        $"Написано на {UploadedAt.ToLocalTime():dd MMM yyyy}";
 
     public AlbumMediaItemViewModel(MediaResponseDto media)
     {
         _media = media;
-    }
-
-    public class AddPhotoPlaceholderViewModel
-    {
-        public bool IsAddButton => true;
-        public bool IsImage => false;
-        public bool IsLockedLetter => false;
-        public bool IsUnlockedLetter => false;
     }
 }

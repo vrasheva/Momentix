@@ -17,12 +17,10 @@
                 <Grid.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding BackCommand}"/>
                 </Grid.GestureRecognizers>
-                <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5"
-                     Fill="Transparent"
-                     WidthRequest="36" HeightRequest="36"
-                     HorizontalOptions="Center" VerticalOptions="Center"/>
-                <Path Grid.Column="0"
-                      Data="M 20,18 L 15,12 L 20,6"
+                <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5" Fill="Transparent"
+                         WidthRequest="36" HeightRequest="36"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+                <Path Data="M 20,18 L 15,12 L 20,6"
                       Stroke="#111" StrokeThickness="2"
                       StrokeLineCap="Round" StrokeLineJoin="Round"
                       WidthRequest="24" HeightRequest="24"
@@ -35,19 +33,17 @@
             <Label Grid.Column="1" Text="{Binding AlbumTitle}"
                    FontSize="15" FontAttributes="Bold" TextColor="#111"
                    HorizontalOptions="Center" VerticalOptions="Center"/>
-            <BoxView Grid.Column="2" WidthRequest="36" HeightRequest="36"
-                     Color="Transparent"/>
+            <BoxView Grid.Column="2" WidthRequest="36" HeightRequest="36" Color="Transparent"/>
         </Grid>
 
-        <BoxView Grid.Row="0" HeightRequest="0.5" BackgroundColor="#F0F0F0"
-                 VerticalOptions="End"/>
+        <BoxView Grid.Row="0" HeightRequest="0.5" BackgroundColor="#F0F0F0" VerticalOptions="End"/>
 
         <!-- Tabs -->
         <Grid Grid.Row="1" ColumnDefinitions="*,*,*" BackgroundColor="White">
             <VerticalStackLayout Grid.Column="0" Spacing="0">
-                <Label x:Name="TabPhotos" Text="Снимки"
-                       FontSize="13" HorizontalOptions="Center"
-                       Padding="0,10" TextColor="#111" FontAttributes="Bold">
+                <Label x:Name="TabPhotos" Text="Снимки" FontSize="13"
+                       HorizontalOptions="Center" Padding="0,10"
+                       TextColor="#111" FontAttributes="Bold">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnPhotosTapped"/>
                     </Label.GestureRecognizers>
@@ -55,11 +51,9 @@
                 <BoxView x:Name="UnderlinePhotos" HeightRequest="2"
                          BackgroundColor="#111" Margin="16,0"/>
             </VerticalStackLayout>
-
             <VerticalStackLayout Grid.Column="1" Spacing="0">
-                <Label x:Name="TabMemories" Text="Спомени"
-                       FontSize="13" HorizontalOptions="Center"
-                       Padding="0,10" TextColor="#888">
+                <Label x:Name="TabMemories" Text="Спомени" FontSize="13"
+                       HorizontalOptions="Center" Padding="0,10" TextColor="#888">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnMemoriesTapped"/>
                     </Label.GestureRecognizers>
@@ -67,11 +61,9 @@
                 <BoxView x:Name="UnderlineMemories" HeightRequest="2"
                          BackgroundColor="Transparent" Margin="16,0"/>
             </VerticalStackLayout>
-
             <VerticalStackLayout Grid.Column="2" Spacing="0">
-                <Label x:Name="TabMembers" Text="Членове"
-                       FontSize="13" HorizontalOptions="Center"
-                       Padding="0,10" TextColor="#888">
+                <Label x:Name="TabMembers" Text="Членове" FontSize="13"
+                       HorizontalOptions="Center" Padding="0,10" TextColor="#888">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Tapped="OnMembersTapped"/>
                     </Label.GestureRecognizers>
@@ -81,26 +73,23 @@
             </VerticalStackLayout>
         </Grid>
 
-        <BoxView Grid.Row="1" HeightRequest="0.5" BackgroundColor="#F0F0F0"
-                 VerticalOptions="End"/>
+        <BoxView Grid.Row="1" HeightRequest="0.5" BackgroundColor="#F0F0F0" VerticalOptions="End"/>
 
         <!-- Content -->
         <Grid Grid.Row="2">
 
-            <!-- Photos Tab -->
+            <!-- ── Photos Tab ── -->
             <ScrollView x:Name="PhotosContent" IsVisible="True">
                 <VerticalStackLayout Padding="12" Spacing="8">
-
                     <ActivityIndicator IsRunning="{Binding IsLoading}"
-                           IsVisible="{Binding IsLoading}"
-                           Color="{DynamicResource Primary}"
-                           Margin="0,16"/>
-
-                    <!-- Първи ред: бутон + първа снимка -->
+                                       IsVisible="{Binding IsLoading}"
+                                       Color="{DynamicResource Primary}"
+                                       Margin="0,16"/>
+                    <!-- Първи ред: картичка + първа снимка -->
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <Border Grid.Column="0"
-                            HeightRequest="160" BackgroundColor="#FAFAFA"
-                            StrokeThickness="1.5" Stroke="#CCCCCC">
+                        <Border Grid.Column="0" HeightRequest="160"
+                                BackgroundColor="#FAFAFA"
+                                StrokeThickness="1.5" Stroke="#CCCCCC">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12"/>
                             </Border.StrokeShape>
@@ -108,16 +97,15 @@
                                 <TapGestureRecognizer Command="{Binding PickPhotoCommand}"/>
                             </Border.GestureRecognizers>
                             <VerticalStackLayout HorizontalOptions="Center"
-                             VerticalOptions="Center" Spacing="4">
+                                                 VerticalOptions="Center" Spacing="4">
                                 <Label Text="+" FontSize="28" TextColor="#AAAAAA"
-                                    HorizontalOptions="Center"/>
+                                       HorizontalOptions="Center"/>
                                 <Label Text="Добави снимка" FontSize="12"
-                                   TextColor="#AAAAAA" HorizontalOptions="Center"/>
+                                       TextColor="#AAAAAA" HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
-
-                        <Border Grid.Column="1"
-                                HeightRequest="160" StrokeThickness="0"
+                        <Border Grid.Column="1" HeightRequest="160"
+                                StrokeThickness="0"
                                 IsVisible="{Binding HasPhotos}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12"/>
@@ -125,254 +113,389 @@
                             <Image Source="{Binding FirstPhoto.Url}" Aspect="AspectFill"/>
                         </Border>
                     </Grid>
-
-                    <!-- Останалите снимки -->
+                    <!-- Останалите снимки по 2 на ред -->
                     <CollectionView ItemsSource="{Binding RestPhotos}">
                         <CollectionView.ItemsLayout>
                             <GridItemsLayout Orientation="Vertical" Span="2"
-                                 HorizontalItemSpacing="8"
-                                 VerticalItemSpacing="8"/>
+                                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <VerticalStackLayout Spacing="4" Padding="0,0,0,4">
-                                    <Border HeightRequest="160" StrokeThickness="0">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="12"/>
-                                        </Border.StrokeShape>
-                                        <Image Source="{Binding Url}" Aspect="AspectFill"/>
-                                    </Border>
-                                </VerticalStackLayout>
+                                <Border HeightRequest="160" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Image Source="{Binding Url}" Aspect="AspectFill"/>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- Memories Tab -->
+            <!-- ── Memories Tab ── -->
             <ScrollView x:Name="MemoriesContent" IsVisible="False">
-                <VerticalStackLayout Padding="16" Spacing="10">
-
-                    <!-- Добави спомен — ПЪРВИ -->
-                    <Label Text="Добави спомен" FontSize="13"
-                           FontAttributes="Bold" TextColor="#111" Margin="0,4,0,4"/>
-                    <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10"/>
-                        </Border.StrokeShape>
-                        <Editor Placeholder="Напиши спомен или писмо..."
-                                Text="{Binding LetterText}"
-                                MinimumHeightRequest="44"
-                                AutoSize="TextChanges"
-                                Margin="10,8"
-                                TextColor="#111" PlaceholderColor="#BBBBBB"
-                                BackgroundColor="Transparent"/>
-                    </Border>
-                    <Button Text="Добави" Command="{Binding AddLetterCommand}"
-                            BackgroundColor="{DynamicResource Primary}"
-                            TextColor="White"
-                            HeightRequest="46" CornerRadius="12"
-                            FontAttributes="Bold" FontSize="14"
-                            Margin="0,0,0,8"/>
-
-                    <Label Text="{Binding StatusMessage}"
-                           TextColor="#E24B4A" FontSize="12"
-                           HorizontalOptions="Center"/>
-
-                    <!-- Спомени списък -->
-                    <CollectionView ItemsSource="{Binding MediaItems}">
+                <VerticalStackLayout Padding="12" Spacing="8">
+                    <!-- Първи ред: картичка + първо писмо -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <!-- Картичка Добави спомен -->
+                        <Border Grid.Column="0" HeightRequest="120"
+                                BackgroundColor="#FAFAFA"
+                                StrokeThickness="1.5" Stroke="#CCCCCC">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenAddMemoryPopupCommand}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout HorizontalOptions="Center"
+                                                 VerticalOptions="Center" Spacing="4">
+                                <Border BackgroundColor="#E8F1FD" WidthRequest="36" HeightRequest="36"
+                                        HorizontalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="18"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="+" FontSize="24" FontAttributes="Bold"
+                                           TextColor="#60A5FA"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Label Text="Добави спомен" FontSize="10"
+                                       TextColor="#888888" HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+                        <!-- Първо писмо -->
+                        <Border Grid.Column="1" HeightRequest="120"
+                                BackgroundColor="White" StrokeThickness="0.5"
+                                Stroke="#E0E0E0"
+                                IsVisible="{Binding HasFirstLetter}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenLetterCommand}"
+                                                      CommandParameter="{Binding FirstLetter}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                <Label Text="✉️" FontSize="22" HorizontalOptions="Center"/>
+                                <Label Text="{Binding FirstLetter.UploadedByName}"
+                                       FontSize="11" FontAttributes="Bold"
+                                       TextColor="#111" HorizontalOptions="Center"
+                                       LineBreakMode="TailTruncation"/>
+                                <Label Text="{Binding FirstLetter.UploadedAtText}"
+                                       FontSize="10" TextColor="#888"
+                                       HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                    <!-- Останалите писма по 2 на ред -->
+                    <CollectionView x:Name="LettersList" ItemsSource="{Binding RestLetters}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="2"
+                                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                        </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <VerticalStackLayout Spacing="10" Margin="0,0,0,10">
-
-                                    <!-- Заключено писмо -->
-                                    <Border IsVisible="{Binding IsLockedLetter}"
-                                            BackgroundColor="#2C2C2A"
-                                            StrokeThickness="0" Padding="16">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="14"/>
-                                        </Border.StrokeShape>
-                                        <VerticalStackLayout Spacing="6"
-                                                             HorizontalOptions="Center">
-                                            <Label Text="🔒" FontSize="24"
-                                                   HorizontalOptions="Center"/>
-                                            <Label Text="{Binding CountdownText}"
-                                                   FontSize="22" FontAttributes="Bold"
-                                                   TextColor="#FAC775"
-                                                   HorizontalOptions="Center"/>
-                                            <Label Text="{Binding UnlockDateText}"
-                                                   FontSize="12" TextColor="#888780"
-                                                   HorizontalOptions="Center"/>
-                                        </VerticalStackLayout>
-                                    </Border>
-
-                                    <!-- Отключено писмо -->
-                                    <Border IsVisible="{Binding IsUnlockedLetter}"
-                                            BackgroundColor="White"
-                                            StrokeThickness="0.5"
-                                            Stroke="#E0E0E0" Padding="14">
-                                        <Border.StrokeShape>
-                                            <RoundRectangle CornerRadius="14"/>
-                                        </Border.StrokeShape>
-                                        <VerticalStackLayout Spacing="4">
-                                            <Label Text="{Binding UploadedByName, StringFormat='Писмо от {0}'}"
-                                                   FontSize="14" FontAttributes="Bold"
-                                                   TextColor="#111"/>
-                                            <Label Text="{Binding UploadedAtText}"
-                                                   FontSize="11" TextColor="#888"
-                                                   Margin="0,0,0,6"/>
-                                            <Label Text="{Binding Url}"
-                                                   FontSize="13" TextColor="#444"
-                                                   LineBreakMode="WordWrap"/>
-                                        </VerticalStackLayout>
-                                    </Border>
-
-                                    <!-- Снимка в спомени -->
-                                    <VerticalStackLayout IsVisible="{Binding IsImage}"
-                                                         Spacing="4">
-                                        <Border HeightRequest="160" StrokeThickness="0">
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="12"/>
-                                            </Border.StrokeShape>
-                                            <Image Source="{Binding Url}" Aspect="AspectFill"/>
-                                        </Border>
-                                        <Label Text="{Binding UploadedByName, StringFormat='Качено от {0}'}"
-                                               FontSize="11" TextColor="#888"/>
+                                <Border HeightRequest="120" BackgroundColor="White"
+                                        StrokeThickness="0.5" Stroke="#E0E0E0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.OpenLetterCommand, Source={x:Reference LettersList}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                    <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                                        <Label Text="✉️" FontSize="22" HorizontalOptions="Center"/>
+                                        <Label Text="{Binding UploadedByName}"
+                                               FontSize="11" FontAttributes="Bold"
+                                               TextColor="#111" HorizontalOptions="Center"
+                                               LineBreakMode="TailTruncation"/>
+                                        <Label Text="{Binding UploadedAtText}"
+                                               FontSize="10" TextColor="#888"
+                                               HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
-
-                                </VerticalStackLayout>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                         <CollectionView.EmptyView>
-                            <Label Text="Няма спомени все още."
-                                   Padding="0,16"
-                                   HorizontalTextAlignment="Center"
-                                   TextColor="#888" FontSize="13"/>
+                            <BoxView HeightRequest="0"/>
                         </CollectionView.EmptyView>
                     </CollectionView>
-
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- Members Tab -->
+            <!-- ── Members Tab ── -->
             <ScrollView x:Name="MembersContent" IsVisible="False">
-                <VerticalStackLayout Padding="16" Spacing="0">
-
-                    <!-- Добави член — ПЪРВИ -->
-                    <Border Margin="0,8,0,4" BackgroundColor="White"
-                            StrokeThickness="0.5" Stroke="#E0E0E0">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10"/>
-                        </Border.StrokeShape>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Tapped="OnAddMemberTapped"/>
-                        </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10"
-                              Padding="14,12">
-                            <Label Text="+" FontSize="20" TextColor="#888"
-                                   VerticalOptions="Center"/>
-                            <Label Grid.Column="1" Text="Добави член"
-                                   FontSize="13" TextColor="#888"
-                                   VerticalOptions="Center"/>
-                        </Grid>
-                    </Border>
-
-                    <!-- Add member panel -->
-                    <VerticalStackLayout x:Name="AddMemberPanel"
-                                         IsVisible="False" Spacing="8"
-                                         Margin="0,0,0,12">
-                        <Border BackgroundColor="White" StrokeThickness="1"
-                                Stroke="#E0E0E0">
+                <VerticalStackLayout Padding="12" Spacing="8">
+                    <!-- Първи ред: картичка + първи член -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <!-- Картичка Добави член -->
+                        <Border Grid.Column="0" HeightRequest="100"
+                                BackgroundColor="#FAFAFA"
+                                StrokeThickness="1.5" Stroke="#CCCCCC">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="10"/>
+                                <RoundRectangle CornerRadius="12"/>
                             </Border.StrokeShape>
-                            <Picker Title="Избери приятел"
-                                    ItemsSource="{Binding Friends}"
-                                    SelectedItem="{Binding SelectedFriend}"
-                                    ItemDisplayBinding="{Binding DisplayName}"
-                                    HeightRequest="44"
-                                    Margin="10,0"
-                                    TextColor="#111"
-                                    TitleColor="#888"
-                                    BackgroundColor="Transparent"/>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenAddMemberPopupCommand}"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout HorizontalOptions="Center"
+                                                 VerticalOptions="Center" Spacing="4">
+                                <Border BackgroundColor="#E8F1FD" WidthRequest="36" HeightRequest="36"
+                                        HorizontalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="18"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="+" FontSize="24" FontAttributes="Bold"
+                                           TextColor="#60A5FA"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Label Text="Добави член" FontSize="10"
+                                       TextColor="#888888" HorizontalOptions="Center"/>
+                            </VerticalStackLayout>
                         </Border>
-                        <Button Text="Сподели с приятел" Command="{Binding AddSelectedFriendCommand}"
-                                BackgroundColor="{DynamicResource Primary}"
-                                TextColor="White"
-                                HeightRequest="46" CornerRadius="12"
-                                FontAttributes="Bold" FontSize="14"/>
-                        <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0" Margin="0,4"/>
-                        <Border BackgroundColor="White" StrokeThickness="1"
-                                Stroke="#E0E0E0">
+                        <!-- Първи член -->
+                        <Border Grid.Column="1" HeightRequest="100"
+                                BackgroundColor="White" StrokeThickness="0.5"
+                                Stroke="#E0E0E0"
+                                IsVisible="{Binding HasFirstMember}">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="10"/>
+                                <RoundRectangle CornerRadius="12"/>
                             </Border.StrokeShape>
-                            <Entry Placeholder="Имейл на приятел..."
-                                   Text="{Binding MemberEmail}"
-                                   Keyboard="Email" Margin="10,0"
-                                   HeightRequest="44"
-                                   TextColor="#111" PlaceholderColor="#BBBBBB"
-                                   BackgroundColor="Transparent"/>
+                            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="3"
+                                  HorizontalOptions="Center" VerticalOptions="Center">
+                                <Border Grid.Row="0" BackgroundColor="{Binding FirstMember.AvatarColor}"
+                                        WidthRequest="38" HeightRequest="38"
+                                        HorizontalOptions="Center">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="19"/>
+                                    </Border.StrokeShape>
+                                    <Label Text="{Binding FirstMember.Initials}"
+                                           FontSize="13" FontAttributes="Bold" TextColor="White"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                </Border>
+                                <Label Grid.Row="1" Text="{Binding FirstMember.FullName}"
+                                       FontSize="11" FontAttributes="Bold" TextColor="#111"
+                                       HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
+                                <Image Grid.Row="2" Source="crown.svg"
+                                       WidthRequest="14" HeightRequest="14"
+                                       HorizontalOptions="Center"
+                                       IsVisible="{Binding FirstMember.IsOwner}"/>
+                            </Grid>
                         </Border>
-                        <Button Text="Добави" Command="{Binding AddMemberCommand}"
-                                BackgroundColor="{DynamicResource Primary}"
-                                TextColor="White"
-                                HeightRequest="46" CornerRadius="12"
-                                FontAttributes="Bold" FontSize="14"/>
-                        <Label Text="{Binding StatusMessage}"
-                               TextColor="#E24B4A" FontSize="12"
-                               HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-                    <!-- Членове списък -->
-                    <CollectionView ItemsSource="{Binding Members}">
+                    </Grid>
+                    <!-- Останалите членове по 2 на ред -->
+                    <CollectionView x:Name="MembersList" ItemsSource="{Binding RestMembers}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="2"
+                                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                        </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <VerticalStackLayout>
-                                    <Grid ColumnDefinitions="Auto,*,Auto"
-                                          ColumnSpacing="12" Padding="0,10">
-                                        <Border WidthRequest="38" HeightRequest="38"
-                                                BackgroundColor="#EEEDFE"
-                                                StrokeThickness="0">
+                                <Border HeightRequest="100" BackgroundColor="White"
+                                        StrokeThickness="0.5" Stroke="#E0E0E0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="3"
+                                          HorizontalOptions="Center" VerticalOptions="Center">
+                                        <Border Grid.Row="0" BackgroundColor="{Binding AvatarColor}"
+                                                WidthRequest="38" HeightRequest="38"
+                                                HorizontalOptions="Center">
                                             <Border.StrokeShape>
                                                 <RoundRectangle CornerRadius="19"/>
                                             </Border.StrokeShape>
                                             <Label Text="{Binding Initials}"
-                                                   FontSize="12" FontAttributes="Bold"
-                                                   TextColor="#534AB7"
-                                                   HorizontalOptions="Center"
-                                                   VerticalOptions="Center"/>
+                                                   FontSize="13" FontAttributes="Bold" TextColor="White"
+                                                   HorizontalOptions="Center" VerticalOptions="Center"/>
                                         </Border>
-                                        <VerticalStackLayout Grid.Column="1"
-                                                             VerticalOptions="Center"
-                                                             Spacing="2">
-                                            <Label Text="{Binding FullName}"
-                                                   FontSize="13" FontAttributes="Bold"
-                                                   TextColor="#111"/>
-                                            <Label Text="{Binding RoleText}"
-                                                   FontSize="11" TextColor="#888"/>
-                                        </VerticalStackLayout>
-                                        <Label Grid.Column="2" Text="👑"
-                                               FontSize="16"
-                                               VerticalOptions="Center"
+                                        <Label Grid.Row="1" Text="{Binding FullName}"
+                                               FontSize="11" FontAttributes="Bold" TextColor="#111"
+                                               HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
+                                        <Image Grid.Row="2" Source="crown.svg"
+                                               WidthRequest="14" HeightRequest="14"
+                                               HorizontalOptions="Center"
                                                IsVisible="{Binding IsOwner}"/>
                                     </Grid>
-                                    <BoxView HeightRequest="0.5"
-                                             BackgroundColor="#F0F0F0"/>
-                                </VerticalStackLayout>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                         <CollectionView.EmptyView>
-                            <Label Text="Няма членове все още."
-                                   Padding="0,32"
-                                   HorizontalTextAlignment="Center"
-                                   TextColor="#888" FontSize="13"/>
+                            <BoxView HeightRequest="0"/>
                         </CollectionView.EmptyView>
                     </CollectionView>
-
                 </VerticalStackLayout>
             </ScrollView>
 
         </Grid>
+
+        <!-- ── Popup: Добави спомен ── -->
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              IsVisible="{Binding IsAddMemoryPopupVisible}"
+              BackgroundColor="#80000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseAddMemoryPopupCommand}"/>
+            </Grid.GestureRecognizers>
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    VerticalOptions="Center" HorizontalOptions="Fill" Margin="24,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPopupContentTapped"/>
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="16" Padding="20">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Добави спомен" FontSize="17" FontAttributes="Bold"
+                               TextColor="#111" VerticalOptions="Center"/>
+                        <Button Grid.Column="1" Text="✕"
+                                Command="{Binding CloseAddMemoryPopupCommand}"
+                                BackgroundColor="#F3F4F6" TextColor="#888888"
+                                FontSize="13" CornerRadius="15"
+                                WidthRequest="30" HeightRequest="30" Padding="0"/>
+                    </Grid>
+                    <Border BackgroundColor="#F3F4F6" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Editor Placeholder="Напиши спомен или писмо..."
+                                Text="{Binding LetterText}"
+                                MinimumHeightRequest="100"
+                                AutoSize="TextChanges"
+                                Margin="12,8"
+                                TextColor="#111" PlaceholderColor="#BBBBBB"
+                                BackgroundColor="Transparent"/>
+                    </Border>
+                    <Label Text="{Binding StatusMessage}"
+                           TextColor="#E24B4A" FontSize="12"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
+                    <Button Text="Добави" Command="{Binding AddLetterCommand}"
+                            BackgroundColor="#60A5FA" TextColor="White"
+                            HeightRequest="46" CornerRadius="12"
+                            FontAttributes="Bold" FontSize="14"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- ── Popup: Добави член ── -->
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              IsVisible="{Binding IsAddMemberPopupVisible}"
+              BackgroundColor="#80000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseAddMemberPopupCommand}"/>
+            </Grid.GestureRecognizers>
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    VerticalOptions="Center" HorizontalOptions="Fill" Margin="24,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPopupContentTapped"/>
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="16" Padding="20">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Добави член" FontSize="17" FontAttributes="Bold"
+                               TextColor="#111" VerticalOptions="Center"/>
+                        <Button Grid.Column="1" Text="✕"
+                                Command="{Binding CloseAddMemberPopupCommand}"
+                                BackgroundColor="#F3F4F6" TextColor="#888888"
+                                FontSize="13" CornerRadius="15"
+                                WidthRequest="30" HeightRequest="30" Padding="0"/>
+                    </Grid>
+                    <Border BackgroundColor="#F3F4F6" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Entry Placeholder="Търси приятел..."
+                               Text="{Binding MemberSearchText}"
+                               BackgroundColor="Transparent"
+                               TextColor="#111" PlaceholderColor="#AAAAAA"
+                               Margin="12,0" HeightRequest="44"/>
+                    </Border>
+                    <CollectionView x:Name="FriendPickerList"
+                                    ItemsSource="{Binding FilteredFriends}"
+                                    HeightRequest="220" SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <Label Text="Няма приятели за добавяне."
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#888" FontSize="13" Padding="0,16"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
+                                    <Border Grid.Column="0" BackgroundColor="{Binding AvatarColor}"
+                                            WidthRequest="38" HeightRequest="38">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="19"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Initials}" FontSize="13" FontAttributes="Bold"
+                                               TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold"
+                                               FontSize="13" TextColor="#111"/>
+                                        <Label Text="{Binding Email}" FontSize="11" TextColor="#888"/>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2" Text="Добави"
+                                            Command="{Binding BindingContext.AddFriendAsMemberCommand, Source={x:Reference FriendPickerList}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#60A5FA" TextColor="White"
+                                            FontSize="11" CornerRadius="10"
+                                            Padding="10,6" VerticalOptions="Center"/>
+                                    <BoxView Grid.ColumnSpan="3" HeightRequest="0.5"
+                                             BackgroundColor="#F5F5F5" VerticalOptions="End"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Label Text="{Binding StatusMessage}"
+                           TextColor="#E24B4A" FontSize="12"
+                           HorizontalOptions="Center"
+                           IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+        <!-- ── Popup: Отвори писмо ── -->
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              IsVisible="{Binding IsLetterPopupVisible}"
+              BackgroundColor="#80000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseLetterPopupCommand}"/>
+            </Grid.GestureRecognizers>
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    VerticalOptions="Center" HorizontalOptions="Fill" Margin="24,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPopupContentTapped"/>
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="12" Padding="20">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding OpenedLetterAuthor, StringFormat='Писмо от {0}'}"
+                                   FontSize="17" FontAttributes="Bold" TextColor="#111"/>
+                            <Label Text="{Binding OpenedLetterDate}"
+                                   FontSize="12" TextColor="#888"/>
+                        </VerticalStackLayout>
+                        <Button Grid.Column="1" Text="✕"
+                                Command="{Binding CloseLetterPopupCommand}"
+                                BackgroundColor="#F3F4F6" TextColor="#888888"
+                                FontSize="13" CornerRadius="15"
+                                WidthRequest="30" HeightRequest="30" Padding="0"/>
+                    </Grid>
+                    <BoxView HeightRequest="0.5" BackgroundColor="#E0E0E0"/>
+                    <ScrollView MaximumHeightRequest="300">
+                        <Label Text="{Binding OpenedLetterText}"
+                               FontSize="14" TextColor="#333"
+                               LineBreakMode="WordWrap"/>
+                    </ScrollView>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
     </Grid>
 </ContentPage>

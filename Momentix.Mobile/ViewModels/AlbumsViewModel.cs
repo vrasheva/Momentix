@@ -33,6 +33,8 @@ namespace Momentix.Mobile.ViewModels
         public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
         public IRelayCommand GoToCreateAlbumCommand => new AsyncRelayCommand(GoToCreateAlbum);
         public IRelayCommand<AlbumResponseDto> OpenAlbumCommand => new AsyncRelayCommand<AlbumResponseDto>(OpenAlbum);
+        public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
+            await Shell.Current.GoToAsync("ProfilePage"));
 
         public AlbumsViewModel(ApiService apiService)
         {

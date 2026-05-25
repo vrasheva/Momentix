@@ -11,6 +11,9 @@ public partial class TimeCapsulesViewModel : BaseViewModel
     private IDispatcherTimer? _timer;
 
     public ObservableCollection<TimeCapsuleItemViewModel> Capsules { get; } = new();
+    public ObservableCollection<TimeCapsuleItemViewModel> RestCapsules { get; } = new();
+    public bool HasFirstCapsule => Capsules.Count > 0;
+    public TimeCapsuleItemViewModel? FirstCapsule => Capsules.Count > 0 ? Capsules[0] : null;
 
     private string _errorMessage = string.Empty;
     public string ErrorMessage
@@ -30,6 +33,8 @@ public partial class TimeCapsulesViewModel : BaseViewModel
     public IRelayCommand GoToCreateCapsuleCommand => new AsyncRelayCommand(GoToCreateCapsule);
     public IRelayCommand<TimeCapsuleItemViewModel> OpenCapsuleCommand => new AsyncRelayCommand<TimeCapsuleItemViewModel>(OpenCapsule);
     public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
+    public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
+        await Shell.Current.GoToAsync("ProfilePage"));
 
     public TimeCapsulesViewModel(ApiService apiService)
     {
@@ -69,18 +74,22 @@ public partial class TimeCapsulesViewModel : BaseViewModel
         {
             var result = await _apiService.GetAsync<List<TimeCapsuleResponseDto>>("TimeCapsule");
             Capsules.Clear();
+            RestCapsules.Clear();
 
             if (result == null)
             {
                 ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
                     ? "Capsules could not be loaded. Login again and make sure the API is running."
                     : _apiService.LastErrorMessage;
+                OnPropertyChanged(nameof(HasFirstCapsule));
+                OnPropertyChanged(nameof(FirstCapsule));
                 return;
             }
 
             if (result.Count == 0)
             {
-                ErrorMessage = "No capsules yet. Create one with the New Capsule button.";
+                OnPropertyChanged(nameof(HasFirstCapsule));
+                OnPropertyChanged(nameof(FirstCapsule));
                 return;
             }
 
@@ -89,6 +98,12 @@ public partial class TimeCapsulesViewModel : BaseViewModel
                 .Select(g => g.First())
                 .OrderBy(c => c.UnlockAt))
                 Capsules.Add(new TimeCapsuleItemViewModel(capsule));
+
+            foreach (var capsule in Capsules.Skip(1))
+                RestCapsules.Add(capsule);
+
+            OnPropertyChanged(nameof(HasFirstCapsule));
+            OnPropertyChanged(nameof(FirstCapsule));
         }
         catch (Exception ex)
         {
@@ -134,7 +149,6 @@ public partial class TimeCapsulesViewModel : BaseViewModel
         Preferences.Remove("user_name");
         Preferences.Remove("user_id");
         _apiService.ClearToken();
-
         await Shell.Current.GoToAsync("//LoginPage");
     }
 }
@@ -150,21 +164,33 @@ public class TimeCapsuleItemViewModel : BaseViewModel
     public int MemberCount => _capsule.MemberCount;
     public int MediaCount => _capsule.MediaCount;
     public bool IsUnlocked => _capsule.IsUnlocked || DateTime.UtcNow >= _capsule.UnlockAt;
-    public string StatusText => IsUnlocked ? "Unlocked" : "Locked";
-    public string UnlockDateText => $"Unlocks: {_capsule.UnlockAt.ToLocalTime():dd.MM.yyyy HH:mm}";
+    public bool IsLocked => !IsUnlocked;
+    public string StatusText => IsUnlocked ? "Отключена" : "Заключена";
+    public string UnlockDateText => $"Отключва се: {_capsule.UnlockAt.ToLocalTime():dd.MM.yyyy HH:mm}";
+    public string UnlockDateShort => _capsule.UnlockAt.ToLocalTime().ToString("dd.MM.yyyy");
+
+    public string CardBackground
+    {
+        get
+        {
+            if (IsUnlocked) return "#1B4D3E";
+            var days = (_capsule.UnlockAt - DateTime.UtcNow).TotalDays;
+            if (days > 60) return "#2D2D3A";
+            if (days > 14) return "#1A2744";
+            return "#1B3A2A";
+        }
+    }
 
     public string CountdownText
     {
         get
         {
-            if (IsUnlocked)
-                return "Ready to open";
-
+            if (IsUnlocked) return "Ready to open";
             var remaining = _capsule.UnlockAt - DateTime.UtcNow;
-            if (remaining < TimeSpan.Zero)
-                remaining = TimeSpan.Zero;
-
-            return $"{remaining.Days}d {remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+            if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
+            if (remaining.TotalDays >= 1)
+                return $"{(int)remaining.TotalDays}д {remaining.Hours}ч";
+            return $"{remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
         }
     }
 
@@ -176,8 +202,9 @@ public class TimeCapsuleItemViewModel : BaseViewModel
     public void RefreshCountdown()
     {
         OnPropertyChanged(nameof(IsUnlocked));
+        OnPropertyChanged(nameof(IsLocked));
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(CountdownText));
+        OnPropertyChanged(nameof(CardBackground));
     }
 }
-

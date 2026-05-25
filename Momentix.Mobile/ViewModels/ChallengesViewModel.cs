@@ -9,7 +9,7 @@ public partial class ChallengesViewModel : BaseViewModel
 {
     private readonly ApiService _apiService;
 
-    public ObservableCollection<ChallengeSubmissionResponseDto> Submissions { get; } = new();
+    public ObservableCollection<ChallengeSubmissionItemViewModel> Submissions { get; } = new();
 
     private ChallengeResponseDto? _activeChallenge;
     public ChallengeResponseDto? ActiveChallenge
@@ -24,11 +24,11 @@ public partial class ChallengesViewModel : BaseViewModel
         }
     }
 
-    public string ChallengeTitle => ActiveChallenge?.Description ?? "No active challenge";
+    public string ChallengeTitle => ActiveChallenge?.Description ?? "Няма активно предизвикателство";
 
     public string RevealText => ActiveChallenge == null
         ? string.Empty
-        : $"Reveal time: {ActiveChallenge.RevealAt.ToLocalTime():HH:mm}";
+        : $"Разкриване: {ActiveChallenge.RevealAt.ToLocalTime():HH:mm}";
 
     private string _submissionText = string.Empty;
     public string SubmissionText
@@ -51,7 +51,7 @@ public partial class ChallengesViewModel : BaseViewModel
     }
 
     public string SelectedPhotoName => SelectedPhoto == null
-        ? "No photo selected"
+        ? "Няма избрана снимка"
         : SelectedPhoto.FileName;
 
     public bool HasSelectedPhoto => SelectedPhoto != null;
@@ -73,7 +73,10 @@ public partial class ChallengesViewModel : BaseViewModel
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand SubmitCommand => new AsyncRelayCommand(Submit);
-    public IRelayCommand<ChallengeSubmissionResponseDto> VoteCommand => new AsyncRelayCommand<ChallengeSubmissionResponseDto>(Vote);
+    public IRelayCommand<ChallengeSubmissionItemViewModel> VoteCommand =>
+        new AsyncRelayCommand<ChallengeSubmissionItemViewModel>(Vote);
+    public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
+        await Shell.Current.GoToAsync("ProfilePage"));
 
     public ChallengesViewModel(ApiService apiService)
     {
@@ -86,7 +89,7 @@ public partial class ChallengesViewModel : BaseViewModel
         {
             SelectedPhoto = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Select challenge photo"
+                Title = "Избери снимка"
             });
 
             if (SelectedPhoto != null)
@@ -94,11 +97,11 @@ public partial class ChallengesViewModel : BaseViewModel
         }
         catch (FeatureNotSupportedException)
         {
-            StatusMessage = "Photo picker is not supported on this device.";
+            StatusMessage = "Камерата не се поддържа на това устройство.";
         }
         catch (PermissionException)
         {
-            StatusMessage = "Photo permission was denied.";
+            StatusMessage = "Нямаш разрешение за достъп до снимките.";
         }
         catch (Exception ex)
         {
@@ -108,8 +111,7 @@ public partial class ChallengesViewModel : BaseViewModel
 
     private async Task Load()
     {
-        if (IsLoading)
-            return;
+        if (IsLoading) return;
 
         IsLoading = true;
         StatusMessage = string.Empty;
@@ -132,9 +134,7 @@ public partial class ChallengesViewModel : BaseViewModel
     private async Task LoadSubmissions()
     {
         Submissions.Clear();
-
-        if (ActiveChallenge == null)
-            return;
+        if (ActiveChallenge == null) return;
 
         var result = await _apiService.GetAsync<List<ChallengeSubmissionResponseDto>>(
             $"Challenges/{ActiveChallenge.Id}/submissions");
@@ -142,7 +142,7 @@ public partial class ChallengesViewModel : BaseViewModel
         if (result == null)
         {
             StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                ? "Submissions could not be loaded."
+                ? "Публикациите не можаха да се заредят."
                 : _apiService.LastErrorMessage;
             return;
         }
@@ -151,25 +151,17 @@ public partial class ChallengesViewModel : BaseViewModel
             .GroupBy(s => s.Id)
             .Select(g => g.First())
             .OrderByDescending(s => s.SubmittedAt))
-            Submissions.Add(NormalizeSubmission(submission));
+        {
+            submission.MediaUrl = ApiService.ToDeviceUrl(submission.MediaUrl);
+            Submissions.Add(new ChallengeSubmissionItemViewModel(submission));
+        }
     }
 
     private async Task Submit()
     {
-        if (IsLoading)
-            return;
-
-        if (ActiveChallenge == null)
-        {
-            StatusMessage = "No active challenge.";
-            return;
-        }
-
-        if (SelectedPhoto == null)
-        {
-            StatusMessage = "Pick a photo first.";
-            return;
-        }
+        if (IsLoading) return;
+        if (ActiveChallenge == null) { StatusMessage = "Няма активно предизвикателство."; return; }
+        if (SelectedPhoto == null) { StatusMessage = "Избери снимка първо."; return; }
 
         IsLoading = true;
         StatusMessage = string.Empty;
@@ -183,53 +175,93 @@ public partial class ChallengesViewModel : BaseViewModel
 
             var result = await _apiService.PostFileAsync<ChallengeSubmissionResponseDto>(
                 $"Challenges/{ActiveChallenge.Id}/submissions/photo",
-                stream,
-                SelectedPhoto.FileName,
-                contentType);
+                stream, SelectedPhoto.FileName, contentType);
 
             if (result == null)
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Submission was not saved."
+                    ? "Публикацията не беше запазена."
                     : _apiService.LastErrorMessage;
                 return;
             }
 
+            result.MediaUrl = ApiService.ToDeviceUrl(result.MediaUrl);
+
             if (!Submissions.Any(s => s.Id == result.Id))
-                Submissions.Insert(0, NormalizeSubmission(result));
+                Submissions.Insert(0, new ChallengeSubmissionItemViewModel(result));
 
             SubmissionText = string.Empty;
             SelectedPhoto = null;
-            StatusMessage = "Submission saved. Streak +1.";
+
+            StatusMessage = result.AiIsSatisfied == true
+                ? $"✓ Прието! {result.AiFeedback}"
+                : result.AiIsSatisfied == false
+                    ? $"✗ Не прието: {result.AiFeedback}"
+                    : "Публикувано. Streak +1.";
         }
-        catch (Exception ex)
-        {
-            StatusMessage = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { StatusMessage = ex.Message; }
+        finally { IsLoading = false; }
     }
 
-    private static ChallengeSubmissionResponseDto NormalizeSubmission(ChallengeSubmissionResponseDto submission)
+    private async Task Vote(ChallengeSubmissionItemViewModel? submission)
     {
-        submission.MediaUrl = ApiService.ToDeviceUrl(submission.MediaUrl);
-        return submission;
-    }
-    private async Task Vote(ChallengeSubmissionResponseDto? submission)
-    {
-        if (submission == null)
-            return;
+        if (submission == null) return;
 
         var success = await _apiService.PostAsync(
             $"Challenges/submissions/{submission.Id}/vote",
             new CreateChallengeVoteDto { SelectedOption = ChallengeTitle });
 
-        StatusMessage = success ? "Vote saved." : "Vote was not saved.";
-
-        if (success)
-            await LoadSubmissions();
+        StatusMessage = success ? "Гласът е запазен." : "Гласът не беше запазен.";
+        if (success) await LoadSubmissions();
     }
 }
 
+public class ChallengeSubmissionItemViewModel
+{
+    private readonly ChallengeSubmissionResponseDto _dto;
+
+    public int Id => _dto.Id;
+    public string UserName => _dto.UserName;
+    public string MediaUrl => _dto.MediaUrl;
+    public DateTime SubmittedAt => _dto.SubmittedAt;
+    public int VoteCount => _dto.VoteCount;
+
+    public string UserInitials
+    {
+        get
+        {
+            var parts = UserName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 0) return "?";
+            if (parts.Length == 1) return parts[0][..Math.Min(2, parts[0].Length)].ToUpper();
+            return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        }
+    }
+
+    public string SubmittedAtText => SubmittedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm");
+
+    public bool HasAiFeedback => !string.IsNullOrWhiteSpace(_dto.AiFeedback);
+    public string AiFeedback => _dto.AiFeedback ?? string.Empty;
+
+    public string AiBadgeText
+    {
+        get
+        {
+            if (_dto.AiIsSatisfied == null) return "AI ?";
+            return _dto.AiIsSatisfied == true ? "✓ AI" : "✗ AI";
+        }
+    }
+
+    public string AiBadgeColor
+    {
+        get
+        {
+            if (_dto.AiIsSatisfied == null) return "#888888";
+            return _dto.AiIsSatisfied == true ? "#16A34A" : "#DC2626";
+        }
+    }
+
+    public ChallengeSubmissionItemViewModel(ChallengeSubmissionResponseDto dto)
+    {
+        _dto = dto;
+    }
+}

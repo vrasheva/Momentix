@@ -41,6 +41,7 @@ public class MediaController : ControllerBase
             {
                 Id = m.Id,
                 Url = m.Url,
+                LetterText = m.Type == MediaType.Letter ? m.Url : null,  // ← добави
                 Type = m.Type,
                 UploadedAt = m.UploadedAt,
                 UploadedByName = m.UploadedBy.FullName,
@@ -130,6 +131,7 @@ public class MediaController : ControllerBase
         {
             Id = media.Id,
             Url = media.Url,
+            LetterText = media.Url,
             Type = media.Type,
             UploadedAt = media.UploadedAt,
             UploadedByName = userName,

@@ -244,6 +244,49 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
         }
     }
 
+    public class FriendInviteViewModel : BaseViewModel
+    {
+        private readonly FriendResponseDto _friend;
+
+        public string UserId => _friend.UserId;
+        public string FullName => _friend.FullName;
+        public string Email => _friend.Email;
+
+        public string Initials
+        {
+            get
+            {
+                var parts = FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 0) return "?";
+                if (parts.Length == 1) return parts[0][..Math.Min(2, parts[0].Length)].ToUpper();
+                return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+            }
+        }
+
+        public string AvatarColor
+        {
+            get
+            {
+                string[] colors = ["#6750A4", "#7B61C4", "#4A90D9", "#43A047",
+                               "#E67E22", "#E91E63", "#00ACC1", "#8D6E63"];
+                var index = Math.Abs(UserId.GetHashCode()) % colors.Length;
+                return colors[index];
+            }
+        }
+
+        private bool _isInvited;
+        public bool IsInvited
+        {
+            get => _isInvited;
+            set { _isInvited = value; OnPropertyChanged(); }
+        }
+
+        public FriendInviteViewModel(FriendResponseDto friend)
+        {
+            _friend = friend;
+        }
+    }
+
     private async Task Cancel()
     {
         await Shell.Current.GoToAsync("..");

@@ -23,7 +23,7 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="10"/>
                 </Border.StrokeShape>
-                <Entry Placeholder="Твоето ime" Text="{Binding FullName}"
+                <Entry Placeholder="Твоето име" Text="{Binding FullName}"
                        HeightRequest="46" Margin="8,0"
                        TextColor="#111111" PlaceholderColor="#BBBBBB"
                        BackgroundColor="Transparent"/>

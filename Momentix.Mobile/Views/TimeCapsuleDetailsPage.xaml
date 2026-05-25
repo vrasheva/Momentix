@@ -3,201 +3,251 @@
     x:Class="Momentix.Mobile.Views.TimeCapsuleDetailsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Capsule"
-    BackgroundColor="{DynamicResource PageBackground}">
+    Title=""
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False"
+    Shell.TabBarIsVisible="False">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="16">
-            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                <Button
-                    Text="Back"
-                    Command="{Binding BackCommand}"
-                    BackgroundColor="Transparent"
-                    TextColor="{DynamicResource Primary}" />
-                <Label
-                    Grid.Column="1"
-                    Text="{Binding CapsuleTitle}"
-                    FontSize="26"
-                    FontAttributes="Bold"
-                    VerticalOptions="Center"
-                    TextColor="{DynamicResource TextPrimary}" />
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Padding="16,14" BackgroundColor="White">
+            <Grid WidthRequest="36" HeightRequest="36">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                </Grid.GestureRecognizers>
+                <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5" Fill="Transparent"
+                         WidthRequest="36" HeightRequest="36"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+                <Path Data="M 20,18 L 15,12 L 20,6"
+                      Stroke="#111" StrokeThickness="2"
+                      StrokeLineCap="Round" StrokeLineJoin="Round"
+                      WidthRequest="24" HeightRequest="24"
+                      HorizontalOptions="Start" VerticalOptions="Center">
+                    <Path.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                    </Path.GestureRecognizers>
+                </Path>
             </Grid>
+            <Label Grid.Column="1" Text="{Binding CapsuleTitle}"
+                   FontSize="15" FontAttributes="Bold" TextColor="#111"
+                   HorizontalOptions="Center" VerticalOptions="Center"/>
+            <BoxView Grid.Column="2" WidthRequest="36" HeightRequest="36" Color="Transparent"/>
+        </Grid>
 
-            <Border
-                Padding="16"
-                BackgroundColor="{DynamicResource CardBackground}"
-                StrokeThickness="1"
-                Stroke="{DynamicResource BorderColor}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <VerticalStackLayout Spacing="8">
-                    <Label
-                        Text="{Binding StatusText}"
-                        FontSize="14"
-                        TextColor="{DynamicResource Primary}" />
-                    <Label
-                        Text="{Binding Description}"
-                        FontSize="15"
-                        TextColor="{DynamicResource TextSecondary}" />
-                    <Label
-                        Text="{Binding CountdownText}"
-                        FontSize="28"
-                        FontAttributes="Bold"
-                        TextColor="#386A20" />
-                    <Label
-                        Text="{Binding UnlockDateText}"
-                        FontSize="13"
-                        TextColor="{DynamicResource TextSecondary}" />
-                </VerticalStackLayout>
-            </Border>
+        <BoxView Grid.Row="0" HeightRequest="0.5" BackgroundColor="#F0F0F0" VerticalOptions="End"/>
 
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout
-                Spacing="10"
-                IsVisible="{Binding IsOwner}">
-                <Label
-                    Text="Share capsule"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    TextColor="{DynamicResource TextPrimary}" />
-                <Border
-                    Padding="10,0"
-                    BackgroundColor="{DynamicResource CardBackground}"
-                    StrokeThickness="1"
-                    Stroke="{DynamicResource BorderColor}">
+                <!-- Countdown карта -->
+                <Border Margin="16,16,16,0" Padding="20"
+                        BackgroundColor="{Binding CountdownCardColor}"
+                        StrokeThickness="0">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
+                        <RoundRectangle CornerRadius="20"/>
                     </Border.StrokeShape>
-                    <Picker
-                        Title="Choose friend"
-                        ItemsSource="{Binding Friends}"
-                        SelectedItem="{Binding SelectedFriend}"
-                        ItemDisplayBinding="{Binding DisplayName}"
-                        HeightRequest="46"
-                        TextColor="{DynamicResource TextPrimary}"
-                        TitleColor="{DynamicResource TextSecondary}"
-                        BackgroundColor="Transparent" />
-                </Border>
-                <Button
-                    Text="Share with friend"
-                    Command="{Binding AddSelectedFriendCommand}"
-                    BackgroundColor="{DynamicResource Primary}"
-                    TextColor="White"
-                    HeightRequest="46"
-                    CornerRadius="12"
-                    FontAttributes="Bold" />
-            </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="8">
+                        <!-- Статус badge -->
+                        <Border BackgroundColor="#FFFFFF22" Padding="10,4"
+                                HorizontalOptions="Start">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="20"/>
+                            </Border.StrokeShape>
+                            <Label Text="{Binding StatusText}" FontSize="12"
+                                   FontAttributes="Bold" TextColor="White"/>
+                        </Border>
 
-            <VerticalStackLayout Spacing="8">
-                <Label
-                    Text="People"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    TextColor="{DynamicResource TextPrimary}" />
-                <VerticalStackLayout
-                    Spacing="0"
-                    BindableLayout.ItemsSource="{Binding Members}">
-                    <BindableLayout.ItemTemplate>
+                        <!-- Описание -->
+                        <Label Text="{Binding Description}" FontSize="14"
+                               TextColor="#FFFFFFCC"
+                               IsVisible="{Binding HasDescription}"/>
+
+                        <!-- Countdown или Ready -->
+                        <Label Text="{Binding CountdownText}"
+                               FontSize="36" FontAttributes="Bold"
+                               TextColor="White" IsVisible="{Binding IsLocked}"/>
+                        <Label Text="Ready to open" FontSize="28" FontAttributes="Bold"
+                               TextColor="White" IsVisible="{Binding IsUnlocked}"/>
+
+                        <!-- Дата -->
+                        <Label Text="{Binding UnlockDateText}" FontSize="12"
+                               TextColor="#FFFFFFAA"/>
+
+                        <!-- Брой медия -->
+                        <Label Text="{Binding MediaCount, StringFormat='{0} снимки'}"
+                               FontSize="12" TextColor="#FFFFFFAA"
+                               IsVisible="{Binding IsUnlocked}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,16"/>
+
+                <!-- Членове -->
+                <Grid ColumnDefinitions="*,Auto" Padding="16,0,16,12">
+                    <Label Text="Членове" FontSize="13" FontAttributes="Bold"
+                           TextColor="#111" VerticalOptions="Center"/>
+                    <Border Grid.Column="1" BackgroundColor="#E8F1FD"
+                            Padding="12,6" StrokeThickness="0"
+                            IsVisible="{Binding IsOwner}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenAddMemberPopupCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="+ Добави" FontSize="12" FontAttributes="Bold"
+                               TextColor="#60A5FA"/>
+                    </Border>
+                </Grid>
+
+                <CollectionView ItemsSource="{Binding Members}" Margin="16,0,16,0">
+                    <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
-                                <Border
-                                    WidthRequest="36"
-                                    HeightRequest="36"
-                                    BackgroundColor="{DynamicResource PrimaryLight}"
-                                    StrokeThickness="0">
+                                <Border Grid.Column="0" BackgroundColor="{Binding AvatarColor}"
+                                        WidthRequest="40" HeightRequest="40">
                                     <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="18" />
+                                        <RoundRectangle CornerRadius="20"/>
                                     </Border.StrokeShape>
-                                    <Label
-                                        Text="{Binding Initials}"
-                                        FontSize="12"
-                                        FontAttributes="Bold"
-                                        TextColor="{DynamicResource PrimaryText}"
-                                        HorizontalOptions="Center"
-                                        VerticalOptions="Center" />
+                                    <Label Text="{Binding Initials}" FontSize="14" FontAttributes="Bold"
+                                           TextColor="White" HorizontalOptions="Center"
+                                           VerticalOptions="Center"/>
                                 </Border>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                    <Label
-                                        Text="{Binding FullName}"
-                                        FontSize="14"
-                                        FontAttributes="Bold"
-                                        TextColor="{DynamicResource TextPrimary}" />
-                                    <Label
-                                        Text="{Binding RoleText}"
-                                        FontSize="12"
-                                        TextColor="{DynamicResource TextSecondary}" />
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                    <Label Text="{Binding FullName}" FontSize="13"
+                                           FontAttributes="Bold" TextColor="#111"/>
+                                    <Label Text="{Binding RoleText}" FontSize="11" TextColor="#888"/>
                                 </VerticalStackLayout>
-                                <Label
-                                    Grid.Column="2"
-                                    Text="Owner"
-                                    FontSize="12"
-                                    TextColor="{DynamicResource Primary}"
-                                    VerticalOptions="Center"
-                                    IsVisible="{Binding IsOwner}" />
+                                <Image Grid.Column="2" Source="crown.svg"
+                                       WidthRequest="16" HeightRequest="16"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding IsOwner}"/>
+                                <BoxView Grid.ColumnSpan="3" HeightRequest="0.5"
+                                         BackgroundColor="#F5F5F5" VerticalOptions="End"/>
                             </Grid>
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!-- Покани приятел popup trigger (само owner) -->
+                <VerticalStackLayout IsVisible="{Binding IsOwner}" Margin="16,8,16,0">
+                    <Label Text="{Binding StatusMessage}" TextColor="#E24B4A"
+                           FontSize="12" HorizontalOptions="Center"
+                           IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
                 </VerticalStackLayout>
-            </VerticalStackLayout>            <Label
-                Text="{Binding StatusMessage}"
-                TextColor="{DynamicResource Primary}" />
 
-            <ActivityIndicator
-                IsRunning="{Binding IsLoading}"
-                IsVisible="{Binding IsLoading}"
-                Color="{DynamicResource Primary}" />
+                <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,16"/>
 
-            <Label
-                Text="Photos"
-                FontSize="20"
-                FontAttributes="Bold"
-                IsVisible="{Binding IsUnlocked}"
-                TextColor="{DynamicResource TextPrimary}" />
+                <!-- Снимки (само ако е отключена) -->
+                <VerticalStackLayout IsVisible="{Binding IsUnlocked}" Margin="16,0,16,24" Spacing="12">
+                    <Label Text="Снимки" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
 
-            <Label
-                Text="Photos will appear here when the capsule unlocks."
-                IsVisible="{Binding IsLocked}"
-                TextColor="{DynamicResource TextSecondary}" />
+                    <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                       IsVisible="{Binding IsLoading}"
+                                       Color="{DynamicResource Primary}"/>
 
-            <CollectionView
-                ItemsSource="{Binding MediaItems}"
-                IsVisible="{Binding IsUnlocked}">
-                <CollectionView.EmptyView>
-                    <Label
-                        Text="No photos in this capsule."
-                        Padding="0,24"
-                        HorizontalTextAlignment="Center"
-                        TextColor="{DynamicResource TextSecondary}" />
-                </CollectionView.EmptyView>
+                    <CollectionView ItemsSource="{Binding MediaItems}">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="2"
+                                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.EmptyView>
+                            <Label Text="Няма снимки в тази капсула." Padding="0,24"
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#888" FontSize="13"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border HeightRequest="160" StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="12"/>
+                                    </Border.StrokeShape>
+                                    <Image Source="{Binding Url}" Aspect="AspectFill"/>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border
-                            Padding="12"
-                            Margin="0,6"
-                            BackgroundColor="{DynamicResource CardBackground}"
-                            StrokeThickness="1"
-                            Stroke="{DynamicResource BorderColor}">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="16" />
-                            </Border.StrokeShape>
-                            <VerticalStackLayout Spacing="8">
-                                <Image
-                                    Source="{Binding Url}"
-                                    IsVisible="{Binding IsImage}"
-                                    Aspect="AspectFill"
-                                    HeightRequest="240"
-                                    BackgroundColor="{DynamicResource PageBackground}" />
-                                <Label
-                                    Text="{Binding UploadedByName, StringFormat='By: {0}'}"
-                                    FontSize="13"
-                                    TextColor="{DynamicResource TextSecondary}" />
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </VerticalStackLayout>
-    </ScrollView>
+                <!-- Заключена съобщение -->
+                <VerticalStackLayout IsVisible="{Binding IsLocked}"
+                                     Margin="16,0,16,32" HorizontalOptions="Center" Spacing="8">
+                    <Image Source="hourglass.svg" WidthRequest="48" HeightRequest="48"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Снимките ще се появят след отключването."
+                           FontSize="13" TextColor="#888888"
+                           HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Popup: Добави член -->
+        <Grid Grid.Row="0" Grid.RowSpan="2"
+              IsVisible="{Binding IsAddMemberPopupVisible}"
+              BackgroundColor="#80000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseAddMemberPopupCommand}"/>
+            </Grid.GestureRecognizers>
+            <Border BackgroundColor="White" StrokeThickness="0"
+                    VerticalOptions="Center" HorizontalOptions="Fill" Margin="24,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="20"/>
+                </Border.StrokeShape>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnPopupContentTapped"/>
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="16" Padding="20">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Text="Добави член" FontSize="17" FontAttributes="Bold"
+                               TextColor="#111" VerticalOptions="Center"/>
+                        <Button Grid.Column="1" Text="✕"
+                                Command="{Binding CloseAddMemberPopupCommand}"
+                                BackgroundColor="#F3F4F6" TextColor="#888888"
+                                FontSize="13" CornerRadius="15"
+                                WidthRequest="30" HeightRequest="30" Padding="0"/>
+                    </Grid>
+                    <CollectionView x:Name="FriendPickerList"
+                                    ItemsSource="{Binding Friends}"
+                                    HeightRequest="250" SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <Label Text="Няма приятели за добавяне."
+                                   HorizontalTextAlignment="Center"
+                                   TextColor="#888" FontSize="13" Padding="0,16"/>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
+                                    <Border Grid.Column="0" BackgroundColor="{Binding AvatarColor}"
+                                            WidthRequest="38" HeightRequest="38">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="19"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Initials}" FontSize="13" FontAttributes="Bold"
+                                               TextColor="White" HorizontalOptions="Center"
+                                               VerticalOptions="Center"/>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding FullName}" FontAttributes="Bold"
+                                               FontSize="13" TextColor="#111"/>
+                                        <Label Text="{Binding Email}" FontSize="11" TextColor="#888"/>
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="2" Text="Добави"
+                                            Command="{Binding BindingContext.AddSelectedFriendCommand, Source={x:Reference FriendPickerList}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#60A5FA" TextColor="White"
+                                            FontSize="11" CornerRadius="10"
+                                            Padding="10,6" VerticalOptions="Center"/>
+                                    <BoxView Grid.ColumnSpan="3" HeightRequest="0.5"
+                                             BackgroundColor="#F5F5F5" VerticalOptions="End"/>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
 </ContentPage>

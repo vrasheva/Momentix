@@ -24,4 +24,8 @@ public partial class TimeCapsuleDetailsPage : ContentPage
         base.OnDisappearing();
         _viewModel.PageDisappeared();
     }
+
+    private void OnPopupContentTapped(object sender, TappedEventArgs e)
+    {
+    }
 }

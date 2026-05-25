@@ -43,6 +43,8 @@ namespace Momentix.Mobile
             builder.Services.AddTransient<ChallengesPage>();
             builder.Services.AddTransient<NotificationsViewModel>();
             builder.Services.AddTransient<NotificationsPage>();
+            builder.Services.AddTransient<ProfileViewModel>();
+            builder.Services.AddTransient<ProfilePage>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
