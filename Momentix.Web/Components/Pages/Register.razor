@@ -1,4 +1,4 @@
-﻿@page "/register"
+@page "/register"
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
@@ -17,6 +17,16 @@
                 <label>Email</label>
                 <InputText class="input" @bind-Value="model.Email" type="email" />
             </div>
+
+            <button class="secondary-button full-width" type="button" @onclick="SendRegistrationEmail" disabled="@(isBusy || isSendingEmail)">
+                @(isSendingEmail ? "Sending email..." : "Send test email")
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(emailStatus))
+            {
+                <div class="status-message">@emailStatus</div>
+            }
+
             <div class="field">
                 <label>Password</label>
                 <InputText class="input" @bind-Value="model.Password" type="password" />
@@ -40,12 +50,34 @@
 @code {
     private readonly RegisterDto model = new() { ThemeColor = "#167a72" };
     private bool isBusy;
+    private bool isSendingEmail;
     private string? error;
+    private string? emailStatus;
 
     protected override void OnInitialized()
     {
         if (Auth.IsLoggedIn)
             Nav.NavigateTo("/albums");
+    }
+
+    private async Task SendRegistrationEmail()
+    {
+        isSendingEmail = true;
+        error = null;
+        emailStatus = null;
+
+        var ok = await Api.PostAsync("Auth/send-registration-email", new SendRegistrationEmailDto
+        {
+            Email = model.Email,
+            FullName = model.FullName
+        });
+
+        if (ok)
+            emailStatus = "Test email sent.";
+        else
+            error = Api.LastError ?? "Email could not be sent.";
+
+        isSendingEmail = false;
     }
 
     private async Task DoRegister()

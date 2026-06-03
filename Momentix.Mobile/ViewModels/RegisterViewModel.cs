@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using Momentix.Mobile.Services;
 using Momentix.Data.DTOs;
 using Microsoft.Maui.Storage;
@@ -38,12 +38,33 @@ namespace Momentix.Mobile.ViewModels
             set { _errorMessage = value; OnPropertyChanged(); }
         }
 
+        private string _emailStatusMessage = string.Empty;
+        public string EmailStatusMessage
+        {
+            get => _emailStatusMessage;
+            set { _emailStatusMessage = value; OnPropertyChanged(); }
+        }
+
         private bool _isLoading = false;
         public bool IsLoading
         {
             get => _isLoading;
             set { _isLoading = value; OnPropertyChanged(); }
         }
+
+        private bool _isSendingEmail = false;
+        public bool IsSendingEmail
+        {
+            get => _isSendingEmail;
+            set
+            {
+                _isSendingEmail = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SendEmailButtonText));
+            }
+        }
+
+        public string SendEmailButtonText => IsSendingEmail ? "Sending email..." : "Send test email";
 
         private string _selectedTheme = "Purple";
         public string SelectedTheme
@@ -58,6 +79,7 @@ namespace Momentix.Mobile.ViewModels
         }
 
         public IRelayCommand RegisterCommand => new AsyncRelayCommand(Register);
+        public IRelayCommand SendRegistrationEmailCommand => new AsyncRelayCommand(SendRegistrationEmail);
         public IRelayCommand GoToLoginCommand => new AsyncRelayCommand(GoToLogin);
         public IRelayCommand<string> SelectThemeCommand => new RelayCommand<string>(SelectTheme);
 
@@ -67,10 +89,52 @@ namespace Momentix.Mobile.ViewModels
 
             var xpRequired = ThemeService.ThemeXpRequired;
             if (!xpRequired.ContainsKey(theme)) return;
-            if (xpRequired[theme] > 0) return; // само безплатни теми при регистрация
+            if (xpRequired[theme] > 0) return;
 
             SelectedTheme = theme;
             ThemeService.Instance.ApplyTheme(theme, false);
+        }
+
+        private async Task SendRegistrationEmail()
+        {
+            if (IsSendingEmail) return;
+
+            if (string.IsNullOrWhiteSpace(UserEmail))
+            {
+                ErrorMessage = "Enter an email first.";
+                EmailStatusMessage = string.Empty;
+                return;
+            }
+
+            IsSendingEmail = true;
+            ErrorMessage = string.Empty;
+            EmailStatusMessage = string.Empty;
+
+            try
+            {
+                var success = await _apiService.PostAsync(
+                    "Auth/send-registration-email",
+                    new SendRegistrationEmailDto
+                    {
+                        Email = UserEmail,
+                        FullName = FullName
+                    });
+
+                if (success)
+                    EmailStatusMessage = "Test email sent.";
+                else
+                    ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                        ? "Email could not be sent."
+                        : _apiService.LastErrorMessage;
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Email error: {ex.Message}";
+            }
+            finally
+            {
+                IsSendingEmail = false;
+            }
         }
 
         private async Task Register()
@@ -79,7 +143,7 @@ namespace Momentix.Mobile.ViewModels
                 string.IsNullOrWhiteSpace(UserEmail) ||
                 string.IsNullOrWhiteSpace(UserPassword))
             {
-                ErrorMessage = "Моля попълни всички полета.";
+                ErrorMessage = "Please fill all fields.";
                 return;
             }
 
@@ -112,13 +176,13 @@ namespace Momentix.Mobile.ViewModels
                 else
                 {
                     ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                        ? "Грешка при регистрацията. Опитай отново."
+                        ? "Registration failed. Try again."
                         : _apiService.LastErrorMessage;
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Грешка: {ex.Message}";
+                ErrorMessage = $"Error: {ex.Message}";
             }
             finally
             {

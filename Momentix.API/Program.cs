@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +61,7 @@ namespace Momentix.API
             // Services
             builder.Services.AddScoped<TokenService>();
             builder.Services.AddScoped<NotificationService>();
+            builder.Services.AddScoped<EmailService>();
             builder.Services.AddHttpClient<ChallengeVisionService>(client =>
             {
                 client.Timeout = TimeSpan.FromMinutes(10);

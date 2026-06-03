@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using Momentix.Data.DTOs;
 using Momentix.Mobile.Services;
 using System.Collections.ObjectModel;
@@ -24,11 +24,11 @@ public partial class ChallengesViewModel : BaseViewModel
         }
     }
 
-    public string ChallengeTitle => ActiveChallenge?.Description ?? "Няма активно предизвикателство";
+    public string ChallengeTitle => ActiveChallenge?.Description ?? "No active challenge";
 
     public string RevealText => ActiveChallenge == null
         ? string.Empty
-        : $"Разкриване: {ActiveChallenge.RevealAt.ToLocalTime():HH:mm}";
+        : $"Reveal: {ActiveChallenge.RevealAt.ToLocalTime():HH:mm}";
 
     private string _submissionText = string.Empty;
     public string SubmissionText
@@ -51,7 +51,7 @@ public partial class ChallengesViewModel : BaseViewModel
     }
 
     public string SelectedPhotoName => SelectedPhoto == null
-        ? "Няма избрана снимка"
+        ? "No photo selected"
         : SelectedPhoto.FileName;
 
     public bool HasSelectedPhoto => SelectedPhoto != null;
@@ -89,7 +89,7 @@ public partial class ChallengesViewModel : BaseViewModel
         {
             SelectedPhoto = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Избери снимка"
+                Title = "Select photo"
             });
 
             if (SelectedPhoto != null)
@@ -97,11 +97,11 @@ public partial class ChallengesViewModel : BaseViewModel
         }
         catch (FeatureNotSupportedException)
         {
-            StatusMessage = "Камерата не се поддържа на това устройство.";
+            StatusMessage = "Photo picker is not supported on this device.";
         }
         catch (PermissionException)
         {
-            StatusMessage = "Нямаш разрешение за достъп до снимките.";
+            StatusMessage = "Photo permission was denied.";
         }
         catch (Exception ex)
         {
@@ -142,7 +142,7 @@ public partial class ChallengesViewModel : BaseViewModel
         if (result == null)
         {
             StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                ? "Публикациите не можаха да се заредят."
+                ? "Submissions could not be loaded."
                 : _apiService.LastErrorMessage;
             return;
         }
@@ -160,11 +160,11 @@ public partial class ChallengesViewModel : BaseViewModel
     private async Task Submit()
     {
         if (IsLoading) return;
-        if (ActiveChallenge == null) { StatusMessage = "Няма активно предизвикателство."; return; }
-        if (SelectedPhoto == null) { StatusMessage = "Избери снимка първо."; return; }
+        if (ActiveChallenge == null) { StatusMessage = "No active challenge."; return; }
+        if (SelectedPhoto == null) { StatusMessage = "Pick a photo first."; return; }
 
         IsLoading = true;
-        StatusMessage = string.Empty;
+        StatusMessage = "Uploading photo and checking it with AI...";
 
         try
         {
@@ -180,7 +180,7 @@ public partial class ChallengesViewModel : BaseViewModel
             if (result == null)
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Публикацията не беше запазена."
+                    ? "Submission was not saved."
                     : _apiService.LastErrorMessage;
                 return;
             }
@@ -192,15 +192,25 @@ public partial class ChallengesViewModel : BaseViewModel
 
             SubmissionText = string.Empty;
             SelectedPhoto = null;
-
-            StatusMessage = result.AiIsSatisfied == true
-                ? $"✓ Прието! {result.AiFeedback}"
-                : result.AiIsSatisfied == false
-                    ? $"✗ Не прието: {result.AiFeedback}"
-                    : "Публикувано. Streak +1.";
+            StatusMessage = BuildSubmitStatus(result);
         }
         catch (Exception ex) { StatusMessage = ex.Message; }
         finally { IsLoading = false; }
+    }
+
+    private static string BuildSubmitStatus(ChallengeSubmissionResponseDto submission)
+    {
+        var confidence = submission.AiConfidence.HasValue ? $" ({submission.AiConfidence.Value}%)" : string.Empty;
+
+        if (submission.AiIsSatisfied == true)
+            return $"Accepted by AI{confidence}. {submission.AiFeedback}".Trim();
+
+        if (submission.AiIsSatisfied == false)
+            return $"Not accepted by AI{confidence}. {submission.AiFeedback}".Trim();
+
+        return string.IsNullOrWhiteSpace(submission.AiFeedback)
+            ? "Posted. AI check was not available."
+            : $"Posted. {submission.AiFeedback}";
     }
 
     private async Task Vote(ChallengeSubmissionItemViewModel? submission)
@@ -211,7 +221,7 @@ public partial class ChallengesViewModel : BaseViewModel
             $"Challenges/submissions/{submission.Id}/vote",
             new CreateChallengeVoteDto { SelectedOption = ChallengeTitle });
 
-        StatusMessage = success ? "Гласът е запазен." : "Гласът не беше запазен.";
+        StatusMessage = success ? "Vote saved." : "Vote was not saved.";
         if (success) await LoadSubmissions();
     }
 }
@@ -247,7 +257,7 @@ public class ChallengeSubmissionItemViewModel
         get
         {
             if (_dto.AiIsSatisfied == null) return "AI ?";
-            return _dto.AiIsSatisfied == true ? "✓ AI" : "✗ AI";
+            return _dto.AiConfidence.HasValue ? $"AI {_dto.AiConfidence.Value}%" : "AI checked";
         }
     }
 

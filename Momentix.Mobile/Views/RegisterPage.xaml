@@ -42,6 +42,19 @@
                        BackgroundColor="Transparent"/>
             </Border>
 
+            <Button Text="{Binding SendEmailButtonText}"
+                    Command="{Binding SendRegistrationEmailCommand}"
+                    BackgroundColor="#EEF2FF" TextColor="#111111"
+                    HeightRequest="44" CornerRadius="12"
+                    FontAttributes="Bold" FontSize="13"
+                    HorizontalOptions="Fill"
+                    Margin="0,0,0,8"/>
+
+            <Label Text="{Binding EmailStatusMessage}" TextColor="#16A34A"
+                   FontSize="12" HorizontalOptions="Center"
+                   IsVisible="{Binding EmailStatusMessage, Converter={StaticResource StringToBoolConverter}}"
+                   Margin="0,0,0,8"/>
+
             <Label Text="Парола" FontSize="11" FontAttributes="Bold"
                    TextColor="#888888" Margin="0,0,0,6"/>
             <Border BackgroundColor="White" StrokeThickness="1"

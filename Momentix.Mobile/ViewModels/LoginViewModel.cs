@@ -50,7 +50,7 @@ namespace Momentix.Mobile.ViewModels
         {
             if (string.IsNullOrWhiteSpace(UserEmail) || string.IsNullOrWhiteSpace(UserPassword))
             {
-                ErrorMessage = "Моля въведи имейл и парола.";
+                ErrorMessage = "Enter email and password.";
                 return;
             }
 
@@ -80,16 +80,25 @@ namespace Momentix.Mobile.ViewModels
 
                     await Shell.Current.GoToAsync("//AlbumsPage");
                     await Task.Delay(300);
-                    // OnNavigatedTo ще зареди албумите с правилния токен
                 }
                 else
                 {
-                    ErrorMessage = "Невалиден имейл или парола.";
+                    ErrorMessage = "Invalid email or password.";
                 }
+            }
+            catch (TaskCanceledException)
+            {
+                ErrorMessage = "Cannot reach the API. Make sure Momentix.API is running on port 5036.";
+            }
+            catch (HttpRequestException)
+            {
+                ErrorMessage = "Cannot connect to the API. Start Momentix.API and try again.";
             }
             catch (Exception ex)
             {
-                ErrorMessage = ex.ToString();
+                ErrorMessage = string.IsNullOrWhiteSpace(ex.Message)
+                    ? "Login failed. Try again."
+                    : ex.Message;
             }
             finally
             {
