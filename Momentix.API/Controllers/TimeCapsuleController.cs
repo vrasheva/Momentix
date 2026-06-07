@@ -244,10 +244,11 @@ namespace Momentix.API.Controllers
                 .Select(u => u.FullName)
                 .FirstOrDefaultAsync() ?? "Someone";
 
+            // AddMember:
             _notificationService.Add(
                 userToAdd.Id,
-                "Time capsule shared",
-                $"{ownerName} shared time capsule \"{capsule.Title}\" with you.",
+                "Споделена времева капсула",
+                $"{ownerName} сподели капсула \"{capsule.Title}\" с теб.",
                 NotificationType.CapsuleShared,
                 "TimeCapsule",
                 capsule.Id,
@@ -300,10 +301,11 @@ namespace Momentix.API.Controllers
                     .Select(m => m.UserId)
                     .Append(capsule.OwnerId);
 
+                // UnlockDueCapsules:
                 _notificationService.AddForUsers(
                     recipients,
-                    "Time capsule unlocked",
-                    $"Time capsule \"{capsule.Title}\" is now open.",
+                    "Времева капсула отключена",
+                    $"Капсула \"{capsule.Title}\" вече е отворена.",
                     NotificationType.CapsuleUnlocked,
                     "TimeCapsule",
                     capsule.Id,

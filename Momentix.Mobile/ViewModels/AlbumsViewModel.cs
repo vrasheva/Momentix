@@ -12,11 +12,16 @@ namespace Momentix.Mobile.ViewModels
         public ObservableCollection<AlbumResponseDto> MyAlbums { get; } = new();
         public ObservableCollection<AlbumResponseDto> MyAlbumsRest { get; } = new();
         public ObservableCollection<AlbumResponseDto> SharedWithMe { get; } = new();
+        public ObservableCollection<AlbumResponseDto> SharedWithMeRest { get; } = new();
         public ObservableCollection<AlbumResponseDto> SharedByMe { get; } = new();
         public ObservableCollection<AlbumResponseDto> SharedByMeRest { get; } = new();
 
         public bool HasMyAlbum0 => MyAlbums.Count > 0;
         public AlbumResponseDto? MyAlbum0 => MyAlbums.Count > 0 ? MyAlbums[0] : null;
+
+        public bool HasSharedWithMe0 => SharedWithMe.Count > 0;
+        public AlbumResponseDto? SharedWithMe0 => SharedWithMe.Count > 0 ? SharedWithMe[0] : null;
+
         public bool HasSharedByMe0 => SharedByMe.Count > 0;
         public AlbumResponseDto? SharedByMe0 => SharedByMe.Count > 0 ? SharedByMe[0] : null;
 
@@ -47,6 +52,8 @@ namespace Momentix.Mobile.ViewModels
         public IRelayCommand<AlbumResponseDto> OpenAlbumCommand => new AsyncRelayCommand<AlbumResponseDto>(OpenAlbum);
         public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
             await Shell.Current.GoToAsync("ProfilePage"));
+        public IRelayCommand GoToNotificationsCommand => new AsyncRelayCommand(async () =>
+            await Shell.Current.GoToAsync("NotificationsPage"));
 
         public AlbumsViewModel(ApiService apiService)
         {
@@ -65,6 +72,7 @@ namespace Momentix.Mobile.ViewModels
                 MyAlbums.Clear();
                 MyAlbumsRest.Clear();
                 SharedWithMe.Clear();
+                SharedWithMeRest.Clear();
                 SharedByMe.Clear();
                 SharedByMeRest.Clear();
 
@@ -74,23 +82,24 @@ namespace Momentix.Mobile.ViewModels
                     {
                         if (album.IsOwner && album.MemberCount == 0)
                             MyAlbums.Add(album);
-
                         if (album.IsOwner && album.MemberCount > 0)
                             SharedByMe.Add(album);
-
                         if (album.IsSharedWithMe)
                             SharedWithMe.Add(album);
                     }
 
                     foreach (var a in MyAlbums.Skip(1))
                         MyAlbumsRest.Add(a);
-
+                    foreach (var a in SharedWithMe.Skip(1))
+                        SharedWithMeRest.Add(a);
                     foreach (var a in SharedByMe.Skip(1))
                         SharedByMeRest.Add(a);
                 }
 
                 OnPropertyChanged(nameof(HasMyAlbum0));
                 OnPropertyChanged(nameof(MyAlbum0));
+                OnPropertyChanged(nameof(HasSharedWithMe0));
+                OnPropertyChanged(nameof(SharedWithMe0));
                 OnPropertyChanged(nameof(HasSharedByMe0));
                 OnPropertyChanged(nameof(SharedByMe0));
                 OnPropertyChanged(nameof(SharedWithMeEmpty));

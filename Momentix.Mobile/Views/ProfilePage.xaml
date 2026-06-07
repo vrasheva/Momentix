@@ -11,7 +11,7 @@
     <Grid RowDefinitions="Auto,*">
 
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*" Padding="16,14" BackgroundColor="White">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Padding="16,14" BackgroundColor="White">
             <Grid WidthRequest="36" HeightRequest="36">
                 <Grid.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding BackCommand}"/>
@@ -19,8 +19,7 @@
                 <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5" Fill="Transparent"
                          WidthRequest="36" HeightRequest="36"
                          HorizontalOptions="Center" VerticalOptions="Center"/>
-                <Path Data="M 20,18 L 15,12 L 20,6"
-                      Stroke="#111" StrokeThickness="2"
+                <Path Data="M 20,18 L 15,12 L 20,6" Stroke="#111" StrokeThickness="2"
                       StrokeLineCap="Round" StrokeLineJoin="Round"
                       WidthRequest="24" HeightRequest="24"
                       HorizontalOptions="Start" VerticalOptions="Center">
@@ -31,26 +30,27 @@
             </Grid>
             <Label Grid.Column="1" Text="Профил" FontSize="15" FontAttributes="Bold"
                    TextColor="#111" HorizontalOptions="Center" VerticalOptions="Center"/>
+            <BoxView Grid.Column="2" WidthRequest="36" HeightRequest="36" Color="Transparent"/>
         </Grid>
 
         <BoxView Grid.Row="0" HeightRequest="0.5" BackgroundColor="#F0F0F0" VerticalOptions="End"/>
 
-        <!-- Content -->
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Spacing="0" Padding="0,24,0,0">
+            <VerticalStackLayout Spacing="0" Padding="0,24,0,32">
 
                 <!-- Avatar -->
                 <VerticalStackLayout HorizontalOptions="Center" Spacing="12" Margin="0,0,0,32">
-                    <Border BackgroundColor="#F3F4F6"
+                    <Border BackgroundColor="{DynamicResource PrimaryLight}"
                             WidthRequest="100" HeightRequest="100"
-                            HorizontalOptions="Center">
+                            HorizontalOptions="Center" StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="50"/>
                         </Border.StrokeShape>
                         <Grid>
-                            <!-- Placeholder икона -->
-                            <Image Source="person.svg"
-                                   WidthRequest="52" HeightRequest="52"
+                            <!-- Инициали -->
+                            <Label Text="{Binding Initials}"
+                                   FontSize="36" FontAttributes="Bold"
+                                   TextColor="{DynamicResource Primary}"
                                    HorizontalOptions="Center" VerticalOptions="Center"
                                    IsVisible="{Binding HasNoProfilePicture}"/>
                             <!-- Профилна снимка -->
@@ -59,8 +59,7 @@
                                    IsVisible="{Binding HasProfilePicture}"/>
                         </Grid>
                     </Border>
-                    <!-- Бутон за смяна на снимка -->
-                    <Border BackgroundColor="#F3F4F6" StrokeThickness="0"
+                    <Border BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0"
                             Padding="16,8" HorizontalOptions="Center">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10"/>
@@ -68,35 +67,164 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding PickProfilePictureCommand}"/>
                         </Border.GestureRecognizers>
-                        <Label Text="Смени снимка" FontSize="13" TextColor="#60A5FA"
+                        <Label Text="Смени снимка" FontSize="13" TextColor="{DynamicResource Primary}"
                                FontAttributes="Bold"/>
                     </Border>
                 </VerticalStackLayout>
 
+                <!-- Status -->
+                <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}"
+                       FontSize="12" HorizontalOptions="Center" Margin="0,0,0,8"
+                       IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
+
                 <!-- Info -->
                 <VerticalStackLayout Spacing="0" Margin="16,0">
 
-                    <!-- Име -->
+                    <!-- Ime -->
                     <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="0,16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,14">
                         <Label Text="Име" FontSize="13" TextColor="#888888"
-                               VerticalOptions="Center" WidthRequest="80"/>
+                               VerticalOptions="Center" WidthRequest="70"/>
+                        <!-- Показване -->
                         <Label Grid.Column="1" Text="{Binding FullName}"
                                FontSize="14" FontAttributes="Bold" TextColor="#111111"
-                               VerticalOptions="Center"/>
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsNotEditingName}"/>
+                        <!-- Редактиране -->
+                        <Entry Grid.Column="1" Text="{Binding FullName}"
+                               FontSize="14" TextColor="#111111"
+                               BackgroundColor="Transparent"
+                               IsVisible="{Binding IsEditingName}"
+                               ReturnCommand="{Binding SaveNameCommand}"/>
+                        <!-- Бутони -->
+                        <Border Grid.Column="2" BackgroundColor="{DynamicResource PrimaryLight}"
+                                Padding="10,5" StrokeThickness="0"
+                                IsVisible="{Binding IsNotEditingName}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding EditNameCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Редактирай" FontSize="11" TextColor="{DynamicResource Primary}"
+                                   FontAttributes="Bold"/>
+                        </Border>
+                        <Border Grid.Column="2" BackgroundColor="{DynamicResource Primary}"
+                                Padding="10,5" StrokeThickness="0"
+                                IsVisible="{Binding IsEditingName}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SaveNameCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Запази" FontSize="11" TextColor="White" FontAttributes="Bold"/>
+                        </Border>
                     </Grid>
 
                     <!-- Имейл -->
                     <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16" Padding="0,16">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,14">
                         <Label Text="Имейл" FontSize="13" TextColor="#888888"
-                               VerticalOptions="Center" WidthRequest="80"/>
+                               VerticalOptions="Center" WidthRequest="70"/>
                         <Label Grid.Column="1" Text="{Binding Email}"
                                FontSize="14" TextColor="#111111"
-                               VerticalOptions="Center"/>
+                               VerticalOptions="Center"
+                               IsVisible="{Binding IsNotEditingEmail}"/>
+                        <Entry Grid.Column="1" Text="{Binding Email}"
+                               FontSize="14" TextColor="#111111"
+                               BackgroundColor="Transparent" Keyboard="Email"
+                               IsVisible="{Binding IsEditingEmail}"
+                               ReturnCommand="{Binding SaveEmailCommand}"/>
+                        <Border Grid.Column="2" BackgroundColor="{DynamicResource PrimaryLight}"
+                                Padding="10,5" StrokeThickness="0"
+                                IsVisible="{Binding IsNotEditingEmail}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding EditEmailCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Редактирай" FontSize="11" TextColor="{DynamicResource Primary}"
+                                   FontAttributes="Bold"/>
+                        </Border>
+                        <Border Grid.Column="2" BackgroundColor="{DynamicResource Primary}"
+                                Padding="10,5" StrokeThickness="0"
+                                IsVisible="{Binding IsEditingEmail}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SaveEmailCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Запази" FontSize="11" TextColor="White" FontAttributes="Bold"/>
+                        </Border>
                     </Grid>
                     <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
 
+                </VerticalStackLayout>
+
+                <!-- Тема -->
+                <VerticalStackLayout Margin="16,24,16,0" Spacing="12">
+                    <Label Text="Тема" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
+                    <FlexLayout Wrap="Wrap" Direction="Row" JustifyContent="Start">
+                        <Border BackgroundColor="#DBEAFE" WidthRequest="52" HeightRequest="52"
+                                Margin="0,0,10,10" StrokeThickness="2"
+                                Stroke="{Binding SelectedTheme, Converter={StaticResource StringEqualsConverter}, ConverterParameter='Blue'}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="26"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Blue"/>
+                            </Border.GestureRecognizers>
+                            <Ellipse Fill="#60A5FA" WidthRequest="32" HeightRequest="32"
+                                     HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Border BackgroundColor="#D1FAE5" WidthRequest="52" HeightRequest="52"
+                                Margin="0,0,10,10" StrokeThickness="2" Stroke="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="26"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Green"/>
+                            </Border.GestureRecognizers>
+                            <Ellipse Fill="#34D399" WidthRequest="32" HeightRequest="32"
+                                     HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Border BackgroundColor="#FEF3C7" WidthRequest="52" HeightRequest="52"
+                                Margin="0,0,10,10" StrokeThickness="2" Stroke="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="26"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Yellow"/>
+                            </Border.GestureRecognizers>
+                            <Ellipse Fill="#FBBF24" WidthRequest="32" HeightRequest="32"
+                                     HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Border BackgroundColor="#EDE9FE" WidthRequest="52" HeightRequest="52"
+                                Margin="0,0,10,10" StrokeThickness="2" Stroke="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="26"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Purple"/>
+                            </Border.GestureRecognizers>
+                            <Ellipse Fill="#A78BFA" WidthRequest="32" HeightRequest="32"
+                                     HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                        <Border BackgroundColor="#F3F4F6" WidthRequest="52" HeightRequest="52"
+                                Margin="0,0,10,10" StrokeThickness="2" Stroke="Transparent">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="26"/>
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Black"/>
+                            </Border.GestureRecognizers>
+                            <Ellipse Fill="#1F2937" WidthRequest="32" HeightRequest="32"
+                                     HorizontalOptions="Center" VerticalOptions="Center"/>
+                        </Border>
+                    </FlexLayout>
                 </VerticalStackLayout>
 
                 <!-- Logout -->
@@ -109,8 +237,7 @@
                         <TapGestureRecognizer Command="{Binding LogoutCommand}"/>
                     </Border.GestureRecognizers>
                     <Label Text="Изход" FontSize="15" FontAttributes="Bold"
-                           TextColor="#EF4444" HorizontalOptions="Center"
-                           Padding="0,16"/>
+                           TextColor="#EF4444" HorizontalOptions="Center" Padding="0,16"/>
                 </Border>
 
             </VerticalStackLayout>

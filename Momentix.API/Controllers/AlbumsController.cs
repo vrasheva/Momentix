@@ -188,8 +188,8 @@ namespace Momentix.API.Controllers
 
             _notificationService.Add(
                 userToAdd.Id,
-                "Album shared",
-                $"{ownerName} shared album \"{album.Title}\" with you.",
+                "Споделен албум",
+                $"{ownerName} сподели албум \"{album.Title}\" с теб.",
                 NotificationType.AlbumShared,
                 "Album",
                 album.Id,

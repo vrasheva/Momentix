@@ -35,6 +35,8 @@ public partial class TimeCapsulesViewModel : BaseViewModel
     public IRelayCommand LogoutCommand => new AsyncRelayCommand(Logout);
     public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
         await Shell.Current.GoToAsync("ProfilePage"));
+    public IRelayCommand GoToNotificationsCommand => new AsyncRelayCommand(async () =>
+        await Shell.Current.GoToAsync("NotificationsPage"));
 
     public TimeCapsulesViewModel(ApiService apiService)
     {
@@ -44,10 +46,7 @@ public partial class TimeCapsulesViewModel : BaseViewModel
     public void StartCountdown()
     {
         _timer ??= Application.Current?.Dispatcher.CreateTimer();
-
-        if (_timer == null || _timer.IsRunning)
-            return;
-
+        if (_timer == null || _timer.IsRunning) return;
         _timer.Interval = TimeSpan.FromSeconds(1);
         _timer.Tick += (_, _) =>
         {
@@ -64,9 +63,7 @@ public partial class TimeCapsulesViewModel : BaseViewModel
 
     private async Task LoadCapsules()
     {
-        if (IsLoading)
-            return;
-
+        if (IsLoading) return;
         IsLoading = true;
         ErrorMessage = string.Empty;
 
@@ -79,7 +76,7 @@ public partial class TimeCapsulesViewModel : BaseViewModel
             if (result == null)
             {
                 ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Capsules could not be loaded. Login again and make sure the API is running."
+                    ? "Капсулите не можаха да се заредят."
                     : _apiService.LastErrorMessage;
                 OnPropertyChanged(nameof(HasFirstCapsule));
                 OnPropertyChanged(nameof(FirstCapsule));
@@ -105,42 +102,25 @@ public partial class TimeCapsulesViewModel : BaseViewModel
             OnPropertyChanged(nameof(HasFirstCapsule));
             OnPropertyChanged(nameof(FirstCapsule));
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
     }
 
     private async Task GoToCreateCapsule()
     {
-        try
-        {
-            await Shell.Current.GoToAsync("CreateTimeCapsulePage");
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+        try { await Shell.Current.GoToAsync("CreateTimeCapsulePage"); }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
     }
 
     private async Task OpenCapsule(TimeCapsuleItemViewModel? capsule)
     {
-        if (capsule == null)
-            return;
-
+        if (capsule == null) return;
         try
         {
             await Shell.Current.GoToAsync(
                 $"TimeCapsuleDetailsPage?TimeCapsuleId={capsule.Id}&CapsuleTitle={Uri.EscapeDataString(capsule.Title)}");
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
     }
 
     private async Task Logout()
@@ -186,11 +166,28 @@ public class TimeCapsuleItemViewModel : BaseViewModel
         }
     }
 
+    public string BadgeColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#3B82F6",
+                "Green" => "#059669",
+                "Yellow" => "#D97706",
+                "Purple" => "#7C3AED",
+                "Black" => "#111827",
+                _ => "#3B82F6"
+            };
+        }
+    }
+
     public string CountdownText
     {
         get
         {
-            if (IsUnlocked) return "Ready to open";
+            if (IsUnlocked) return "Готова за отваряне";
             var remaining = _capsule.UnlockAt - DateTime.UtcNow;
             if (remaining < TimeSpan.Zero) remaining = TimeSpan.Zero;
             if (remaining.TotalDays >= 1)
@@ -211,5 +208,6 @@ public class TimeCapsuleItemViewModel : BaseViewModel
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(CountdownText));
         OnPropertyChanged(nameof(CardBackground));
+        OnPropertyChanged(nameof(BadgeColor));
     }
 }

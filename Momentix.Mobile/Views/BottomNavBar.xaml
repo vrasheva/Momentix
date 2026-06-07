@@ -12,7 +12,7 @@
             <Shadow Brush="Black" Offset="0,-2" Radius="12" Opacity="0.07"/>
         </Border.Shadow>
 
-        <Grid ColumnDefinitions="*,*,*,*,*" Padding="0,4,0,16">
+        <Grid ColumnDefinitions="*,*,*,*" Padding="0,4,0,16">
             <VerticalStackLayout Grid.Column="0" Spacing="4" HorizontalOptions="Center">
                 <VerticalStackLayout.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnAlbumsTapped"/>
@@ -59,18 +59,6 @@
                     </Image.Source>
                 </Image>
                 <Ellipse x:Name="DotChallenge" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Grid.Column="4" Spacing="4" HorizontalOptions="Center">
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnNotificationsTapped"/>
-                </VerticalStackLayout.GestureRecognizers>
-                <Image WidthRequest="26" HeightRequest="26" HorizontalOptions="Center">
-                    <Image.Source>
-                        <FontImageSource x:Name="FntNotifications" FontFamily="MaterialIcons" Glyph="&#xE7F4;" Size="26" Color="#AAAAAA"/>
-                    </Image.Source>
-                </Image>
-                <Ellipse x:Name="DotNotifications" Fill="#6750A4" WidthRequest="5" HeightRequest="5" HorizontalOptions="Center" IsVisible="False"/>
             </VerticalStackLayout>
         </Grid>
     </Border>

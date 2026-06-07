@@ -4,52 +4,57 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Momentix.Mobile.Views"
-    Title=""
-    BackgroundColor="White"
-    Shell.TabBarIsVisible="False">
+    Title="" BackgroundColor="White" Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">
-
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Spacing="0">
 
-                <!-- Topbar -->
-                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,10" BackgroundColor="White">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,14,16,10" BackgroundColor="White">
                     <VerticalStackLayout Spacing="1">
                         <Label Text="Momentix" FontSize="22" FontAttributes="Bold,Italic"
                                TextColor="#111111" CharacterSpacing="-0.5"/>
-                        <Label Text="Предизвикателства" FontSize="13" FontAttributes="Bold"
-                               TextColor="#111111"/>
+                        <Label Text="Предизвикателства" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
                     </VerticalStackLayout>
                     <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
-                            BackgroundColor="#F3F4F6" StrokeThickness="0">
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToNotificationsCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Path Data="M 12,2 C 8.1,2 5,5.1 5,9 L 5,15 L 3,17 L 3,18 L 21,18 L 21,17 L 19,15 L 19,9 C 19,5.1 15.9,2 12,2 Z M 12,22 C 13.1,22 14,21.1 14,20 L 10,20 C 10,21.1 10.9,22 12,22 Z"
+                              Fill="{DynamicResource Primary}" WidthRequest="20" HeightRequest="20"
+                              HorizontalOptions="Center" VerticalOptions="Center" Aspect="Uniform"/>
+                    </Border>
+                    <Border Grid.Column="2" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToProfileCommand}"/>
                         </Border.GestureRecognizers>
-                        <Image Source="person.svg" WidthRequest="22" HeightRequest="22"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Path Data="M 12,12 C 14.2,12 16,10.2 16,8 C 16,5.8 14.2,4 12,4 C 9.8,4 8,5.8 8,8 C 8,10.2 9.8,12 12,12 Z M 12,14 C 9.3,14 4,15.4 4,18 L 4,20 L 20,20 L 20,18 C 20,15.4 14.7,14 12,14 Z"
+                              Fill="{DynamicResource Primary}" WidthRequest="22" HeightRequest="22"
+                              HorizontalOptions="Center" VerticalOptions="Center" Aspect="Uniform"/>
                     </Border>
                 </Grid>
 
                 <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
-
-                <ActivityIndicator IsRunning="{Binding IsLoading}"
-                                   IsVisible="{Binding IsLoading}"
-                                   Color="{DynamicResource Primary}"
-                                   Margin="0,8"/>
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Color="{DynamicResource Primary}" Margin="0,8"/>
 
                 <!-- Challenge карта -->
                 <Border Margin="16,16,16,0" Padding="20"
-                        BackgroundColor="#1A2744" StrokeThickness="0">
+                        BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="20"/>
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Border Grid.Column="0" BackgroundColor="#FFFFFF22"
+                            <Border Grid.Column="0" BackgroundColor="{DynamicResource Primary}"
                                     Padding="10,4" HorizontalOptions="Start">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="20"/>
@@ -58,45 +63,52 @@
                                        FontAttributes="Bold" TextColor="White"/>
                             </Border>
                             <Label Grid.Column="1" Text="{Binding RevealText}"
-                                   FontSize="11" TextColor="#FFFFFFAA"
-                                   VerticalOptions="Center"/>
+                                   FontSize="11" TextColor="#555555" VerticalOptions="Center"/>
                         </Grid>
 
                         <Label Text="{Binding ChallengeTitle}" FontSize="22"
-                               FontAttributes="Bold" TextColor="White"/>
+                               FontAttributes="Bold" TextColor="{DynamicResource Primary}"/>
 
-                        <!-- Снимка избрана -->
-                        <Border BackgroundColor="#FFFFFF15" Padding="12"
-                                StrokeThickness="0"
+                        <Border BackgroundColor="#FFFFFF80" Padding="12" StrokeThickness="0"
                                 IsVisible="{Binding HasSelectedPhoto}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="10"/>
                             </Border.StrokeShape>
                             <Label Text="{Binding SelectedPhotoName}" FontSize="12"
-                                   TextColor="White" LineBreakMode="TailTruncation"/>
+                                   TextColor="#111111" LineBreakMode="TailTruncation"/>
                         </Border>
 
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                            <Button Grid.Column="0" Text="📷 Снимка"
-                                    Command="{Binding PickPhotoCommand}"
-                                    BackgroundColor="#FFFFFF22" TextColor="White"
-                                    FontSize="13" CornerRadius="12" HeightRequest="44"/>
+                            <Border Grid.Column="0" BackgroundColor="#FFFFFF80"
+                                    HeightRequest="44" StrokeThickness="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12"/>
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding PickPhotoCommand}"/>
+                                </Border.GestureRecognizers>
+                                <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
+                                    <Path Data="M 2,5 L 2,17 L 22,17 L 22,5 L 16,5 L 14,2 L 10,2 L 8,5 Z M 12,14 C 9.8,14 8,12.2 8,10 C 8,7.8 9.8,6 12,6 C 14.2,6 16,7.8 16,10 C 16,12.2 14.2,14 12,14 Z M 12,8 C 10.9,8 10,8.9 10,10 C 10,11.1 10.9,12 12,12 C 13.1,12 14,11.1 14,10 C 14,8.9 13.1,8 12,8 Z"
+                                          Fill="{DynamicResource Primary}" WidthRequest="20" HeightRequest="20" Aspect="Uniform"/>
+                                    <Label Text="Снимка" FontSize="13"
+                                           TextColor="{DynamicResource Primary}" VerticalOptions="Center"/>
+                                </HorizontalStackLayout>
+                            </Border>
                             <Button Grid.Column="1" Text="Изпрати"
                                     Command="{Binding SubmitCommand}"
-                                    BackgroundColor="#60A5FA" TextColor="White"
+                                    BackgroundColor="{DynamicResource Primary}" TextColor="White"
                                     FontSize="13" FontAttributes="Bold"
                                     CornerRadius="12" HeightRequest="44"/>
                         </Grid>
 
-                        <Label Text="{Binding StatusMessage}"
-                               TextColor="#FFFFFFCC" FontSize="12"
+                        <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}"
+                               FontSize="12"
                                IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"/>
                     </VerticalStackLayout>
                 </Border>
 
                 <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,16"/>
 
-                <!-- Feed -->
                 <Grid ColumnDefinitions="*,Auto" Padding="16,0,16,12">
                     <Label Text="Публикации" FontSize="13" FontAttributes="Bold"
                            TextColor="#111111" VerticalOptions="Center"/>
@@ -105,46 +117,35 @@
                 <CollectionView ItemsSource="{Binding Submissions}" Margin="16,0,16,16">
                     <CollectionView.EmptyView>
                         <Label Text="Няма публикации все още." Padding="0,24"
-                               HorizontalTextAlignment="Center"
-                               TextColor="#888" FontSize="13"/>
+                               HorizontalTextAlignment="Center" TextColor="#888" FontSize="13"/>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout Spacing="0" Margin="0,0,0,16">
-                                <!-- Header -->
-                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10"
-                                      Margin="0,0,0,8">
-                                    <Border Grid.Column="0" BackgroundColor="#E8F1FD"
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" Margin="0,0,0,8">
+                                    <Border Grid.Column="0" BackgroundColor="{DynamicResource PrimaryLight}"
                                             WidthRequest="36" HeightRequest="36">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="18"/>
                                         </Border.StrokeShape>
-                                        <Label Text="{Binding UserInitials}"
-                                               FontSize="13" FontAttributes="Bold"
-                                               TextColor="#60A5FA"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center"/>
+                                        <Label Text="{Binding UserInitials}" FontSize="13" FontAttributes="Bold"
+                                               TextColor="{DynamicResource Primary}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                        <Label Text="{Binding UserName}" FontSize="13"
-                                               FontAttributes="Bold" TextColor="#111111"/>
-                                        <Label Text="{Binding SubmittedAtText}" FontSize="11"
-                                               TextColor="#888888"/>
+                                        <Label Text="{Binding UserName}" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
+                                        <Label Text="{Binding SubmittedAtText}" FontSize="11" TextColor="#888888"/>
                                     </VerticalStackLayout>
-                                    <!-- AI badge -->
-                                    <Border Grid.Column="2"
-                                            BackgroundColor="{Binding AiBadgeColor}"
+                                    <Border Grid.Column="2" BackgroundColor="{Binding AiBadgeColor}"
                                             Padding="8,4" VerticalOptions="Center">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="10"/>
                                         </Border.StrokeShape>
-                                        <Label Text="{Binding AiBadgeText}"
-                                               FontSize="10" FontAttributes="Bold"
-                                               TextColor="White"/>
+                                        <Label Text="{Binding AiBadgeText}" FontSize="10"
+                                               FontAttributes="Bold" TextColor="White"/>
                                     </Border>
                                 </Grid>
 
-                                <!-- Снимка -->
                                 <Border HeightRequest="240" StrokeThickness="0">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="14"/>
@@ -152,23 +153,23 @@
                                     <Image Source="{Binding MediaUrl}" Aspect="AspectFill"/>
                                 </Border>
 
-                                <!-- AI feedback -->
-                                <Label Text="{Binding AiFeedback}"
-                                       FontSize="12" TextColor="#888888"
-                                       Margin="0,6,0,0"
-                                       IsVisible="{Binding HasAiFeedback}"/>
+                                <Label Text="{Binding AiFeedback}" FontSize="12" TextColor="#888888"
+                                       Margin="0,6,0,0" IsVisible="{Binding HasAiFeedback}"/>
 
-                                <!-- Vote -->
                                 <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
-                                    <Label Text="{Binding VoteCount, StringFormat='❤️ {0} гласа'}"
-                                           FontSize="13" TextColor="#111111"
-                                           VerticalOptions="Center"/>
+                                    <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                        <Path Data="M 12,21 C 12,21 3,14 3,8 C 3,5.2 5.2,3 8,3 C 9.8,3 11.4,3.9 12,5.1 C 12.6,3.9 14.2,3 16,3 C 18.8,3 21,5.2 21,8 C 21,14 12,21 12,21 Z"
+                                              Fill="{DynamicResource Primary}" WidthRequest="16" HeightRequest="16"
+                                              Aspect="Uniform" VerticalOptions="Center"/>
+                                        <Label Text="{Binding VoteCount, StringFormat='{0} гласа'}"
+                                               FontSize="13" TextColor="#111111" VerticalOptions="Center"/>
+                                    </HorizontalStackLayout>
                                     <Button Grid.Column="1" Text="Гласувай"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.VoteCommand}"
                                             CommandParameter="{Binding .}"
-                                            BackgroundColor="#60A5FA" TextColor="White"
-                                            FontSize="12" CornerRadius="10"
-                                            Padding="14,6"/>
+                                            BackgroundColor="{DynamicResource PrimaryLight}"
+                                            TextColor="{DynamicResource Primary}"
+                                            FontSize="12" CornerRadius="10" Padding="14,6"/>
                                 </Grid>
 
                                 <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0" Margin="0,12,0,0"/>
@@ -179,8 +180,6 @@
 
             </VerticalStackLayout>
         </ScrollView>
-
         <views:BottomNavBar Grid.Row="1" ActiveTab="Challenge"/>
-
     </Grid>
 </ContentPage>

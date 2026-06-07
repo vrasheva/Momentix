@@ -2,7 +2,7 @@
 
 namespace Momentix.Mobile.Views;
 
-public enum NavTab { Albums, Friends, Capsules, Challenge, Notifications }
+public enum NavTab { Albums, Friends, Capsules, Challenge }
 
 public partial class BottomNavBar : ContentView
 {
@@ -45,7 +45,6 @@ public partial class BottomNavBar : ContentView
         if (location.Contains("FriendsPage")) return NavTab.Friends;
         if (location.Contains("TimeCapsulesPage")) return NavTab.Capsules;
         if (location.Contains("ChallengesPage")) return NavTab.Challenge;
-        if (location.Contains("NotificationsPage")) return NavTab.Notifications;
         return NavTab.Albums;
     }
 
@@ -61,13 +60,11 @@ public partial class BottomNavBar : ContentView
         FntFriends.Color = Inactive;
         FntCapsules.Color = Inactive;
         FntChallenge.Color = Inactive;
-        FntNotifications.Color = Inactive;
 
         DotAlbums.IsVisible = false;
         DotFriends.IsVisible = false;
         DotCapsules.IsVisible = false;
         DotChallenge.IsVisible = false;
-        DotNotifications.IsVisible = false;
 
         switch (tab)
         {
@@ -91,11 +88,6 @@ public partial class BottomNavBar : ContentView
                 DotChallenge.IsVisible = true;
                 DotChallenge.Fill = activeBrush;
                 break;
-            case NavTab.Notifications:
-                FntNotifications.Color = activeColor;
-                DotNotifications.IsVisible = true;
-                DotNotifications.Fill = activeBrush;
-                break;
         }
     }
 
@@ -110,7 +102,4 @@ public partial class BottomNavBar : ContentView
 
     private async void OnChallengeTapped(object sender, EventArgs e)
         => await Shell.Current.GoToAsync("//ChallengesPage");
-
-    private async void OnNotificationsTapped(object sender, EventArgs e)
-        => await Shell.Current.GoToAsync("//NotificationsPage");
 }

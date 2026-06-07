@@ -4,31 +4,41 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Momentix.Mobile.Views"
-    Title=""
-    BackgroundColor="White"
-    Shell.TabBarIsVisible="False">
+    Title="" BackgroundColor="White" Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Spacing="0">
 
-                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,10" BackgroundColor="White">
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,14,16,10" BackgroundColor="White">
                     <VerticalStackLayout Spacing="1">
                         <Label Text="Momentix" FontSize="22" FontAttributes="Bold,Italic"
                                TextColor="#111111" CharacterSpacing="-0.5"/>
-                        <Label Text="Албуми" FontSize="13" FontAttributes="Bold"
-                               TextColor="#111111"/>
+                        <Label Text="Албуми" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
                     </VerticalStackLayout>
                     <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
-                            BackgroundColor="#F3F4F6" StrokeThickness="0">
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToNotificationsCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Path Data="M 12,2 C 8.1,2 5,5.1 5,9 L 5,15 L 3,17 L 3,18 L 21,18 L 21,17 L 19,15 L 19,9 C 19,5.1 15.9,2 12,2 Z M 12,22 C 13.1,22 14,21.1 14,20 L 10,20 C 10,21.1 10.9,22 12,22 Z"
+                              Fill="{DynamicResource Primary}" WidthRequest="20" HeightRequest="20"
+                              HorizontalOptions="Center" VerticalOptions="Center" Aspect="Uniform"/>
+                    </Border>
+                    <Border Grid.Column="2" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="18"/>
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding GoToProfileCommand}"/>
                         </Border.GestureRecognizers>
-                        <Image Source="person.svg" WidthRequest="22" HeightRequest="22"
-                               HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <Path Data="M 12,12 C 14.2,12 16,10.2 16,8 C 16,5.8 14.2,4 12,4 C 9.8,4 8,5.8 8,8 C 8,10.2 9.8,12 12,12 Z M 12,14 C 9.3,14 4,15.4 4,18 L 4,20 L 20,20 L 20,18 C 20,15.4 14.7,14 12,14 Z"
+                              Fill="{DynamicResource Primary}" WidthRequest="22" HeightRequest="22"
+                              HorizontalOptions="Center" VerticalOptions="Center" Aspect="Uniform"/>
                     </Border>
                 </Grid>
 
@@ -56,8 +66,7 @@
                             <TapGestureRecognizer Command="{Binding GoToCreateAlbumCommand}"/>
                         </Border.GestureRecognizers>
                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
-                            <Border BackgroundColor="{DynamicResource PrimaryLight}" WidthRequest="36" HeightRequest="36"
-                                    HorizontalOptions="Center">
+                            <Border BackgroundColor="{DynamicResource PrimaryLight}" WidthRequest="36" HeightRequest="36" HorizontalOptions="Center">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="18"/>
                                 </Border.StrokeShape>
@@ -65,13 +74,11 @@
                                        TextColor="{DynamicResource Primary}"
                                        HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
-                            <Label Text="Добави албум" FontSize="12" TextColor="#AAAAAA"
-                                   HorizontalOptions="Center"/>
+                            <Label Text="Добави албум" FontSize="12" TextColor="#AAAAAA" HorizontalOptions="Center"/>
                         </VerticalStackLayout>
                     </Border>
 
-                    <Border Grid.Row="0" Grid.Column="1" HeightRequest="110" StrokeThickness="0"
-                            IsVisible="{Binding HasMyAlbum0}">
+                    <Border Grid.Row="0" Grid.Column="1" HeightRequest="110" StrokeThickness="0" IsVisible="{Binding HasMyAlbum0}">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="12"/>
                         </Border.StrokeShape>
@@ -92,8 +99,7 @@
                                 <Image Source="{Binding MyAlbum0.ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto3}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
-                                    WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End"
-                                    Margin="0,0,4,4" ZIndex="10">
+                                    WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="5"/>
                                 </Border.StrokeShape>
@@ -103,12 +109,10 @@
                         </Grid>
                     </Border>
 
-                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2" Margin="0,4,0,0"
-                                         IsVisible="{Binding HasMyAlbum0}">
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2" Margin="0,4,0,0" IsVisible="{Binding HasMyAlbum0}">
                         <Label Text="{Binding MyAlbum0.Title}" FontSize="12" FontAttributes="Bold"
                                TextColor="#111111" LineBreakMode="TailTruncation"/>
-                        <Label Text="{Binding MyAlbum0.MediaCount, StringFormat='{0} снимки'}"
-                               FontSize="10" TextColor="#888888"/>
+                        <Label Text="{Binding MyAlbum0.MediaCount, StringFormat='{0} снимки'}" FontSize="10" TextColor="#888888"/>
                     </VerticalStackLayout>
                 </Grid>
 
@@ -161,24 +165,85 @@
                     <Label Grid.Column="1" Text="{Binding SharedWithMe.Count}" FontSize="12" TextColor="#888888" VerticalOptions="Center"/>
                 </Grid>
                 <Label Text="Няма споделени с теб албуми." Padding="16,4,16,12" TextColor="#888888" FontSize="12" IsVisible="{Binding SharedWithMeEmpty}"/>
-                <FlexLayout x:Name="SharedWithMeGrid" BindableLayout.ItemsSource="{Binding SharedWithMe}" Wrap="Wrap" Direction="Row" Margin="12,0,12,8">
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8" Margin="12,0,12,8" RowDefinitions="Auto,Auto"
+                      IsVisible="{Binding SharedWithMeNotEmpty}">
+                    <Border Grid.Row="0" Grid.Column="0" HeightRequest="110" StrokeThickness="0" IsVisible="{Binding HasSharedWithMe0}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenAlbumCommand}" CommandParameter="{Binding SharedWithMe0}"/>
+                        </Border.GestureRecognizers>
+                        <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
+                            <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
+                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto0}"/>
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
+                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto1}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
+                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto2}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
+                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto3}"/>
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
+                                    WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="5"/>
+                                </Border.StrokeShape>
+                                <Label Text="{Binding SharedWithMe0.MediaCount}" FontSize="10" FontAttributes="Bold"
+                                       TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="0" Spacing="2" Margin="0,4,0,0" IsVisible="{Binding HasSharedWithMe0}">
+                        <Label Text="{Binding SharedWithMe0.Title}" FontSize="12" FontAttributes="Bold"
+                               TextColor="#111111" LineBreakMode="TailTruncation"/>
+                        <Label Text="{Binding SharedWithMe0.OwnerName}" FontSize="10" TextColor="#888888"/>
+                    </VerticalStackLayout>
+                </Grid>
+
+                <FlexLayout x:Name="SharedWithMeRestGrid" BindableLayout.ItemsSource="{Binding SharedWithMeRest}"
+                            Wrap="Wrap" Direction="Row" Margin="12,0,12,8"
+                            IsVisible="{Binding SharedWithMeNotEmpty}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
-                            <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="12" Padding="0,10" WidthRequest="340">
-                                <Grid.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference SharedWithMeGrid}}" CommandParameter="{Binding .}"/>
-                                </Grid.GestureRecognizers>
-                                <Border BackgroundColor="#E1F5EE" StrokeThickness="0" WidthRequest="46" HeightRequest="46">
+                            <VerticalStackLayout Spacing="4" Margin="0,0,8,8" WidthRequest="160">
+                                <Border HeightRequest="110" StrokeThickness="0">
                                     <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="10"/>
+                                        <RoundRectangle CornerRadius="12"/>
                                     </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding BindingContext.OpenAlbumCommand, Source={x:Reference SharedWithMeRestGrid}}" CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
+                                        <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
+                                            <Image Source="{Binding ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
+                                        </Border>
+                                        <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
+                                            <Image Source="{Binding ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
+                                            <Image Source="{Binding ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
+                                            <Image Source="{Binding ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
+                                        </Border>
+                                        <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
+                                                WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="5"/>
+                                            </Border.StrokeShape>
+                                            <Label Text="{Binding MediaCount}" FontSize="10" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                        </Border>
+                                    </Grid>
                                 </Border>
-                                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
-                                    <Label Text="{Binding Title}" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
-                                    <Label Text="{Binding OwnerName}" FontSize="11" TextColor="#888888"/>
-                                </VerticalStackLayout>
-                                <Label Grid.Column="2" Text="›" FontSize="18" TextColor="#CCCCCC" VerticalOptions="Center"/>
-                            </Grid>
+                                <Label Text="{Binding Title}" FontSize="12" FontAttributes="Bold" TextColor="#111111" LineBreakMode="TailTruncation"/>
+                                <Label Text="{Binding OwnerName}" FontSize="10" TextColor="#888888"/>
+                            </VerticalStackLayout>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
@@ -247,7 +312,8 @@
                     </VerticalStackLayout>
                 </Grid>
 
-                <FlexLayout x:Name="SharedByMeRestGrid" BindableLayout.ItemsSource="{Binding SharedByMeRest}" Wrap="Wrap" Direction="Row" Margin="12,0,12,16">
+                <FlexLayout x:Name="SharedByMeRestGrid" BindableLayout.ItemsSource="{Binding SharedByMeRest}"
+                            Wrap="Wrap" Direction="Row" Margin="12,0,12,16">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout Spacing="4" Margin="0,0,8,8" WidthRequest="160">

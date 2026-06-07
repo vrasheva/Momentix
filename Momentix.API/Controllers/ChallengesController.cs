@@ -23,22 +23,22 @@ public class ChallengesController : ControllerBase
     private readonly ChallengeVisionService _challengeVisionService;
 
     private static readonly string[] DailyPrompts =
-    {
-        "Capture something green",
-        "Capture something shiny",
-        "Capture something round",
-        "Capture something blue",
-        "Capture something tiny",
-        "Capture something made of metal",
-        "Capture something with letters",
-        "Capture something soft",
-        "Capture something old",
-        "Capture something with a reflection",
-        "Capture something from nature",
-        "Capture something you use every day",
-        "Capture something handmade",
-        "Capture something that made you smile"
-    };
+{
+    "Снимай нещо зелено",
+    "Снимай нещо блестящо",
+    "Снимай нещо кръгло",
+    "Снимай нещо синьо",
+    "Снимай нещо малко",
+    "Снимай нещо метално",
+    "Снимай нещо с букви",
+    "Снимай нещо меко",
+    "Снимай нещо старо",
+    "Снимай нещо с отражение",
+    "Снимай нещо от природата",
+    "Снимай нещо, което използваш всеки ден",
+    "Снимай нещо ръчно изработено",
+    "Снимай нещо, което те е накарало да се усмихнеш"
+};
 
     public ChallengesController(
         AppDbContext context,
@@ -183,17 +183,27 @@ public class ChallengesController : ControllerBase
 
         submission.MediaUrl = $"{Request.Scheme}://{Request.Host}/api/Challenges/submissions/{submission.Id}/content";
 
-        var evaluation = await _challengeVisionService.EvaluateAsync(
-            challenge.Description,
-            storedPath,
-            file.ContentType,
-            HttpContext.RequestAborted);
+        // AI проверката е по желание — ако не е налична, снимката пак се запазва
+        try
+        {
+            var evaluation = await _challengeVisionService.EvaluateAsync(
+                challenge.Description,
+                storedPath,
+                file.ContentType,
+                HttpContext.RequestAborted);
 
-        submission.AiIsSatisfied = evaluation.IsSatisfied;
-        submission.AiConfidence = evaluation.Confidence;
-        submission.AiFeedback = evaluation.Feedback;
-        submission.AiModel = evaluation.Model;
-        submission.AiEvaluatedAt = evaluation.EvaluatedAt;
+            submission.AiIsSatisfied = evaluation.IsSatisfied;
+            submission.AiConfidence = evaluation.Confidence;
+            submission.AiFeedback = evaluation.Feedback;
+            submission.AiModel = evaluation.Model;
+            submission.AiEvaluatedAt = evaluation.EvaluatedAt;
+        }
+        catch (Exception)
+        {
+            // AI не е налично — продължаваме без оценка
+            submission.AiFeedback = null;
+            submission.AiIsSatisfied = null;
+        }
 
         await NotifyChallengeFriends(submission.Id, userId, user?.FullName ?? "A friend");
         await _context.SaveChangesAsync();
@@ -335,10 +345,11 @@ public class ChallengesController : ControllerBase
     private async Task NotifyChallengeFriends(int submissionId, string userId, string userName)
     {
         var friendIds = await GetFriendIds(userId);
+        // NotifyChallengeFriends:
         _notificationService.AddForUsers(
             friendIds,
-            "New challenge photo",
-            $"{userName} posted a challenge photo.",
+            "Ново снимка в предизвикателство",
+            $"{userName} публикува снимка в предизвикателството.",
             NotificationType.ChallengeSubmission,
             "ChallengeSubmission",
             submissionId,

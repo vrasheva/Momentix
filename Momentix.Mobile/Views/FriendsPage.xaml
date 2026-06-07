@@ -4,20 +4,47 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:views="clr-namespace:Momentix.Mobile.Views"
-    Title=""
-    BackgroundColor="White"
-    Shell.TabBarIsVisible="False">
+    Title="" BackgroundColor="White" Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Spacing="0">
 
-                <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,10" BackgroundColor="White">
-                    <Label Text="Приятели" FontSize="22" FontAttributes="Bold"
-                           TextColor="#111111" CharacterSpacing="-0.5"/>
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8" Padding="16,14,16,10" BackgroundColor="White">
+                    <VerticalStackLayout Spacing="1">
+                        <Label Text="Momentix" FontSize="22" FontAttributes="Bold,Italic"
+                               TextColor="#111111" CharacterSpacing="-0.5"/>
+                        <Label Text="Приятели" FontSize="13" FontAttributes="Bold" TextColor="#111111"/>
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToNotificationsCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Path Data="M 12,2 C 8.1,2 5,5.1 5,9 L 5,15 L 3,17 L 3,18 L 21,18 L 21,17 L 19,15 L 19,9 C 19,5.1 15.9,2 12,2 Z M 12,22 C 13.1,22 14,21.1 14,20 L 10,20 C 10,21.1 10.9,22 12,22 Z"
+                              Fill="{DynamicResource Primary}" WidthRequest="20" HeightRequest="20"
+                              HorizontalOptions="Center" VerticalOptions="Center" Aspect="Uniform"/>
+                    </Border>
+                    <Border Grid.Column="2" WidthRequest="36" HeightRequest="36"
+                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="18"/>
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GoToProfileCommand}"/>
+                        </Border.GestureRecognizers>
+                        <Path Data="M 12,12 C 14.2,12 16,10.2 16,8 C 16,5.8 14.2,4 12,4 C 9.8,4 8,5.8 8,8 C 8,10.2 9.8,12 12,12 Z M 12,14 C 9.3,14 4,15.4 4,18 L 4,20 L 20,20 L 20,18 C 20,15.4 14.7,14 12,14 Z"
+      Fill="{DynamicResource Primary}"
+      WidthRequest="22" HeightRequest="22"
+      HorizontalOptions="Center" VerticalOptions="Center"
+      Aspect="Uniform"/>
+                    </Border>
                 </Grid>
-                <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
 
+                <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
                 <Label Text="{Binding StatusMessage}" TextColor="{DynamicResource Primary}"
                        FontSize="12" IsVisible="{Binding HasStatusMessage}" Margin="16,8,16,0"/>
 
@@ -66,7 +93,6 @@
                     <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,4"/>
                 </VerticalStackLayout>
 
-                <!-- Твоите приятели -->
                 <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
                     <Label Text="Твоите приятели" FontSize="13" FontAttributes="Bold"
                            TextColor="#111111" VerticalOptions="Center"/>
@@ -80,7 +106,6 @@
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout Spacing="4">
-                                <!-- Add card -->
                                 <Grid IsVisible="{Binding IsAddCard}">
                                     <Grid.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding BindingContext.CardTappedCommand, Source={x:Reference FriendsList}}" CommandParameter="{Binding .}"/>
@@ -103,16 +128,16 @@
                                         </VerticalStackLayout>
                                     </Border>
                                 </Grid>
-                                <!-- Friend card -->
                                 <Grid IsVisible="{Binding IsAddCard, Converter={StaticResource InverseBoolConverter}}">
                                     <Grid.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding BindingContext.CardTappedCommand, Source={x:Reference FriendsList}}" CommandParameter="{Binding .}"/>
                                     </Grid.GestureRecognizers>
-                                    <Border StrokeThickness="0" HeightRequest="100" BackgroundColor="{Binding AvatarColor}">
+                                    <Border StrokeThickness="0" HeightRequest="100" BackgroundColor="{DynamicResource PrimaryLight}">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="12"/>
                                         </Border.StrokeShape>
-                                        <Label Text="{Binding Initials}" FontSize="28" FontAttributes="Bold" TextColor="White"
+                                        <Label Text="{Binding Initials}" FontSize="28" FontAttributes="Bold"
+                                               TextColor="{DynamicResource Primary}"
                                                HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </Border>
                                 </Grid>
@@ -132,7 +157,6 @@
 
                 <BoxView HeightRequest="8" BackgroundColor="#F7F7F7" Margin="0,4"/>
 
-                <!-- Може да познаваш -->
                 <VerticalStackLayout IsVisible="{Binding HasSuggestions}">
                     <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
                         <Label Text="Може да познаваш" FontSize="13" FontAttributes="Bold"
@@ -143,13 +167,14 @@
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,8">
-                                    <Border Grid.Column="0" BackgroundColor="{Binding AvatarColor}"
+                                    <Border Grid.Column="0" BackgroundColor="{DynamicResource PrimaryLight}"
                                             WidthRequest="44" HeightRequest="44">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="22"/>
                                         </Border.StrokeShape>
                                         <Label Text="{Binding Initials}" FontSize="15" FontAttributes="Bold"
-                                               TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                               TextColor="{DynamicResource Primary}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                         <Label Text="{Binding FullName}" FontAttributes="Bold" FontSize="13" TextColor="#111111"/>
@@ -158,7 +183,8 @@
                                     <Button Grid.Column="2" Text="Добави"
                                             Command="{Binding BindingContext.SendRequestCommand, Source={x:Reference UsersList}}"
                                             CommandParameter="{Binding .}"
-                                            BackgroundColor="{DynamicResource Primary}" TextColor="White"
+                                            BackgroundColor="{DynamicResource PrimaryLight}"
+                                            TextColor="{DynamicResource Primary}"
                                             FontSize="12" FontAttributes="Bold" CornerRadius="10"
                                             Padding="14,7" VerticalOptions="Center"/>
                                     <BoxView Grid.ColumnSpan="3" HeightRequest="0.5" BackgroundColor="#F5F5F5" VerticalOptions="End"/>
@@ -215,13 +241,14 @@
                             <RoundRectangle CornerRadius="12"/>
                         </Border.StrokeShape>
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
-                            <Border Grid.Column="0" BackgroundColor="{Binding SearchResultAvatarColor}"
+                            <Border Grid.Column="0" BackgroundColor="{DynamicResource PrimaryLight}"
                                     WidthRequest="40" HeightRequest="40">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="20"/>
                                 </Border.StrokeShape>
                                 <Label Text="{Binding SearchResultInitials}" FontSize="14" FontAttributes="Bold"
-                                       TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                       TextColor="{DynamicResource Primary}"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
                             </Border>
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                                 <Label Text="{Binding SearchResultName}" FontAttributes="Bold" FontSize="13" TextColor="#111111"/>
@@ -229,7 +256,8 @@
                             </VerticalStackLayout>
                             <Button Grid.Column="2" IsVisible="{Binding SearchResultCanAdd}" Text="Добави"
                                     Command="{Binding SendRequestToSearchResultCommand}"
-                                    BackgroundColor="{DynamicResource Primary}" TextColor="White"
+                                    BackgroundColor="{DynamicResource PrimaryLight}"
+                                    TextColor="{DynamicResource Primary}"
                                     FontSize="12" FontAttributes="Bold" CornerRadius="10"
                                     Padding="12,7" VerticalOptions="Center"/>
                         </Grid>

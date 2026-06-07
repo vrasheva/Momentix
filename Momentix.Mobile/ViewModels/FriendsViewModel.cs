@@ -64,6 +64,10 @@ public partial class FriendsViewModel : BaseViewModel
     public IRelayCommand<FriendRequestItemViewModel> AcceptRequestCommand => new AsyncRelayCommand<FriendRequestItemViewModel>(AcceptIncomingRequest);
     public IRelayCommand<FriendRequestItemViewModel> DeclineRequestCommand => new AsyncRelayCommand<FriendRequestItemViewModel>(DeclineIncomingRequest);
     public IRelayCommand<FriendItemViewModel> RemoveFriendCommand => new AsyncRelayCommand<FriendItemViewModel>(RemoveFriend);
+    public IRelayCommand GoToProfileCommand => new AsyncRelayCommand(async () =>
+        await Shell.Current.GoToAsync("ProfilePage"));
+    public IRelayCommand GoToNotificationsCommand => new AsyncRelayCommand(async () =>
+        await Shell.Current.GoToAsync("NotificationsPage"));
 
     public FriendsViewModel(ApiService apiService)
     {

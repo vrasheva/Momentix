@@ -243,10 +243,11 @@ public class FriendsController : ControllerBase
         request.RespondedAt = DateTime.UtcNow;
 
         await AddMutualFriendship(request.RequesterId, request.AddresseeId);
+        // AcceptRequest:
         _notificationService.Add(
             request.RequesterId,
-            "Friend request accepted",
-            $"{request.Addressee.FullName} accepted your friend request.",
+            "Заявката за приятелство е приета",
+            $"{request.Addressee.FullName} прие заявката ти за приятелство.",
             NotificationType.FriendAccepted,
             "Friend",
             null,
@@ -346,10 +347,11 @@ public class FriendsController : ControllerBase
             existingRequest.Status = FriendRequestStatus.Pending;
             existingRequest.CreatedAt = DateTime.UtcNow;
             existingRequest.RespondedAt = null;
+            // SendFriendRequestToUser (съществуваща):
             _notificationService.Add(
                 targetUserId,
-                "Friend request",
-                $"{existingRequest.Requester.FullName} sent you a friend request.",
+                "Заявка за приятелство",
+                $"{existingRequest.Requester.FullName} ти изпрати заявка за приятелство.",
                 NotificationType.FriendRequest,
                 "FriendRequest",
                 existingRequest.Id,
@@ -374,10 +376,11 @@ public class FriendsController : ControllerBase
             .Include(fr => fr.Addressee)
             .FirstAsync(fr => fr.Id == request.Id);
 
+        // SendFriendRequestToUser (нова):
         _notificationService.Add(
             targetUserId,
-            "Friend request",
-            $"{request.Requester.FullName} sent you a friend request.",
+            "Заявка за приятелство",
+            $"{request.Requester.FullName} ти изпрати заявка за приятелство.",
             NotificationType.FriendRequest,
             "FriendRequest",
             request.Id,
