@@ -66,7 +66,7 @@ namespace Momentix.Mobile.ViewModels
 
         public string SendEmailButtonText => IsSendingEmail ? "Sending email..." : "Send test email";
 
-        private string _selectedTheme = "Purple";
+        private string _selectedTheme = "Black";
         public string SelectedTheme
         {
             get => _selectedTheme;
@@ -76,6 +76,7 @@ namespace Momentix.Mobile.ViewModels
         public RegisterViewModel(ApiService apiService)
         {
             _apiService = apiService;
+            ThemeService.Instance.ApplyTheme("Black", false);
         }
 
         public IRelayCommand RegisterCommand => new AsyncRelayCommand(Register);

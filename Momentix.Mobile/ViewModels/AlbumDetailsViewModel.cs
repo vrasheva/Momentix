@@ -119,6 +119,20 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         set { _isLetterPopupVisible = value; OnPropertyChanged(); }
     }
 
+    private bool _isRenamePopupVisible;
+    public bool IsRenamePopupVisible
+    {
+        get => _isRenamePopupVisible;
+        set { _isRenamePopupVisible = value; OnPropertyChanged(); }
+    }
+
+    private bool _isEditLetterPopupVisible;
+    public bool IsEditLetterPopupVisible
+    {
+        get => _isEditLetterPopupVisible;
+        set { _isEditLetterPopupVisible = value; OnPropertyChanged(); }
+    }
+
     private string _openedLetterText = string.Empty;
     public string OpenedLetterText
     {
@@ -140,6 +154,23 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         set { _openedLetterDate = value; OnPropertyChanged(); }
     }
 
+    private string _newAlbumTitle = string.Empty;
+    public string NewAlbumTitle
+    {
+        get => _newAlbumTitle;
+        set { _newAlbumTitle = value; OnPropertyChanged(); }
+    }
+
+    private string _editLetterText = string.Empty;
+    public string EditLetterText
+    {
+        get => _editLetterText;
+        set { _editLetterText = value; OnPropertyChanged(); }
+    }
+
+    private AlbumMediaItemViewModel? _editingLetter;
+
+    // ── Команди ──
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
     public IRelayCommand AddMemberCommand => new AsyncRelayCommand(AddMember);
     public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
@@ -147,6 +178,56 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     public IRelayCommand AddLetterCommand => new AsyncRelayCommand(AddLetter);
     public IRelayCommand PickPhotoCommand => new AsyncRelayCommand(PickPhoto);
     public IRelayCommand BackCommand => new AsyncRelayCommand(Back);
+    public IRelayCommand RenameAlbumCommand => new AsyncRelayCommand(RenameAlbum);
+    public IRelayCommand SaveEditLetterCommand => new AsyncRelayCommand(SaveEditLetter);
+
+    public IRelayCommand<AlbumMediaItemViewModel> DeletePhotoCommand =>
+        new AsyncRelayCommand<AlbumMediaItemViewModel>(DeletePhoto);
+
+    public IRelayCommand<AlbumMediaItemViewModel> OpenLetterCommand =>
+        new RelayCommand<AlbumMediaItemViewModel>(letter =>
+        {
+            if (letter == null || !letter.IsUnlockedLetter) return;
+            OpenedLetterText = letter.LetterContent;
+            OpenedLetterAuthor = letter.UploadedByName;
+            OpenedLetterDate = letter.UploadedAtText;
+            IsLetterPopupVisible = true;
+        });
+
+    public IRelayCommand<AlbumMediaItemViewModel> OpenEditLetterCommand =>
+        new RelayCommand<AlbumMediaItemViewModel>(letter =>
+        {
+            if (letter == null || !letter.IsMyLetter) return;
+            _editingLetter = letter;
+            EditLetterText = letter.LetterContent;
+            StatusMessage = string.Empty;
+            IsEditLetterPopupVisible = true;
+        });
+
+    public IRelayCommand CloseLetterPopupCommand => new RelayCommand(() =>
+        IsLetterPopupVisible = false);
+
+    public IRelayCommand CloseEditLetterPopupCommand => new RelayCommand(() =>
+    {
+        IsEditLetterPopupVisible = false;
+        EditLetterText = string.Empty;
+        _editingLetter = null;
+        StatusMessage = string.Empty;
+    });
+
+    public IRelayCommand OpenRenamePopupCommand => new RelayCommand(() =>
+    {
+        NewAlbumTitle = AlbumTitle;
+        StatusMessage = string.Empty;
+        IsRenamePopupVisible = true;
+    });
+
+    public IRelayCommand CloseRenamePopupCommand => new RelayCommand(() =>
+    {
+        IsRenamePopupVisible = false;
+        NewAlbumTitle = string.Empty;
+        StatusMessage = string.Empty;
+    });
 
     public IRelayCommand OpenAddMemoryPopupCommand => new RelayCommand(() =>
     {
@@ -176,19 +257,6 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         MemberEmail = string.Empty;
         StatusMessage = string.Empty;
     });
-
-    public IRelayCommand<AlbumMediaItemViewModel> OpenLetterCommand =>
-        new RelayCommand<AlbumMediaItemViewModel>(letter =>
-        {
-            if (letter == null || !letter.IsUnlockedLetter) return;
-            OpenedLetterText = letter.LetterContent;
-            OpenedLetterAuthor = letter.UploadedByName;
-            OpenedLetterDate = letter.UploadedAtText;
-            IsLetterPopupVisible = true;
-        });
-
-    public IRelayCommand CloseLetterPopupCommand => new RelayCommand(() =>
-        IsLetterPopupVisible = false);
 
     public IRelayCommand<FriendItemViewModel> AddFriendAsMemberCommand =>
         new AsyncRelayCommand<FriendItemViewModel>(async friend =>
@@ -304,8 +372,7 @@ public partial class AlbumDetailsViewModel : BaseViewModel
         var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
         Friends.Clear();
 
-        if (result == null)
-            return;
+        if (result == null) return;
 
         var existingMemberIds = Members.Select(m => m.UserId).ToHashSet();
 
@@ -404,7 +471,6 @@ public partial class AlbumDetailsViewModel : BaseViewModel
                 var vm = new AlbumMediaItemViewModel(result);
                 MediaItems.Insert(0, vm);
 
-                // Старата първа буква отива в RestLetters
                 if (LetterItems.Count > 0)
                     RestLetters.Insert(0, LetterItems[0]);
                 LetterItems.Insert(0, vm);
@@ -420,6 +486,125 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             {
                 StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
                     ? "Споменът не беше добавен."
+                    : _apiService.LastErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SaveEditLetter()
+    {
+        if (_editingLetter == null || string.IsNullOrWhiteSpace(EditLetterText)) return;
+
+        IsLoading = true;
+        StatusMessage = string.Empty;
+
+        try
+        {
+            var success = await _apiService.PutAsync(
+                $"Media/{_editingLetter.Id}/letter",
+                new CreateLetterMediaDto { Text = EditLetterText.Trim() });
+
+            if (success)
+            {
+                IsEditLetterPopupVisible = false;
+                EditLetterText = string.Empty;
+                _editingLetter = null;
+                await Load();
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Писмото не беше запазено."
+                    : _apiService.LastErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task DeletePhoto(AlbumMediaItemViewModel? photo)
+    {
+        if (photo == null) return;
+
+        bool confirmed = await Shell.Current.DisplayAlert(
+            "Изтрий снимка",
+            "Сигурна ли си, че искаш да изтриеш тази снимка?",
+            "Изтрий", "Откажи");
+
+        if (!confirmed) return;
+
+        IsLoading = true;
+        StatusMessage = string.Empty;
+
+        try
+        {
+            var success = await _apiService.DeleteAsync($"Media/{photo.Id}");
+            if (success)
+            {
+                MediaItems.Remove(photo);
+                PhotoItems.Remove(photo);
+                RestPhotos.Clear();
+                foreach (var p in PhotoItems.Skip(1))
+                    RestPhotos.Add(p);
+
+                OnPropertyChanged(nameof(HasPhotos));
+                OnPropertyChanged(nameof(FirstPhoto));
+                StatusMessage = "Снимката е изтрита.";
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Снимката не беше изтрита."
+                    : _apiService.LastErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task RenameAlbum()
+    {
+        if (string.IsNullOrWhiteSpace(NewAlbumTitle)) return;
+
+        IsLoading = true;
+        StatusMessage = string.Empty;
+
+        try
+        {
+            var success = await _apiService.PutAsync(
+                $"Albums/{AlbumId}",
+                new { Title = NewAlbumTitle.Trim() });
+
+            if (success)
+            {
+                AlbumTitle = NewAlbumTitle.Trim();
+                IsRenamePopupVisible = false;
+                NewAlbumTitle = string.Empty;
+            }
+            else
+            {
+                StatusMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
+                    ? "Заглавието не беше променено."
                     : _apiService.LastErrorMessage;
             }
         }
@@ -512,10 +697,13 @@ public class AlbumMediaItemViewModel
     public MediaType Type => _media.Type;
     public DateTime UploadedAt => _media.UploadedAt;
     public string UploadedByName => _media.UploadedByName;
+    public string UploadedById => _media.UploadedById ?? string.Empty;
     public bool IsImage => _media.Type == MediaType.Image;
     public bool IsLetter => _media.Type == MediaType.Letter;
     public bool IsLockedLetter => IsLetter && _media.IsLocked;
     public bool IsUnlockedLetter => IsLetter && !_media.IsLocked;
+    public bool IsMyLetter => IsLetter &&
+        _media.UploadedById == Preferences.Get("user_id", string.Empty);
 
     public string CountdownText
     {

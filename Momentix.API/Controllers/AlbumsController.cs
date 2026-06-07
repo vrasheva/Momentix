@@ -41,23 +41,30 @@ namespace Momentix.API.Controllers
                 .Include(a => a.Owner)
                 .Include(a => a.Members)
                 .Include(a => a.MediaItems)
-                .Select(a => new AlbumResponseDto
-                {
-                    Id = a.Id,
-                    Title = a.Title,
-                    Description = a.Description,
-                    CreatedAt = a.CreatedAt,
-                    OwnerId = a.OwnerId,
-                    OwnerName = a.Owner.FullName,
-                    MemberCount = a.Members.Count,
-                    MediaCount = a.MediaItems.Count,
-                    IsOwner = a.OwnerId == userId,
-                    IsSharedWithMe = a.OwnerId != userId &&
-                                     a.Members.Any(m => m.UserId == userId)
-                })
                 .ToListAsync();
 
-            return Ok(albums);
+            var result = albums.Select(a => new AlbumResponseDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Description = a.Description,
+                CreatedAt = a.CreatedAt,
+                OwnerId = a.OwnerId,
+                OwnerName = a.Owner.FullName,
+                MemberCount = a.Members.Count,
+                MediaCount = a.MediaItems.Count,
+                IsOwner = a.OwnerId == userId,
+                IsSharedWithMe = a.OwnerId != userId &&
+                                 a.Members.Any(m => m.UserId == userId),
+                ThumbnailUrls = a.MediaItems
+                    .Where(m => m.Type == MediaType.Image)
+                    .OrderByDescending(m => m.UploadedAt)
+                    .Take(4)
+                    .Select(m => m.Url)
+                    .ToList()
+            }).ToList();
+
+            return Ok(result);
         }
 
         // Вземи конкретен албум
@@ -262,6 +269,21 @@ namespace Momentix.API.Controllers
             }
 
             return Ok(members);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAlbum(int id, [FromBody] UpdateAlbumDto dto)
+        {
+            var userId = GetUserId();
+            var album = await _context.Albums.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (album == null) return NotFound("Албумът не е намерен.");
+            if (album.OwnerId != userId) return Forbid();
+
+            album.Title = dto.Title;
+            await _context.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

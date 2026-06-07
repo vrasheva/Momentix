@@ -11,9 +11,33 @@ public class FriendInviteViewModel : INotifyPropertyChanged
     public string UserId { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string Initials => FullName.Length >= 2
-        ? $"{FullName[0]}{FullName.Split(' ').LastOrDefault()?[0]}"
-        : FullName.Length == 1 ? FullName[0].ToString() : "?";
+
+    public string Initials
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FullName)) return "?";
+            var parts = FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0][0].ToString().ToUpper();
+            return $"{parts[0][0]}{parts[parts.Length - 1][0]}".ToUpper();
+        }
+    }
+
+    public string AvatarColor
+    {
+        get
+        {
+            var colors = new[]
+            {
+                "#60A5FA", "#34D399", "#FBBF24",
+                "#A78BFA", "#F87171", "#38BDF8",
+                "#4ADE80", "#FB923C"
+            };
+            if (string.IsNullOrWhiteSpace(UserId)) return colors[0];
+            var index = Math.Abs(UserId.GetHashCode()) % colors.Length;
+            return colors[index];
+        }
+    }
 
     private bool _isInvited;
     public bool IsInvited
@@ -119,7 +143,6 @@ public partial class CreateAlbumViewModel : BaseViewModel
 
     public ObservableCollection<string> SelectedPhotos { get; } = new();
     public int SelectedPhotosCount => SelectedPhotos.Count;
-
     public ObservableCollection<FriendInviteViewModel> Friends { get; } = new();
 
     public IRelayCommand SaveCommand => new AsyncRelayCommand(Save);
@@ -158,9 +181,8 @@ public partial class CreateAlbumViewModel : BaseViewModel
             {
                 Title = "Избери снимка"
             });
-            
-            if (file == null)
-                return;
+
+            if (file == null) return;
 
             SelectedPhotos.Add(file.FullPath);
             OnPropertyChanged(nameof(SelectedPhotosCount));
@@ -191,7 +213,6 @@ public partial class CreateAlbumViewModel : BaseViewModel
                 return;
             }
 
-            // Качи снимките
             foreach (var photoPath in SelectedPhotos)
             {
                 try
@@ -206,7 +227,6 @@ public partial class CreateAlbumViewModel : BaseViewModel
                         ".gif" => "image/gif",
                         _ => "image/jpeg"
                     };
-
                     await _apiService.PostFileAsync<MediaResponseDto>(
                         $"Media/album/{album.Id}/photo",
                         stream, fileName, contentType);
@@ -214,23 +234,17 @@ public partial class CreateAlbumViewModel : BaseViewModel
                 catch { }
             }
 
-            // Добави членове
             foreach (var friend in Friends.Where(f => f.IsInvited))
             {
-                System.Diagnostics.Debug.WriteLine($"Adding member: {friend.Email}, CanUpload: {friend.CanUpload}");
-
-                var success = await _apiService.PostAsync(
+                await _apiService.PostAsync(
                     $"Albums/{album.Id}/members",
                     new AddAlbumMemberDto
                     {
                         UserEmail = friend.Email,
                         CanUpload = friend.CanUpload
                     });
-
-                System.Diagnostics.Debug.WriteLine($"Result: {success}");
             }
 
-            // Добави писмо
             if (HasLetter && !string.IsNullOrWhiteSpace(LetterText))
             {
                 DateTime? unlockAt = null;
@@ -239,7 +253,6 @@ public partial class CreateAlbumViewModel : BaseViewModel
                     var unlockDate = LetterUnlockDate.Date + LetterUnlockTime;
                     unlockAt = DateTime.SpecifyKind(unlockDate, DateTimeKind.Local).ToUniversalTime();
                 }
-
                 await _apiService.PostAsync<CreateLetterMediaDto, MediaResponseDto>(
                     $"Media/album/{album.Id}/letter",
                     new CreateLetterMediaDto { Text = LetterText, UnlockAt = unlockAt });

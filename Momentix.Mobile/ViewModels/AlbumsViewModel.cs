@@ -10,8 +10,20 @@ namespace Momentix.Mobile.ViewModels
         private readonly ApiService _apiService;
 
         public ObservableCollection<AlbumResponseDto> MyAlbums { get; } = new();
+        public ObservableCollection<AlbumResponseDto> MyAlbumsRest { get; } = new();
         public ObservableCollection<AlbumResponseDto> SharedWithMe { get; } = new();
         public ObservableCollection<AlbumResponseDto> SharedByMe { get; } = new();
+        public ObservableCollection<AlbumResponseDto> SharedByMeRest { get; } = new();
+
+        public bool HasMyAlbum0 => MyAlbums.Count > 0;
+        public AlbumResponseDto? MyAlbum0 => MyAlbums.Count > 0 ? MyAlbums[0] : null;
+        public bool HasSharedByMe0 => SharedByMe.Count > 0;
+        public AlbumResponseDto? SharedByMe0 => SharedByMe.Count > 0 ? SharedByMe[0] : null;
+
+        public bool SharedWithMeEmpty => SharedWithMe.Count == 0;
+        public bool SharedWithMeNotEmpty => SharedWithMe.Count > 0;
+        public bool SharedByMeEmpty => SharedByMe.Count == 0;
+        public bool SharedByMeNotEmpty => SharedByMe.Count > 0;
 
         private string _errorMessage = string.Empty;
         public string ErrorMessage
@@ -51,8 +63,10 @@ namespace Momentix.Mobile.ViewModels
                 var result = await _apiService.GetAsync<List<AlbumResponseDto>>("Albums");
 
                 MyAlbums.Clear();
+                MyAlbumsRest.Clear();
                 SharedWithMe.Clear();
                 SharedByMe.Clear();
+                SharedByMeRest.Clear();
 
                 if (result != null)
                 {
@@ -60,15 +74,29 @@ namespace Momentix.Mobile.ViewModels
                     {
                         if (album.IsOwner && album.MemberCount == 0)
                             MyAlbums.Add(album);
-                        else if (album.IsOwner && album.MemberCount > 0)
-                        {
-                            MyAlbums.Add(album);
+
+                        if (album.IsOwner && album.MemberCount > 0)
                             SharedByMe.Add(album);
-                        }
-                        else if (album.IsSharedWithMe)
+
+                        if (album.IsSharedWithMe)
                             SharedWithMe.Add(album);
                     }
+
+                    foreach (var a in MyAlbums.Skip(1))
+                        MyAlbumsRest.Add(a);
+
+                    foreach (var a in SharedByMe.Skip(1))
+                        SharedByMeRest.Add(a);
                 }
+
+                OnPropertyChanged(nameof(HasMyAlbum0));
+                OnPropertyChanged(nameof(MyAlbum0));
+                OnPropertyChanged(nameof(HasSharedByMe0));
+                OnPropertyChanged(nameof(SharedByMe0));
+                OnPropertyChanged(nameof(SharedWithMeEmpty));
+                OnPropertyChanged(nameof(SharedWithMeNotEmpty));
+                OnPropertyChanged(nameof(SharedByMeEmpty));
+                OnPropertyChanged(nameof(SharedByMeNotEmpty));
             }
             catch (Exception ex)
             {

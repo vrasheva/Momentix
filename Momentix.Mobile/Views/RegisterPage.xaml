@@ -32,7 +32,7 @@
             <Label Text="Имейл" FontSize="11" FontAttributes="Bold"
                    TextColor="#888888" Margin="0,0,0,6"/>
             <Border BackgroundColor="White" StrokeThickness="1"
-                    Stroke="#E0E0E0" Margin="0,0,0,16">
+                    Stroke="#E0E0E0" Margin="0,0,0,12">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="10"/>
                 </Border.StrokeShape>
@@ -42,13 +42,15 @@
                        BackgroundColor="Transparent"/>
             </Border>
 
-            <Button Text="{Binding SendEmailButtonText}"
-                    Command="{Binding SendRegistrationEmailCommand}"
-                    BackgroundColor="#EEF2FF" TextColor="#111111"
-                    HeightRequest="44" CornerRadius="12"
-                    FontAttributes="Bold" FontSize="13"
-                    HorizontalOptions="Fill"
-                    Margin="0,0,0,8"/>
+            <!-- Тестов имейл — незабележим текст -->
+            <Label Text="{Binding SendEmailButtonText}"
+                   FontSize="11" TextColor="#CCCCCC"
+                   HorizontalOptions="End"
+                   Margin="0,0,0,4">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SendRegistrationEmailCommand}"/>
+                </Label.GestureRecognizers>
+            </Label>
 
             <Label Text="{Binding EmailStatusMessage}" TextColor="#16A34A"
                    FontSize="12" HorizontalOptions="Center"
@@ -116,10 +118,11 @@
                         <TapGestureRecognizer Command="{Binding SelectThemeCommand}" CommandParameter="Purple"/>
                     </Border.GestureRecognizers>
                 </Border>
+                <!-- Черната тема — дефолтна, stroke е по-дебел -->
                 <Border WidthRequest="36" HeightRequest="36"
                         BackgroundColor="#1F2937"
                         StrokeThickness="{Binding SelectedTheme, Converter={StaticResource ThemeToStrokeConverter}, ConverterParameter=Black}"
-                        Stroke="#60A5FA">
+                        Stroke="#111111">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="18"/>
                     </Border.StrokeShape>
@@ -136,7 +139,7 @@
 
             <ActivityIndicator IsRunning="{Binding IsLoading}"
                                IsVisible="{Binding IsLoading}"
-                               Color="{DynamicResource Primary}"
+                               Color="#111111"
                                Margin="0,0,0,8"/>
 
             <Button Text="Регистрирай се" Command="{Binding RegisterCommand}"
@@ -149,8 +152,9 @@
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
                 <Label Text="Имаш акаунт?" FontSize="13"
                        TextColor="#888888" VerticalOptions="Center"/>
+                <!-- Влез — винаги черен -->
                 <Label Text="Влез" FontSize="13" FontAttributes="Bold"
-                       TextColor="{DynamicResource Primary}" VerticalOptions="Center">
+                       TextColor="#111111" VerticalOptions="Center">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToLoginCommand}"/>
                     </Label.GestureRecognizers>

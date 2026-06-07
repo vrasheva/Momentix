@@ -42,8 +42,9 @@
                        BackgroundColor="Transparent"/>
             </Border>
 
+            <!-- Забравена парола — винаги черна -->
             <Label Text="Забравена парола?" FontSize="11" FontAttributes="Bold"
-                   TextColor="{DynamicResource Primary}"
+                   TextColor="#111111"
                    HorizontalOptions="End" Margin="0,0,0,28"/>
 
             <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A"
@@ -53,7 +54,7 @@
 
             <ActivityIndicator IsRunning="{Binding IsLoading}"
                                IsVisible="{Binding IsLoading}"
-                               Color="{DynamicResource Primary}"
+                               Color="#111111"
                                Margin="0,0,0,8"/>
 
             <Button Text="Влез" Command="{Binding LoginCommand}"
@@ -66,8 +67,9 @@
             <HorizontalStackLayout HorizontalOptions="Center" Spacing="4">
                 <Label Text="Нямаш акаунт?" FontSize="13"
                        TextColor="#888888" VerticalOptions="Center"/>
+                <!-- Регистрирай се — винаги черна -->
                 <Label Text="Регистрирай се" FontSize="13" FontAttributes="Bold"
-                       TextColor="{DynamicResource Primary}" VerticalOptions="Center">
+                       TextColor="#111111" VerticalOptions="Center">
                     <Label.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding GoToRegisterCommand}"/>
                     </Label.GestureRecognizers>

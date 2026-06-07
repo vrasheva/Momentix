@@ -38,7 +38,7 @@ public class EmailService
         using var message = new MailMessage
         {
             From = new MailAddress(smtpEmail, fromName),
-            Subject = "Momentix registration email test",
+            Subject = "Добре дошъл/а в Momentix! / Welcome to Momentix!",
             Body = BuildRegistrationBody(fullName),
             IsBodyHtml = false
         };
@@ -58,7 +58,31 @@ public class EmailService
 
     private static string BuildRegistrationBody(string fullName)
     {
-        var name = string.IsNullOrWhiteSpace(fullName) ? "there" : fullName.Trim();
-        return $"Hi {name},\n\nThis is a Momentix registration email test.\n\nIf you received this, Gmail SMTP is configured correctly.\n\nMomentix";
+        var name = string.IsNullOrWhiteSpace(fullName) ? "потребителю" : fullName.Trim();
+        return $"""
+        Здравей, {name}!
+
+        Добре дошъл/а в Momentix — мястото, където съхраняваш своите моменти.
+
+        Акаунтът ти беше създаден успешно. Вече можеш да влезеш и да започнеш да създаваш албуми, да споделяш спомени с приятели и да улавяш специалните моменти от живота си.
+
+        Ако не си се регистрирал/а в Momentix, можеш да игнорираш този имейл.
+
+        С уважение,
+        Екипът на Momentix
+
+        ────────────────────────────────────
+
+        Hi, {name}!
+
+        Welcome to Momentix — the place where you preserve your moments.
+
+        Your account has been created successfully. You can now log in and start creating albums, sharing memories with friends, and capturing the special moments in your life.
+
+        If you did not register for Momentix, you can ignore this email.
+
+        Best regards,
+        The Momentix Team
+        """;
     }
 }

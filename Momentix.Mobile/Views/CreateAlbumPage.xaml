@@ -12,91 +12,87 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <!-- Topbar — само назад, без Запази -->
-            <Grid ColumnDefinitions="Auto,*" Padding="14,12"
-                  BackgroundColor="White">
-                <Label Text="←" FontSize="22" TextColor="#111"
-                       VerticalOptions="Center">
-                    <Label.GestureRecognizers>
+            <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" BackgroundColor="White">
+                <Grid WidthRequest="36" HeightRequest="36">
+                    <Grid.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding CancelCommand}"/>
-                    </Label.GestureRecognizers>
-                </Label>
+                    </Grid.GestureRecognizers>
+                    <Ellipse Stroke="#E0E0E0" StrokeThickness="1.5" Fill="Transparent"
+                             WidthRequest="36" HeightRequest="36"
+                             HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <Path Data="M 20,18 L 15,12 L 20,6"
+                          Stroke="#111" StrokeThickness="2"
+                          StrokeLineCap="Round" StrokeLineJoin="Round"
+                          WidthRequest="24" HeightRequest="24"
+                          HorizontalOptions="Start" VerticalOptions="Center">
+                        <Path.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CancelCommand}"/>
+                        </Path.GestureRecognizers>
+                    </Path>
+                </Grid>
                 <Label Grid.Column="1" Text="Нов албум" FontSize="15"
                        FontAttributes="Bold" TextColor="#111"
                        HorizontalOptions="Center" VerticalOptions="Center"/>
+                <BoxView Grid.Column="2" WidthRequest="36" HeightRequest="36" Color="Transparent"/>
             </Grid>
             <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
 
-            <!-- Име на албума -->
             <VerticalStackLayout Padding="16,16,16,12" Spacing="6">
-                <Label Text="Име на албума" FontSize="13" FontAttributes="Bold"
-                       TextColor="#111"/>
+                <Label Text="Име на албума" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
                 <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="10"/>
                     </Border.StrokeShape>
-                    <Editor Placeholder="Въведи име..."
-                            Text="{Binding Title}"
-                            MinimumHeightRequest="44"
-                            AutoSize="TextChanges"
-                            Margin="10,8"
-                            TextColor="#111" PlaceholderColor="#BBBBBB"
-                            BackgroundColor="Transparent"/>
+                    <Editor Placeholder="Въведи име..." Text="{Binding Title}"
+                            MinimumHeightRequest="44" AutoSize="TextChanges" Margin="10,8"
+                            TextColor="#111" PlaceholderColor="#BBBBBB" BackgroundColor="Transparent"/>
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Описание -->
             <VerticalStackLayout Padding="16,0,16,12" Spacing="6">
-                <Label Text="Описание" FontSize="13" FontAttributes="Bold"
-                       TextColor="#111"/>
+                <Label Text="Описание" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
                 <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="10"/>
                     </Border.StrokeShape>
-                    <Editor Placeholder="Добави описание..."
-                            Text="{Binding Description}"
-                            MinimumHeightRequest="44"
-                            AutoSize="TextChanges"
-                            Margin="10,8"
-                            TextColor="#111" PlaceholderColor="#BBBBBB"
-                            BackgroundColor="Transparent"/>
+                    <Editor Placeholder="Добави описание..." Text="{Binding Description}"
+                            MinimumHeightRequest="44" AutoSize="TextChanges" Margin="10,8"
+                            TextColor="#111" PlaceholderColor="#BBBBBB" BackgroundColor="Transparent"/>
                 </Border>
             </VerticalStackLayout>
 
             <BoxView HeightRequest="8" BackgroundColor="#F7F7F7"/>
 
-            <!-- Снимки -->
             <VerticalStackLayout Padding="16,16,16,16" Spacing="10">
-                <Label Text="Снимки" FontSize="13" FontAttributes="Bold"
-           TextColor="#111"/>
-
+                <Label Text="Снимки" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
                 <HorizontalStackLayout Spacing="8">
-
-                    <!-- Бутон добави — винаги първи -->
-                    <Border WidthRequest="90" HeightRequest="90"
-                BackgroundColor="#FAFAFA"
-                StrokeThickness="1.5"
-                Stroke="#CCCCCC">
+                    <Border WidthRequest="90" HeightRequest="90" BackgroundColor="#FAFAFA"
+                            StrokeThickness="1.5" Stroke="#CCCCCC">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding PickPhotoCommand}"/>
                         </Border.GestureRecognizers>
-                        <Label Text="+" FontSize="28" TextColor="#AAAAAA"
-                   HorizontalOptions="Center" VerticalOptions="Center"/>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
+                            <Border BackgroundColor="{DynamicResource PrimaryLight}" WidthRequest="32" HeightRequest="32"
+                                    HorizontalOptions="Center">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="16"/>
+                                </Border.StrokeShape>
+                                <Label Text="+" FontSize="20" FontAttributes="Bold"
+                                       TextColor="{DynamicResource Primary}"
+                                       HorizontalOptions="Center" VerticalOptions="Center"/>
+                            </Border>
+                        </VerticalStackLayout>
                     </Border>
-
-                    <!-- Избрани снимки -->
-                    <CollectionView ItemsSource="{Binding SelectedPhotos}"
-                        HeightRequest="90">
+                    <CollectionView ItemsSource="{Binding SelectedPhotos}" HeightRequest="90">
                         <CollectionView.ItemsLayout>
                             <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Border WidthRequest="90" HeightRequest="90"
-                            StrokeThickness="0">
+                                <Border WidthRequest="90" HeightRequest="90" StrokeThickness="0">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="10"/>
                                     </Border.StrokeShape>
@@ -105,75 +101,49 @@
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
-
                 </HorizontalStackLayout>
             </VerticalStackLayout>
 
             <BoxView HeightRequest="8" BackgroundColor="#F7F7F7"/>
 
-            <!-- Сподели с -->
             <VerticalStackLayout Padding="16,12,16,4" Spacing="0">
-                <Label Text="Сподели с" FontSize="13" FontAttributes="Bold"
-                       TextColor="#111" Margin="0,0,0,8"/>
-
+                <Label Text="Сподели с" FontSize="13" FontAttributes="Bold" TextColor="#111" Margin="0,0,0,8"/>
                 <CollectionView ItemsSource="{Binding Friends}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <VerticalStackLayout>
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="12" Padding="0,10">
-
-                                    <!-- Аватар -->
+                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12" Padding="0,10">
                                     <Border WidthRequest="38" HeightRequest="38"
-                                            BackgroundColor="#E8E8FF" StrokeThickness="0">
+                                            BackgroundColor="{DynamicResource PrimaryLight}" StrokeThickness="0">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="19"/>
                                         </Border.StrokeShape>
-                                        <Label Text="{Binding Initials}" FontSize="12"
-                                               FontAttributes="Bold" TextColor="#5050CC"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center"/>
+                                        <Label Text="{Binding Initials}" FontSize="12" FontAttributes="Bold"
+                                               TextColor="{DynamicResource Primary}"
+                                               HorizontalOptions="Center" VerticalOptions="Center"/>
                                     </Border>
-
-                                    <!-- Ime + роля -->
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         VerticalOptions="Center" Spacing="2">
-                                        <Label Text="{Binding FullName}" FontSize="13"
-                                               FontAttributes="Bold" TextColor="#111"/>
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                        <Label Text="{Binding FullName}" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
                                         <Label FontSize="11" TextColor="#888">
                                             <Label.Triggers>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding IsInvited}"
-                                                             Value="False">
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsInvited}" Value="False">
                                                     <Setter Property="IsVisible" Value="False"/>
                                                 </DataTrigger>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding IsInvited}"
-                                                             Value="True">
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsInvited}" Value="True">
                                                     <Setter Property="IsVisible" Value="True"/>
                                                 </DataTrigger>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding CanUpload}"
-                                                             Value="True">
-                                                    <Setter Property="Text"
-                                                            Value="Може да качва"/>
+                                                <DataTrigger TargetType="Label" Binding="{Binding CanUpload}" Value="True">
+                                                    <Setter Property="Text" Value="Може да качва"/>
                                                 </DataTrigger>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding CanUpload}"
-                                                             Value="False">
-                                                    <Setter Property="Text"
-                                                            Value="Само преглед"/>
+                                                <DataTrigger TargetType="Label" Binding="{Binding CanUpload}" Value="False">
+                                                    <Setter Property="Text" Value="Само преглед"/>
                                                 </DataTrigger>
                                             </Label.Triggers>
                                         </Label>
                                     </VerticalStackLayout>
-
-                                    <!-- Toggle -->
-                                    <Switch Grid.Column="2"
-                                        IsToggled="{Binding IsInvited}"
-                                        OnColor="#5B5BD6"
-                                        ThumbColor="White"
-                                        Toggled="OnFriendToggled"/>
+                                    <Switch Grid.Column="2" IsToggled="{Binding IsInvited}"
+                                            OnColor="{DynamicResource Primary}" ThumbColor="White"
+                                            Toggled="OnFriendToggled"/>
                                 </Grid>
                                 <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
                             </VerticalStackLayout>
@@ -184,91 +154,64 @@
 
             <BoxView HeightRequest="8" BackgroundColor="#F7F7F7"/>
 
-            <!-- Писмо / Спомен -->
             <VerticalStackLayout Padding="16,12,16,0" Spacing="0">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,0">
-                    <Label Text="Писмо / Спомен" FontSize="13"
-                           FontAttributes="Bold" TextColor="#111"
-                           VerticalOptions="Center"/>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label Text="Писмо / Спомен" FontSize="13" FontAttributes="Bold" TextColor="#111" VerticalOptions="Center"/>
                     <Switch Grid.Column="1" IsToggled="{Binding HasLetter}"
-                            OnColor="#5B5BD6" ThumbColor="White"/>
+                            OnColor="{DynamicResource Primary}" ThumbColor="White"/>
                 </Grid>
 
-                <VerticalStackLayout IsVisible="{Binding HasLetter}" Spacing="12"
-                                     Margin="0,8,0,0">
+                <VerticalStackLayout IsVisible="{Binding HasLetter}" Spacing="12" Margin="0,8,0,0">
                     <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="10"/>
                         </Border.StrokeShape>
-                        <Editor Placeholder="Напиши спомен или писмо..."
-                            Text="{Binding LetterText}"
-                            MinimumHeightRequest="44"
-                            AutoSize="TextChanges"
-                            Margin="10,8"
-                            TextColor="#111" PlaceholderColor="#BBBBBB"
-                            BackgroundColor="Transparent"/>
+                        <Editor Placeholder="Напиши спомен или писмо..." Text="{Binding LetterText}"
+                                MinimumHeightRequest="44" AutoSize="TextChanges" Margin="10,8"
+                                TextColor="#111" PlaceholderColor="#BBBBBB" BackgroundColor="Transparent"/>
                     </Border>
 
-                    <!-- Заключи до дата -->
                     <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
                         <VerticalStackLayout Spacing="2">
-                            <Label Text="Заключи до дата" FontSize="13"
-                                   FontAttributes="Bold" TextColor="#111"/>
-                            <Label Text="Изберете кога да се отвори"
-                                   FontSize="11" TextColor="#888"/>
+                            <Label Text="Заключи до дата" FontSize="13" FontAttributes="Bold" TextColor="#111"/>
+                            <Label Text="Изберете кога да се отвори" FontSize="11" TextColor="#888"/>
                         </VerticalStackLayout>
                         <Switch Grid.Column="1" IsToggled="{Binding LockLetter}"
-                                OnColor="#5B5BD6" ThumbColor="White"/>
+                                OnColor="{DynamicResource Primary}" ThumbColor="White"/>
                     </Grid>
 
-                    <!-- Дата и час inline -->
                     <VerticalStackLayout IsVisible="{Binding LockLetter}" Spacing="6">
-                        <Label Text="Отваря се на" FontSize="11"
-                               FontAttributes="Bold" TextColor="#888"/>
+                        <Label Text="Отваря се на" FontSize="11" FontAttributes="Bold" TextColor="#888"/>
                         <Grid ColumnDefinitions="*,120" ColumnSpacing="10">
-                            <Border BackgroundColor="White" StrokeThickness="1"
-                                    Stroke="#E0E0E0">
+                            <Border BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="8"/>
                                 </Border.StrokeShape>
                                 <DatePicker Date="{Binding LetterUnlockDate}"
                                             MinimumDate="{x:Static sys:DateTime.Today}"
-                                            Format="dd.MM.yyyy"
-                                            TextColor="#111"
-                                            BackgroundColor="Transparent"
-                                            HeightRequest="44"
-                                            Margin="10,0"/>
+                                            Format="dd.MM.yyyy" TextColor="#111"
+                                            BackgroundColor="Transparent" HeightRequest="44" Margin="10,0"/>
                             </Border>
-                            <Border Grid.Column="1" BackgroundColor="White"
-                                    StrokeThickness="1" Stroke="#E0E0E0">
+                            <Border Grid.Column="1" BackgroundColor="White" StrokeThickness="1" Stroke="#E0E0E0">
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="8"/>
                                 </Border.StrokeShape>
-                                <TimePicker Time="{Binding LetterUnlockTime}"
-                                            TextColor="#111"
-                                            BackgroundColor="Transparent"
-                                            HeightRequest="44"
-                                            Margin="10,0"/>
+                                <TimePicker Time="{Binding LetterUnlockTime}" TextColor="#111"
+                                            BackgroundColor="Transparent" HeightRequest="44" Margin="10,0"/>
                             </Border>
                         </Grid>
                     </VerticalStackLayout>
-
                     <BoxView HeightRequest="8"/>
                 </VerticalStackLayout>
             </VerticalStackLayout>
 
             <BoxView HeightRequest="8" BackgroundColor="#F7F7F7"/>
 
-            <!-- Грешка -->
-            <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A"
-                   FontSize="12" HorizontalOptions="Center" Margin="16,8"
+            <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A" FontSize="12"
+                   HorizontalOptions="Center" Margin="16,8"
                    IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
-
-            <ActivityIndicator IsRunning="{Binding IsLoading}"
-                               IsVisible="{Binding IsLoading}"
-                               Color="#111111" Margin="0,8"/>
-
-            <!-- Бутон -->
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                               Color="{DynamicResource Primary}" Margin="0,8"/>
             <Button Text="Създай албум" Command="{Binding SaveCommand}"
                     BackgroundColor="#111111" TextColor="White"
                     HeightRequest="52" CornerRadius="14"

@@ -44,6 +44,7 @@ public class MediaController : ControllerBase
                 LetterText = m.Type == MediaType.Letter ? m.Url : null,  // ← добави
                 Type = m.Type,
                 UploadedAt = m.UploadedAt,
+                UploadedById = m.UploadedById,
                 UploadedByName = m.UploadedBy.FullName,
                 UnlockAt = m.UnlockAt
             })
@@ -253,6 +254,38 @@ public class MediaController : ControllerBase
         return Ok("Memory deleted.");
     }
 
+    [HttpPut("{id}/letter")]
+    public async Task<IActionResult> UpdateLetter(int id, [FromBody] CreateLetterMediaDto dto)
+    {
+        var userId = GetUserId();
+        var media = await _context.MediaItems.FirstOrDefaultAsync(m => m.Id == id);
+
+        if (media == null)
+            return NotFound("Писмото не е намерено.");
+
+        if (media.Type != MediaType.Letter)
+            return BadRequest("Това не е писмо.");
+
+        // Само авторът може да редактира
+        if (media.UploadedById != userId)
+            return Forbid();
+
+        if (string.IsNullOrWhiteSpace(dto.Text))
+            return BadRequest("Текстът е задължителен.");
+
+        media.Url = dto.Text.Trim();
+        await _context.SaveChangesAsync();
+
+        return Ok(new MediaResponseDto
+        {
+            Id = media.Id,
+            Url = media.Url,
+            LetterText = media.Url,
+            Type = media.Type,
+            UploadedAt = media.UploadedAt,
+            UploadedByName = userId
+        });
+    }
     private async Task<IActionResult> SaveImageMedia(IFormFile file, Media media)
     {
         if (file == null || file.Length == 0)

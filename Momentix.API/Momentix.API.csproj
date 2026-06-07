@@ -37,4 +37,9 @@
     <ProjectReference Include="..\Momentix.Data\Momentix.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="uploads\challenges\" />
+    <Folder Include="uploads\media\" />
+  </ItemGroup>
+
 </Project>
