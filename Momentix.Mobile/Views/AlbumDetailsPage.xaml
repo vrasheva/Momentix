@@ -36,7 +36,6 @@
                         <TapGestureRecognizer Command="{Binding OpenRenamePopupCommand}"/>
                     </Label.GestureRecognizers>
                 </Label>
-                <!-- Молив в хедъра -->
                 <Path Data="M 0,12 L 8,4 L 12,8 L 4,16 L 0,16 Z M 9,3 L 11,1 L 15,5 L 13,7 Z"
                       Fill="{DynamicResource Primary}"
                       WidthRequest="16" HeightRequest="16"
@@ -172,7 +171,6 @@
                                 <Label Text="Добави спомен" FontSize="10" TextColor="#888888" HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
-                        <!-- Първо писмо -->
                         <Border Grid.Column="1" HeightRequest="120" BackgroundColor="White"
                                 StrokeThickness="0.5" Stroke="#E0E0E0" IsVisible="{Binding HasFirstLetter}">
                             <Border.StrokeShape>
@@ -184,7 +182,12 @@
                             </Border.GestureRecognizers>
                             <Grid>
                                 <VerticalStackLayout Spacing="4" VerticalOptions="Center">
-                                    <Label Text="✉️" FontSize="22" HorizontalOptions="Center"/>
+                                    <Path Data="M 1,1 L 23,1 L 23,17 L 1,17 Z M 1,1 L 12,10 L 23,1"
+                                          Stroke="{DynamicResource Primary}"
+                                          StrokeThickness="1.5" StrokeLineJoin="Round"
+                                          Fill="{DynamicResource PrimaryLight}"
+                                          WidthRequest="24" HeightRequest="18"
+                                          HorizontalOptions="Center" Aspect="Uniform"/>
                                     <Label Text="{Binding FirstLetter.UploadedByName}" FontSize="11" FontAttributes="Bold"
                                            TextColor="#111" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
                                     <Label Text="{Binding FirstLetter.UploadedAtText}" FontSize="10" TextColor="#888"
@@ -215,7 +218,12 @@
                                     </Border.GestureRecognizers>
                                     <Grid>
                                         <VerticalStackLayout Spacing="4" VerticalOptions="Center">
-                                            <Label Text="✉️" FontSize="22" HorizontalOptions="Center"/>
+                                            <Path Data="M 1,1 L 23,1 L 23,17 L 1,17 Z M 1,1 L 12,10 L 23,1"
+                                                  Stroke="{DynamicResource Primary}"
+                                                  StrokeThickness="1.5" StrokeLineJoin="Round"
+                                                  Fill="{DynamicResource PrimaryLight}"
+                                                  WidthRequest="24" HeightRequest="18"
+                                                  HorizontalOptions="Center" Aspect="Uniform"/>
                                             <Label Text="{Binding UploadedByName}" FontSize="11" FontAttributes="Bold"
                                                    TextColor="#111" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
                                             <Label Text="{Binding UploadedAtText}" FontSize="10" TextColor="#888"
@@ -276,7 +284,8 @@
                                         <RoundRectangle CornerRadius="19"/>
                                     </Border.StrokeShape>
                                     <Label Text="{Binding FirstMember.Initials}" FontSize="13" FontAttributes="Bold"
-                                           TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                           TextColor="{Binding FirstMember.InitialsColor}"
+                                           HorizontalOptions="Center" VerticalOptions="Center"/>
                                 </Border>
                                 <Label Grid.Row="1" Text="{Binding FirstMember.FullName}" FontSize="11" FontAttributes="Bold"
                                        TextColor="#111" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>
@@ -303,7 +312,8 @@
                                                 <RoundRectangle CornerRadius="19"/>
                                             </Border.StrokeShape>
                                             <Label Text="{Binding Initials}" FontSize="13" FontAttributes="Bold"
-                                                   TextColor="White" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                                   TextColor="{Binding InitialsColor}"
+                                                   HorizontalOptions="Center" VerticalOptions="Center"/>
                                         </Border>
                                         <Label Grid.Row="1" Text="{Binding FullName}" FontSize="11" FontAttributes="Bold"
                                                TextColor="#111" HorizontalOptions="Center" LineBreakMode="TailTruncation"/>

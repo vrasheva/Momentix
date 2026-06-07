@@ -36,33 +36,25 @@
 
                 <BoxView HeightRequest="0.5" BackgroundColor="#F0F0F0"/>
 
-                <ActivityIndicator IsRunning="{Binding IsLoading}"
-                                   IsVisible="{Binding IsLoading}"
-                                   Color="{DynamicResource Primary}"
-                                   Margin="0,8"/>
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                                   Color="{DynamicResource Primary}" Margin="0,8"/>
 
-                <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A"
-                       FontSize="12" Margin="16,4"
+                <Label Text="{Binding ErrorMessage}" TextColor="#E24B4A" FontSize="12" Margin="16,4"
                        IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}}"/>
 
                 <!-- Моите капсули -->
                 <Grid ColumnDefinitions="*,Auto" Padding="16,14,16,8">
                     <Label Text="Моите капсули" FontSize="13" FontAttributes="Bold"
-           TextColor="#111111" VerticalOptions="Center"/>
+                           TextColor="#111111" VerticalOptions="Center"/>
                 </Grid>
 
-                <!-- Grid с картичка + капсули -->
-                <Grid Margin="12,0,12,8">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                <Grid Margin="12,0,12,8" RowDefinitions="Auto,Auto">
 
-                    <!-- Първи ред: картичка + първа капсула -->
                     <Grid Grid.Row="0" ColumnDefinitions="*,*" ColumnSpacing="8" Margin="0,0,0,8">
-                        <!-- Забита картичка Нова капсула -->
+
+                        <!-- Картичка Добави капсула -->
                         <Border Grid.Column="0" HeightRequest="140" BackgroundColor="#FAFAFA"
-                StrokeThickness="1.5" Stroke="#CCCCCC">
+                                StrokeThickness="1.5" Stroke="#CCCCCC" VerticalOptions="Start">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12"/>
                             </Border.StrokeShape>
@@ -70,102 +62,105 @@
                                 <TapGestureRecognizer Command="{Binding GoToCreateCapsuleCommand}"/>
                             </Border.GestureRecognizers>
                             <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="6">
-                                <Border BackgroundColor="#E8F1FD" WidthRequest="40" HeightRequest="40"
-                        HorizontalOptions="Center">
+                                <Border BackgroundColor="{DynamicResource PrimaryLight}"
+                                        WidthRequest="40" HeightRequest="40"
+                                        HorizontalOptions="Center" StrokeThickness="0">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="20"/>
                                     </Border.StrokeShape>
-                                    <Label Text="+" FontSize="26" FontAttributes="Bold" TextColor="#60A5FA"
-                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                                    <Label Text="+" FontSize="26" FontAttributes="Bold"
+                                           TextColor="{DynamicResource Primary}"
+                                           HorizontalOptions="Center" VerticalOptions="Center"
+                                           HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
                                 </Border>
-                                <Label Text="Нова капсула" FontSize="11" TextColor="#888888" HorizontalOptions="Center"/>
-                                <Label Text="Създай" FontSize="10" TextColor="#AAAAAA" HorizontalOptions="Center"/>
+                                <Label Text="Добави капсула" FontSize="11" TextColor="#AAAAAA"
+                                       HorizontalOptions="Center"/>
                             </VerticalStackLayout>
                         </Border>
 
                         <!-- Първа капсула -->
                         <Border Grid.Column="1" HeightRequest="140" StrokeThickness="0"
-                BackgroundColor="{Binding FirstCapsule.CardBackground}"
-                IsVisible="{Binding HasFirstCapsule}">
+                                BackgroundColor="{Binding FirstCapsule.CardBackground}"
+                                IsVisible="{Binding HasFirstCapsule}">
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="12"/>
                             </Border.StrokeShape>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenCapsuleCommand}"
-                                      CommandParameter="{Binding FirstCapsule}"/>
+                                                      CommandParameter="{Binding FirstCapsule}"/>
                             </Border.GestureRecognizers>
                             <Grid RowDefinitions="*,Auto" Padding="10">
                                 <VerticalStackLayout Grid.Row="0" VerticalOptions="Center"
-                                     HorizontalOptions="Center" Spacing="4">
+                                                     HorizontalOptions="Center" Spacing="4">
                                     <VerticalStackLayout IsVisible="{Binding FirstCapsule.IsLocked}"
-                                         HorizontalOptions="Center" Spacing="4">
+                                                         HorizontalOptions="Center" Spacing="4">
                                         <Image Source="hourglass.svg" WidthRequest="32" HeightRequest="32"
-                               HorizontalOptions="Center"/>
+                                               HorizontalOptions="Center"/>
                                         <Label Text="{Binding FirstCapsule.CountdownText}"
-                               FontSize="15" FontAttributes="Bold" TextColor="White"
-                               HorizontalOptions="Center"/>
+                                               FontSize="15" FontAttributes="Bold" TextColor="#111111"
+                                               HorizontalOptions="Center"/>
                                         <Label Text="{Binding FirstCapsule.MediaCount, StringFormat='{0} снимки'}"
-                               FontSize="10" TextColor="#CCCCCC" HorizontalOptions="Center"/>
+                                               FontSize="10" TextColor="#555555" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                     <VerticalStackLayout IsVisible="{Binding FirstCapsule.IsUnlocked}"
-                                         HorizontalOptions="Center" Spacing="4">
+                                                         HorizontalOptions="Center" Spacing="4">
                                         <Label Text="READY" FontSize="18" FontAttributes="Bold"
-                               TextColor="White" HorizontalOptions="Center"/>
+                                               TextColor="#111111" HorizontalOptions="Center"/>
                                         <Label Text="{Binding FirstCapsule.MediaCount, StringFormat='{0} снимки'}"
-                               FontSize="10" TextColor="#CCCCCC" HorizontalOptions="Center"/>
+                                               FontSize="10" TextColor="#555555" HorizontalOptions="Center"/>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
                                 <VerticalStackLayout Grid.Row="1" Spacing="1">
                                     <Label Text="{Binding FirstCapsule.Title}" FontSize="12" FontAttributes="Bold"
-                           TextColor="White" LineBreakMode="TailTruncation"/>
-                                    <Label Text="{Binding FirstCapsule.UnlockDateShort}" FontSize="10" TextColor="#CCCCCC"/>
+                                           TextColor="#111111" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding FirstCapsule.UnlockDateShort}" FontSize="10" TextColor="#555555"/>
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>
                     </Grid>
 
-                    <!-- Останалите капсули по 2 на ред -->
+                    <!-- Останалите капсули -->
                     <CollectionView Grid.Row="1" ItemsSource="{Binding RestCapsules}">
                         <CollectionView.ItemsLayout>
                             <GridItemsLayout Orientation="Vertical" Span="2"
-                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+                                             HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
                         </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Border HeightRequest="140" StrokeThickness="0"
-                        BackgroundColor="{Binding CardBackground}">
+                                        BackgroundColor="{Binding CardBackground}">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="12"/>
                                     </Border.StrokeShape>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
-                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenCapsuleCommand}"
-                            CommandParameter="{Binding .}"/>
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenCapsuleCommand}"
+                                            CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                     <Grid RowDefinitions="*,Auto" Padding="10">
                                         <VerticalStackLayout Grid.Row="0" VerticalOptions="Center"
-                                             HorizontalOptions="Center" Spacing="4">
+                                                             HorizontalOptions="Center" Spacing="4">
                                             <VerticalStackLayout IsVisible="{Binding IsLocked}"
-                                                 HorizontalOptions="Center" Spacing="4">
+                                                                 HorizontalOptions="Center" Spacing="4">
                                                 <Image Source="hourglass.svg" WidthRequest="32" HeightRequest="32"
-                                       HorizontalOptions="Center"/>
+                                                       HorizontalOptions="Center"/>
                                                 <Label Text="{Binding CountdownText}" FontSize="15" FontAttributes="Bold"
-                                       TextColor="White" HorizontalOptions="Center"/>
+                                                       TextColor="#111111" HorizontalOptions="Center"/>
                                                 <Label Text="{Binding MediaCount, StringFormat='{0} снимки'}"
-                                       FontSize="10" TextColor="#CCCCCC" HorizontalOptions="Center"/>
+                                                       FontSize="10" TextColor="#555555" HorizontalOptions="Center"/>
                                             </VerticalStackLayout>
                                             <VerticalStackLayout IsVisible="{Binding IsUnlocked}"
-                                                 HorizontalOptions="Center" Spacing="4">
+                                                                 HorizontalOptions="Center" Spacing="4">
                                                 <Label Text="READY" FontSize="18" FontAttributes="Bold"
-                                       TextColor="White" HorizontalOptions="Center"/>
+                                                       TextColor="#111111" HorizontalOptions="Center"/>
                                                 <Label Text="{Binding MediaCount, StringFormat='{0} снимки'}"
-                                       FontSize="10" TextColor="#CCCCCC" HorizontalOptions="Center"/>
+                                                       FontSize="10" TextColor="#555555" HorizontalOptions="Center"/>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
                                         <VerticalStackLayout Grid.Row="1" Spacing="1">
                                             <Label Text="{Binding Title}" FontSize="12" FontAttributes="Bold"
-                                   TextColor="White" LineBreakMode="TailTruncation"/>
-                                            <Label Text="{Binding UnlockDateShort}" FontSize="10" TextColor="#CCCCCC"/>
+                                                   TextColor="#111111" LineBreakMode="TailTruncation"/>
+                                            <Label Text="{Binding UnlockDateShort}" FontSize="10" TextColor="#555555"/>
                                         </VerticalStackLayout>
                                     </Grid>
                                 </Border>

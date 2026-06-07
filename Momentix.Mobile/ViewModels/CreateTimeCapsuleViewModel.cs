@@ -61,8 +61,8 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     public IRelayCommand CancelCommand => new AsyncRelayCommand(Cancel);
 
     public string SelectedPhotoCountText => SelectedPhotos.Count == 0
-        ? "No photos selected"
-        : $"{SelectedPhotos.Count} photo(s) selected";
+        ? "Няма избрани снимки"
+        : $"{SelectedPhotos.Count} снимки избрани";
 
     public CreateTimeCapsuleViewModel(ApiService apiService)
     {
@@ -86,26 +86,20 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             var result = await _apiService.GetAsync<List<FriendResponseDto>>("Friends");
             Friends.Clear();
 
-            if (result == null)
-                return;
+            if (result == null) return;
 
             foreach (var friend in result
                 .GroupBy(f => f.UserId)
                 .Select(g => g.First())
                 .OrderBy(f => f.FullName))
             {
-                var item = new FriendInviteViewModel(friend)
+                Friends.Add(new FriendInviteViewModel(friend)
                 {
                     IsInvited = invitedIds.Contains(friend.UserId)
-                };
-
-                Friends.Add(item);
+                });
             }
         }
-        catch
-        {
-            // Friend invites are optional while creating the capsule.
-        }
+        catch { }
     }
 
     private async Task PickPhoto()
@@ -114,35 +108,23 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
         {
             var file = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
             {
-                Title = "Select capsule photo"
+                Title = "Избери снимка"
             });
 
-            if (file == null)
-                return;
+            if (file == null) return;
 
             SelectedPhotos.Add(new SelectedPhotoItemViewModel(file));
             OnPropertyChanged(nameof(SelectedPhotoCountText));
             ErrorMessage = string.Empty;
         }
-        catch (FeatureNotSupportedException)
-        {
-            ErrorMessage = "Photo picker is not supported on this device.";
-        }
-        catch (PermissionException)
-        {
-            ErrorMessage = "Photo permission was denied.";
-        }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
+        catch (FeatureNotSupportedException) { ErrorMessage = "Снимките не се поддържат на това устройство."; }
+        catch (PermissionException) { ErrorMessage = "Нямаш разрешение за снимки."; }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
     }
 
     private void RemovePhoto(SelectedPhotoItemViewModel? photo)
     {
-        if (photo == null)
-            return;
-
+        if (photo == null) return;
         SelectedPhotos.Remove(photo);
         OnPropertyChanged(nameof(SelectedPhotoCountText));
     }
@@ -151,14 +133,14 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
     {
         if (string.IsNullOrWhiteSpace(Title))
         {
-            ErrorMessage = "Title is required.";
+            ErrorMessage = "Заглавието е задължително.";
             return;
         }
 
         var localUnlockAt = UnlockDate.Date.Add(UnlockTime);
         if (localUnlockAt <= DateTime.Now)
         {
-            ErrorMessage = "Unlock date must be in the future.";
+            ErrorMessage = "Датата на отключване трябва да е в бъдещето.";
             return;
         }
 
@@ -179,7 +161,7 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             if (result == null)
             {
                 ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                    ? "Capsule was not created."
+                    ? "Капсулата не беше създадена."
                     : _apiService.LastErrorMessage;
                 return;
             }
@@ -188,16 +170,12 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             {
                 var success = await _apiService.PostAsync(
                     $"TimeCapsule/{result.Id}/members",
-                    new AddAlbumMemberDto
-                    {
-                        UserEmail = friend.Email,
-                        CanUpload = false
-                    });
+                    new AddAlbumMemberDto { UserEmail = friend.Email, CanUpload = false });
 
                 if (!success)
                 {
                     ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                        ? "Capsule was created, but a friend was not added."
+                        ? "Капсулата е създадена, но приятелят не беше добавен."
                         : _apiService.LastErrorMessage;
                     return;
                 }
@@ -207,19 +185,16 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             {
                 await using var stream = await photo.File.OpenReadAsync();
                 var contentType = string.IsNullOrWhiteSpace(photo.File.ContentType)
-                    ? "image/jpeg"
-                    : photo.File.ContentType;
+                    ? "image/jpeg" : photo.File.ContentType;
 
                 var uploadResult = await _apiService.PostFileAsync<MediaResponseDto>(
                     $"Media/timecapsule/{result.Id}/photo",
-                    stream,
-                    photo.File.FileName,
-                    contentType);
+                    stream, photo.File.FileName, contentType);
 
                 if (uploadResult == null)
                 {
                     ErrorMessage = string.IsNullOrWhiteSpace(_apiService.LastErrorMessage)
-                        ? "Capsule was created, but a photo was not uploaded."
+                        ? "Капсулата е създадена, но снимката не беше качена."
                         : _apiService.LastErrorMessage;
                     return;
                 }
@@ -234,14 +209,13 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
             OnPropertyChanged(nameof(SelectedPhotoCountText));
             await Shell.Current.GoToAsync("..");
         }
-        catch (Exception ex)
-        {
-            ErrorMessage = ex.Message;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
+        catch (Exception ex) { ErrorMessage = ex.Message; }
+        finally { IsLoading = false; }
+    }
+
+    private async Task Cancel()
+    {
+        await Shell.Current.GoToAsync("..");
     }
 
     public class FriendInviteViewModel : BaseViewModel
@@ -256,10 +230,10 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
         {
             get
             {
+                if (string.IsNullOrWhiteSpace(FullName)) return "?";
                 var parts = FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 0) return "?";
-                if (parts.Length == 1) return parts[0][..Math.Min(2, parts[0].Length)].ToUpper();
-                return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+                if (parts.Length == 1) return parts[0][0].ToString().ToUpper();
+                return $"{parts[0][0]}{parts[parts.Length - 1][0]}".ToUpper();
             }
         }
 
@@ -267,10 +241,16 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
         {
             get
             {
-                string[] colors = ["#6750A4", "#7B61C4", "#4A90D9", "#43A047",
-                               "#E67E22", "#E91E63", "#00ACC1", "#8D6E63"];
-                var index = Math.Abs(UserId.GetHashCode()) % colors.Length;
-                return colors[index];
+                var theme = Preferences.Get("theme_name", "Blue");
+                return theme switch
+                {
+                    "Blue" => "#60A5FA",
+                    "Green" => "#34D399",
+                    "Yellow" => "#FBBF24",
+                    "Purple" => "#A78BFA",
+                    "Black" => "#1F2937",
+                    _ => "#60A5FA"
+                };
             }
         }
 
@@ -285,10 +265,5 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
         {
             _friend = friend;
         }
-    }
-
-    private async Task Cancel()
-    {
-        await Shell.Current.GoToAsync("..");
     }
 }

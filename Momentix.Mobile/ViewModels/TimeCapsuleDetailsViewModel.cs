@@ -16,7 +16,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     private bool _isPageVisible;
 
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
-    public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
+    public ObservableCollection<CapsuleMemberViewModel> Members { get; } = new();
     public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
 
     private int _timeCapsuleId;
@@ -84,7 +84,41 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
     public bool IsLocked => !IsUnlocked;
     public bool HasDescription => !string.IsNullOrWhiteSpace(Description);
     public string StatusText => IsUnlocked ? "Отключена" : "Заключена";
-    public string CountdownCardColor => IsUnlocked ? "#1B4D3E" : "#1A2744";
+    public int MediaCount => MediaItems.Count;
+
+    public string CountdownCardColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#DBEAFE",
+                "Green" => "#D1FAE5",
+                "Yellow" => "#FEF3C7",
+                "Purple" => "#EDE9FE",
+                "Black" => "#F3F4F6",
+                _ => "#DBEAFE"
+            };
+        }
+    }
+
+    public string BadgeColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#60A5FA",
+                "Green" => "#34D399",
+                "Yellow" => "#FBBF24",
+                "Purple" => "#A78BFA",
+                "Black" => "#1F2937",
+                _ => "#60A5FA"
+            };
+        }
+    }
 
     public string UnlockDateText => _capsule == null
         ? string.Empty
@@ -248,7 +282,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         Members.Clear();
         if (result == null) return;
         foreach (var member in result)
-            Members.Add(member);
+            Members.Add(new CapsuleMemberViewModel(member));
     }
 
     private async Task LoadFriends()
@@ -287,6 +321,7 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
             MediaItems.Add(new AlbumMediaItemViewModel(item));
 
         _mediaLoaded = true;
+        OnPropertyChanged(nameof(MediaCount));
     }
 
     private void RefreshState()
@@ -299,10 +334,56 @@ public partial class TimeCapsuleDetailsViewModel : BaseViewModel
         OnPropertyChanged(nameof(CountdownText));
         OnPropertyChanged(nameof(HasDescription));
         OnPropertyChanged(nameof(CountdownCardColor));
+        OnPropertyChanged(nameof(BadgeColor));
+        OnPropertyChanged(nameof(MediaCount));
     }
 
     private async Task Back()
     {
         await Shell.Current.GoToAsync("..");
+    }
+}
+
+public class CapsuleMemberViewModel
+{
+    private readonly AlbumMemberResponseDto _member;
+
+    public string UserId => _member.UserId;
+    public string FullName => _member.FullName;
+    public bool IsOwner => _member.IsOwner;
+    public bool CanUpload => _member.CanUpload;
+    public string RoleText => IsOwner ? "Собственик" : CanUpload ? "Може да качва" : "Само преглед";
+
+    public string Initials
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FullName)) return "?";
+            var parts = FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0][0].ToString().ToUpper();
+            return $"{parts[0][0]}{parts[parts.Length - 1][0]}".ToUpper();
+        }
+    }
+
+    public string AvatarColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#60A5FA",
+                "Green" => "#34D399",
+                "Yellow" => "#FBBF24",
+                "Purple" => "#A78BFA",
+                "Black" => "#1F2937",
+                _ => "#60A5FA"
+            };
+        }
+    }
+
+    public CapsuleMemberViewModel(AlbumMemberResponseDto member)
+    {
+        _member = member;
     }
 }

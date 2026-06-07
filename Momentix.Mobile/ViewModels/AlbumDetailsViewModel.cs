@@ -14,21 +14,21 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     private bool _isPageVisible;
 
     public ObservableCollection<AlbumMediaItemViewModel> MediaItems { get; } = new();
-    public ObservableCollection<AlbumMemberResponseDto> Members { get; } = new();
+    public ObservableCollection<AlbumMemberItemViewModel> Members { get; } = new();
     public ObservableCollection<FriendItemViewModel> Friends { get; } = new();
     public ObservableCollection<FriendItemViewModel> FilteredFriends { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> PhotoItems { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> RestPhotos { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> LetterItems { get; } = new();
     public ObservableCollection<AlbumMediaItemViewModel> RestLetters { get; } = new();
-    public ObservableCollection<AlbumMemberResponseDto> RestMembers { get; } = new();
+    public ObservableCollection<AlbumMemberItemViewModel> RestMembers { get; } = new();
 
     public bool HasPhotos => PhotoItems.Count > 0;
     public AlbumMediaItemViewModel? FirstPhoto => PhotoItems.Count > 0 ? PhotoItems[0] : null;
     public bool HasFirstLetter => LetterItems.Count > 0;
     public AlbumMediaItemViewModel? FirstLetter => LetterItems.Count > 0 ? LetterItems[0] : null;
     public bool HasFirstMember => Members.Count > 0;
-    public AlbumMemberResponseDto? FirstMember => Members.Count > 0 ? Members[0] : null;
+    public AlbumMemberItemViewModel? FirstMember => Members.Count > 0 ? Members[0] : null;
 
     private int _albumId;
     public int AlbumId
@@ -170,7 +170,6 @@ public partial class AlbumDetailsViewModel : BaseViewModel
 
     private AlbumMediaItemViewModel? _editingLetter;
 
-    // ── Команди ──
     public IRelayCommand LoadCommand => new AsyncRelayCommand(Load);
     public IRelayCommand AddMemberCommand => new AsyncRelayCommand(AddMember);
     public IRelayCommand AddSelectedFriendCommand => new AsyncRelayCommand(AddSelectedFriend);
@@ -347,9 +346,9 @@ public partial class AlbumDetailsViewModel : BaseViewModel
             if (members != null)
             {
                 foreach (var m in members)
-                    Members.Add(m);
+                    Members.Add(new AlbumMemberItemViewModel(m));
                 foreach (var m in members.Skip(1))
-                    RestMembers.Add(m);
+                    RestMembers.Add(new AlbumMemberItemViewModel(m));
             }
 
             OnPropertyChanged(nameof(HasFirstMember));
@@ -684,6 +683,67 @@ public partial class AlbumDetailsViewModel : BaseViewModel
     private async Task Back()
     {
         await Shell.Current.GoToAsync("..");
+    }
+}
+
+public class AlbumMemberItemViewModel
+{
+    private readonly AlbumMemberResponseDto _member;
+
+    public string UserId => _member.UserId;
+    public string FullName => _member.FullName;
+    public bool IsOwner => _member.IsOwner;
+    public bool CanUpload => _member.CanUpload;
+    public string RoleText => IsOwner ? "Собственик" : CanUpload ? "Може да качва" : "Само преглед";
+
+    public string Initials
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(FullName)) return "?";
+            var parts = FullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0][0].ToString().ToUpper();
+            return $"{parts[0][0]}{parts[parts.Length - 1][0]}".ToUpper();
+        }
+    }
+
+    public string AvatarColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#DBEAFE",
+                "Green" => "#D1FAE5",
+                "Yellow" => "#FEF3C7",
+                "Purple" => "#EDE9FE",
+                "Black" => "#F3F4F6",
+                _ => "#DBEAFE"
+            };
+        }
+    }
+
+    public string InitialsColor
+    {
+        get
+        {
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#1D4ED8",
+                "Green" => "#047857",
+                "Yellow" => "#B45309",
+                "Purple" => "#5B21B6",
+                "Black" => "#111827",
+                _ => "#1D4ED8"
+            };
+        }
+    }
+
+    public AlbumMemberItemViewModel(AlbumMemberResponseDto member)
+    {
+        _member = member;
     }
 }
 

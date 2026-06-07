@@ -173,11 +173,16 @@ public class TimeCapsuleItemViewModel : BaseViewModel
     {
         get
         {
-            if (IsUnlocked) return "#1B4D3E";
-            var days = (_capsule.UnlockAt - DateTime.UtcNow).TotalDays;
-            if (days > 60) return "#2D2D3A";
-            if (days > 14) return "#1A2744";
-            return "#1B3A2A";
+            var theme = Preferences.Get("theme_name", "Blue");
+            return theme switch
+            {
+                "Blue" => "#DBEAFE",
+                "Green" => "#D1FAE5",
+                "Yellow" => "#FEF3C7",
+                "Purple" => "#EDE9FE",
+                "Black" => "#F3F4F6",
+                _ => "#DBEAFE"
+            };
         }
     }
 
