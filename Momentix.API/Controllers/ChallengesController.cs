@@ -78,6 +78,7 @@ public class ChallengesController : ControllerBase
             {
                 Id = s.Id,
                 ChallengeId = s.ChallengeId,
+                UserId = s.UserId,
                 UserName = s.User.FullName,
                 MediaUrl = s.MediaUrl,
                 SubmittedAt = s.SubmittedAt,
@@ -275,6 +276,28 @@ public class ChallengesController : ControllerBase
 
         await _context.SaveChangesAsync();
         return Ok("Vote saved.");
+    }
+
+    [HttpDelete("submissions/{submissionId}")]
+    public async Task<IActionResult> DeleteSubmission(int submissionId)
+    {
+        var userId = GetUserId();
+
+        var submission = await _context.ChallengeSubmissions
+            .FirstOrDefaultAsync(s => s.Id == submissionId);
+
+        if (submission == null)
+            return NotFound("Участието не е намерено.");
+
+        if (submission.UserId != userId && !User.IsInRole("Admin"))
+            return Forbid();
+
+        DeleteChallengeFile(submissionId);
+
+        _context.ChallengeSubmissions.Remove(submission);
+        await _context.SaveChangesAsync();
+
+        return Ok("Участието е изтрито.");
     }
 
     [HttpPost("admin/reset-active")]

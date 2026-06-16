@@ -1,32 +1,53 @@
 @page "/login"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
 
-<div class="auth-wrap">
-    <section class="auth-panel">
-        <h1 class="page-title">Login</h1>
-        <p class="page-description">Open your Momentix account in the web app.</p>
+<div class="auth-shell">
+    <div class="auth-left">
+        <div class="auth-collage">
+            <img src="images/auth/flatlay-desk.jpg" alt="" />
+            <img class="tall" src="images/auth/polaroids-pile.jpg" alt="" />
+            <img src="images/auth/bw-photos.jpg" alt="" />
+        </div>
+    </div>
 
-        <EditForm Model="model" OnValidSubmit="DoLogin" class="form-stack">
-            <div class="field">
-                <label>Email or username</label>
-                <InputText class="input" @bind-Value="model.Email" type="text" />
+    <div class="auth-right">
+        <div class="auth-form-wrap">
+            <div class="auth-left-logo">
+                <span class="logo-mark" style="background:#111111">M</span>
+                <span class="auth-left-logo-name">Momentix</span>
             </div>
-            <div class="field">
-                <label>Password</label>
-                <InputText class="input" @bind-Value="model.Password" type="password" />
-            </div>
+            <div class="auth-tagline-title">Твоите спомени,<br />винаги с теб.</div>
+            <div class="auth-tagline-desc">Синхронизирано с мобилното приложение.</div>
 
-            @if (!string.IsNullOrWhiteSpace(error))
-            {
-                <div class="error-message">@error</div>
-            }
+            <div class="auth-form-title">Вход</div>
+            <div class="auth-form-sub">Добре дошли!</div>
 
-            <button class="primary-button full-width" type="submit" disabled="@isBusy">@(isBusy ? "Logging in..." : "Login")</button>
-            <a class="secondary-button full-width" href="register">Create account</a>
-        </EditForm>
-    </section>
+            <EditForm Model="model" OnValidSubmit="DoLogin" class="auth-form-stack">
+                <div class="field">
+                    <label>Имейл или потребителско име</label>
+                    <InputText class="input" @bind-Value="model.Email" type="text" placeholder="you@example.com" />
+                </div>
+                <div class="field">
+                    <label>Парола</label>
+                    <InputText class="input" @bind-Value="model.Password" type="password" placeholder="••••••••" />
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(error))
+                {
+                    <div class="error-message">@error</div>
+                }
+
+                <button class="btn-primary full-width" type="submit" disabled="@isBusy">
+                    @(isBusy ? "Влизане..." : "Влез")
+                </button>
+                <div class="auth-divider"></div>
+                <a class="btn-secondary full-width" href="register">Създай акаунт</a>
+            </EditForm>
+        </div>
+    </div>
 </div>
 
 @code {
@@ -37,7 +58,7 @@
     protected override void OnInitialized()
     {
         if (Auth.IsLoggedIn)
-            Nav.NavigateTo("/albums");
+            Nav.NavigateTo("/albums", replace: true);
     }
 
     private async Task DoLogin()
@@ -48,7 +69,7 @@
         var response = await Api.PostAsync<LoginDto, AuthResponseDto>("Auth/login", model);
         if (response == null)
         {
-            error = Api.LastError ?? "Login failed.";
+            error = Api.LastError ?? "Грешка при влизане.";
             isBusy = false;
             return;
         }
@@ -57,4 +78,3 @@
         Nav.NavigateTo("/albums");
     }
 }
-

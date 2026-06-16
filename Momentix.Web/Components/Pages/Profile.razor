@@ -1,0 +1,162 @@
+@page "/profile"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject AuthSession Auth
+@inject NavigationManager Nav
+
+<h1 class="page-title">Профил</h1>
+<p class="page-subtitle">Управлявай своя акаунт и персонализирай темата.</p>
+
+<div class="profile-wrap">
+    @if (!string.IsNullOrWhiteSpace(status))
+    {
+        <div class="badge mb-16">@status</div>
+    }
+
+    <div class="profile-header-row">
+        <div class="profile-avatar">
+            @Initials
+            <span class="profile-avatar-btn"><i class="ti ti-camera"></i></span>
+        </div>
+        <div>
+            <div class="profile-display-name">@Auth.FullName</div>
+            <div class="profile-display-email">@Auth.Email</div>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="info-row">
+            <div class="info-label">Име</div>
+            @if (isEditingName)
+            {
+                <input class="input info-value" @bind="nameDraft" />
+                <button class="info-edit-btn" @onclick="SaveName">Запази</button>
+            }
+            else
+            {
+                <div class="info-value">@Auth.FullName</div>
+                <button class="info-edit-btn" @onclick="StartEditName">Редактирай</button>
+            }
+        </div>
+        <div class="info-row">
+            <div class="info-label">Имейл</div>
+            @if (isEditingEmail)
+            {
+                <input class="input info-value" @bind="emailDraft" />
+                <button class="info-edit-btn" @onclick="SaveEmail">Запази</button>
+            }
+            else
+            {
+                <div class="info-value">@Auth.Email</div>
+                <button class="info-edit-btn" @onclick="StartEditEmail">Редактирай</button>
+            }
+        </div>
+        <div class="info-row">
+            <div class="info-label">Парола</div>
+            <div class="info-value">••••••••</div>
+            <button class="info-edit-btn" @onclick="ShowPasswordNotice">Смени</button>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <div class="theme-row">
+            <div class="theme-row-label">Тема</div>
+            <div class="theme-picker">
+                @foreach (var t in Themes)
+                {
+                    <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Hex)">
+                        <div class="theme-dot @(Auth.ThemeColor == t.Hex ? "active" : "")" style="background:@t.Hex"></div>
+                        <span class="theme-dot-name">@t.Name</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-logout" @onclick="Logout">Изход</button>
+</div>
+
+@code {
+    private bool isEditingName;
+    private bool isEditingEmail;
+    private string nameDraft = string.Empty;
+    private string emailDraft = string.Empty;
+    private string? status;
+
+    private static readonly (string Hex, string Name)[] Themes =
+    [
+        ("#378ADD", "Синя"),
+        ("#7F77DD", "Лилава"),
+        ("#1D9E75", "Зелена"),
+        ("#EF9F27", "Жълта"),
+        ("#111111", "Тъмна"),
+    ];
+
+    private string Initials => string.IsNullOrWhiteSpace(Auth.FullName)
+        ? "?"
+        : string.Join(string.Empty,
+            Auth.FullName!.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2).Select(p => char.ToUpperInvariant(p[0])));
+
+    protected override void OnInitialized()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        nameDraft = Auth.FullName ?? string.Empty;
+        emailDraft = Auth.Email ?? string.Empty;
+    }
+
+    private void StartEditName()
+    {
+        nameDraft = Auth.FullName ?? string.Empty;
+        isEditingName = true;
+        status = null;
+    }
+
+    private void SaveName()
+    {
+        if (string.IsNullOrWhiteSpace(nameDraft))
+            return;
+
+        Auth.UpdateProfile(nameDraft.Trim(), Auth.Email ?? string.Empty);
+        isEditingName = false;
+        status = "Името е запазено.";
+    }
+
+    private void StartEditEmail()
+    {
+        emailDraft = Auth.Email ?? string.Empty;
+        isEditingEmail = true;
+        status = null;
+    }
+
+    private void SaveEmail()
+    {
+        if (string.IsNullOrWhiteSpace(emailDraft))
+            return;
+
+        Auth.UpdateProfile(Auth.FullName ?? string.Empty, emailDraft.Trim());
+        isEditingEmail = false;
+        status = "Имейлът е запазен.";
+    }
+
+    private void ShowPasswordNotice()
+    {
+        status = "Смяната на паролата ще бъде добавена скоро.";
+    }
+
+    private void SelectTheme(string hex)
+    {
+        Auth.UpdateTheme(hex);
+        status = "Темата е променена.";
+    }
+
+    private void Logout()
+    {
+        Auth.SignOut();
+        Nav.NavigateTo("/login");
+    }
+}

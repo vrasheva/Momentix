@@ -1,90 +1,190 @@
-﻿@page "/albums"
+@page "/albums"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Albums</h1>
-        <p class="page-description">Create albums, open shared albums and upload photos.</p>
-    </div>
-</div>
+<h1 class="page-title">Албуми</h1>
+<p class="page-subtitle">Създавай албуми, отварай споделени и качвай снимки.</p>
 
 @if (!string.IsNullOrWhiteSpace(error))
 {
-    <p class="error-message">@error</p>
+    <div class="error-message">@error</div>
 }
-@if (!string.IsNullOrWhiteSpace(status))
+
+@if (isLoading)
 {
-    <p class="status-message">@status</p>
+    <div class="empty-state">Зареждане на албуми...</div>
 }
-
-<div class="grid two">
-    <section class="panel">
-        <h2 class="section-title">Create album</h2>
-        <EditForm Model="newAlbum" OnValidSubmit="CreateAlbum" class="form-stack">
-            <div class="field">
-                <label>Title</label>
-                <InputText class="input" @bind-Value="newAlbum.Title" />
+else
+{
+    <div class="albums-section">
+        <div class="section-header">
+            <div class="section-label" style="margin-bottom:0">Моите албуми</div>
+            <span class="section-count">@myAlbums.Count</span>
+        </div>
+        <div class="albums-grid">
+            <div class="create-card" @onclick="OpenCreate">
+                <i class="ti ti-plus"></i>
+                <span>Добави албум</span>
             </div>
-            <div class="field">
-                <label>Description</label>
-                <InputTextArea class="input" @bind-Value="newAlbum.Description" />
-            </div>
-            <button class="primary-button" type="submit" disabled="@isSaving">@(isSaving ? "Creating..." : "Create album")</button>
-        </EditForm>
-    </section>
+            @foreach (var album in myAlbums)
+            {
+                <div class="album-card-wrap">
+                    <a class="album-card" href="@($"albums/{album.Id}")">
+                        @RenderCardInner(album)
+                    </a>
+                    <button class="album-delete-btn" title="Изтрий албум" type="button"
+                            @onclick="() => DeleteAlbum(album.Id)">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
 
-    <section class="panel">
-        <h2 class="section-title">Your albums</h2>
-        @if (isLoading)
+    <div class="albums-section">
+        <div class="section-header">
+            <div class="section-label" style="margin-bottom:0">Споделени с мен</div>
+            <span class="section-count">@sharedWithMe.Count</span>
+        </div>
+        @if (sharedWithMe.Count == 0)
         {
-            <div class="empty-state">Loading albums...</div>
-        }
-        else if (albums.Count == 0)
-        {
-            <div class="empty-state">No albums yet.</div>
+            <div class="empty-state">Няма споделени с теб албуми.</div>
         }
         else
         {
-            <div class="item-list">
-                @foreach (var album in albums)
+            <div class="albums-grid">
+                @foreach (var album in sharedWithMe)
                 {
-                    <article class="card">
-                        <div class="friend-row">
-                            <a class="card-link" href="@($"albums/{album.Id}")">
-                                <div class="person">
-                                    <strong>@album.Title</strong>
-                                    <span class="muted truncate">@(album.Description ?? "No description")</span>
-                                </div>
-                            </a>
-                            <div class="actions">
-                                <a class="secondary-button" href="@($"albums/{album.Id}")">Open</a>
-                                @if (album.IsOwner)
-                                {
-                                    <button class="danger-button" type="button" @onclick="() => DeleteAlbum(album.Id)">Delete</button>
-                                }
-                            </div>
-                        </div>
-                        <div class="badge-row">
-                            <span class="badge">@album.MediaCount media</span>
-                            <span class="badge gold">@album.MemberCount members</span>
-                            <span class="badge coral">@(album.IsOwner ? "Owner" : "Shared")</span>
-                        </div>
-                    </article>
+                    <a class="album-card" href="@($"albums/{album.Id}")">@RenderCardInner(album)</a>
                 }
             </div>
         }
-    </section>
-</div>
+    </div>
+
+    <div class="albums-section">
+        <div class="section-header">
+            <div class="section-label" style="margin-bottom:0">Споделени от мен</div>
+            <span class="section-count">@sharedByMe.Count</span>
+        </div>
+        @if (sharedByMe.Count == 0)
+        {
+            <div class="empty-state">Не си споделил албуми с приятели.</div>
+        }
+        else
+        {
+            <div class="albums-grid">
+                @foreach (var album in sharedByMe)
+                {
+                    <div class="album-card-wrap">
+                        <a class="album-card" href="@($"albums/{album.Id}")">@RenderCardInner(album)</a>
+                        <button class="album-delete-btn" title="Изтрий албум" type="button"
+                                @onclick="() => DeleteAlbum(album.Id)">
+                            <i class="ti ti-trash"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+
+@if (isCreating)
+{
+    <div class="modal-overlay" @onclick="CancelCreate">
+        <div class="modal-box" style="max-width:600px" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <span class="modal-title">Нов албум</span>
+                <button class="btn-sm" type="button" @onclick="CancelCreate">
+                    <i class="ti ti-x"></i>
+                </button>
+            </div>
+
+            <EditForm Model="newAlbum" OnValidSubmit="CreateAlbum" class="form-stack">
+
+                @* Заглавие и описание *@
+                <div class="field">
+                    <label>Заглавие</label>
+                    <InputText class="input" @bind-Value="newAlbum.Title" placeholder="Заглавие на албума" />
+                </div>
+                <div class="field">
+                    <label>Описание</label>
+                    <InputTextArea class="input" @bind-Value="newAlbum.Description" placeholder="Кратко описание..." />
+                </div>
+
+                @* Снимки *@
+                <div class="field">
+                    <label>Снимки</label>
+                    <InputFile OnChange="OnFilesSelected" accept="image/*" multiple class="input" />
+                    @if (selectedFiles.Count > 0)
+                    {
+                        <span class="album-meta">Избрани: @selectedFiles.Count снимки</span>
+                    }
+                </div>
+
+                @* Писмо *@
+                <div class="field">
+                    <label>Писмо <span style="font-weight:400;color:var(--text-muted)">(незадължително)</span></label>
+                    <textarea class="input" rows="4" placeholder="Напиши писмо към хората в албума..."
+                              @bind="letterText" @bind:event="oninput"></textarea>
+                </div>
+
+                @* Покани приятели *@
+                @if (friendSelections.Count > 0)
+                {
+                    <div class="field">
+                        <label>Сподели с приятели</label>
+                        @foreach (var f in friendSelections)
+                        {
+                            <div class="friend-row" style="padding:10px 0">
+                                <span class="friend-av">@Initials(f.FullName)</span>
+                                <div class="friend-info">
+                                    <div class="friend-name">@f.FullName</div>
+                                    <div class="friend-email">@f.Email</div>
+                                </div>
+                                <div class="friend-actions" style="flex-direction:column;align-items:flex-end;gap:4px">
+                                    <label class="d-flex gap-8" style="font-size:12px;cursor:pointer">
+                                        <input type="checkbox" @bind="f.IsSelected" />
+                                        Покани
+                                    </label>
+                                    @if (f.IsSelected)
+                                    {
+                                        <label class="d-flex gap-8" style="font-size:12px;cursor:pointer;color:var(--text-secondary)">
+                                            <input type="checkbox" @bind="f.CanUpload" />
+                                            Може да качва
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="d-flex gap-8 mt-16">
+                    <button class="btn-primary" type="submit" disabled="@isSaving">
+                        @(isSaving ? "Създаване..." : "Създай албум")
+                    </button>
+                    <button class="btn-secondary" type="button" @onclick="CancelCreate">Откажи</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+}
 
 @code {
     private readonly CreateAlbumDto newAlbum = new();
     private List<AlbumResponseDto> albums = new();
+    private List<AlbumResponseDto> myAlbums = new();
+    private List<AlbumResponseDto> sharedWithMe = new();
+    private List<AlbumResponseDto> sharedByMe = new();
+    private List<FriendSelection> friendSelections = new();
+    private IReadOnlyList<IBrowserFile> selectedFiles = Array.Empty<IBrowserFile>();
+    private string letterText = string.Empty;
     private bool isLoading = true;
     private bool isSaving;
+    private bool isCreating;
     private string? error;
-    private string? status;
 
     protected override async Task OnInitializedAsync()
     {
@@ -95,6 +195,9 @@
         }
 
         await LoadAlbums();
+
+        var friends = await Api.GetAsync<List<FriendResponseDto>>("Friends") ?? new();
+        friendSelections = friends.Select(f => new FriendSelection(f)).ToList();
     }
 
     private async Task LoadAlbums()
@@ -104,48 +207,141 @@
         albums = await Api.GetAsync<List<AlbumResponseDto>>("Albums") ?? new();
         if (Api.LastError != null)
             error = Api.LastError;
+
+        myAlbums = albums.Where(a => a.IsOwner && a.MemberCount == 0).ToList();
+        sharedByMe = albums.Where(a => a.IsOwner && a.MemberCount > 0).ToList();
+        sharedWithMe = albums.Where(a => a.IsSharedWithMe).ToList();
+
         isLoading = false;
+    }
+
+    private void OpenCreate()
+    {
+        isCreating = true;
+        error = null;
+    }
+
+    private void CancelCreate()
+    {
+        isCreating = false;
+        newAlbum.Title = string.Empty;
+        newAlbum.Description = string.Empty;
+        selectedFiles = Array.Empty<IBrowserFile>();
+        letterText = string.Empty;
+        foreach (var f in friendSelections) { f.IsSelected = false; f.CanUpload = true; }
+        error = null;
+    }
+
+    private void OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles(20);
     }
 
     private async Task CreateAlbum()
     {
         if (string.IsNullOrWhiteSpace(newAlbum.Title))
         {
-            error = "Album title is required.";
+            error = "Заглавието на албума е задължително.";
             return;
         }
 
         isSaving = true;
         error = null;
-        status = null;
 
         var created = await Api.PostAsync<CreateAlbumDto, AlbumResponseDto>("Albums", newAlbum);
         if (created == null)
         {
-            error = Api.LastError ?? "Could not create album.";
+            error = Api.LastError ?? "Албумът не беше създаден.";
             isSaving = false;
             return;
         }
 
+        foreach (var f in friendSelections.Where(f => f.IsSelected))
+        {
+            await Api.PostAsync($"Albums/{created.Id}/members", new AddAlbumMemberDto
+            {
+                UserEmail = f.Email,
+                CanUpload = f.CanUpload
+            });
+        }
+
+        foreach (var file in selectedFiles)
+        {
+            await Api.PostFileAsync<MediaResponseDto>($"Media/album/{created.Id}/photo", file);
+        }
+
+        if (!string.IsNullOrWhiteSpace(letterText))
+        {
+            await Api.PostAsync<CreateLetterMediaDto, MediaResponseDto>(
+                $"Media/album/{created.Id}/letter",
+                new CreateLetterMediaDto { Text = letterText });
+        }
+
+        isCreating = false;
+        isSaving = false;
         newAlbum.Title = string.Empty;
         newAlbum.Description = string.Empty;
-        status = "Album created.";
+        selectedFiles = Array.Empty<IBrowserFile>();
+        letterText = string.Empty;
+        foreach (var f in friendSelections) { f.IsSelected = false; f.CanUpload = true; }
         await LoadAlbums();
-        isSaving = false;
     }
 
     private async Task DeleteAlbum(int id)
     {
-        error = null;
-        status = null;
         var ok = await Api.DeleteAsync($"Albums/{id}");
         if (!ok)
-        {
-            error = Api.LastError ?? "Could not delete album.";
-            return;
-        }
+            error = Api.LastError ?? "Албумът не беше изтрит.";
+        else
+            await LoadAlbums();
+    }
 
-        status = "Album deleted.";
-        await LoadAlbums();
+    private RenderFragment RenderCardInner(AlbumResponseDto album) =>@<text>
+        <div class="album-photos @PhotoLayoutClass(album)">
+            @if (album.ThumbnailUrls.Count == 0)
+            {
+                <div class="album-photo"><div class="album-photo-placeholder" style="background:@(album.Color)33"></div></div>
+            }
+            else
+            {
+                @foreach (var url in album.ThumbnailUrls.Take(4))
+                {
+                    <div class="album-photo"><img src="@Api.ToBrowserUrl(url)" alt="" /></div>
+                }
+            }
+        </div>
+        <div class="album-info">
+            <div class="album-name">@album.Title</div>
+            <div class="album-meta">@album.MediaCount снимки @(album.MemberCount > 0 ? $"· {album.MemberCount} приятел{(album.MemberCount == 1 ? "" : "и")}" : "")</div>
+        </div>
+        @if (album.MediaCount > 0)
+        {
+            <span class="album-count-badge">@album.MediaCount</span>
+        }
+    </text>;
+
+    private static string PhotoLayoutClass(AlbumResponseDto album) => album.ThumbnailUrls.Count switch
+    {
+        <= 1 => "single",
+        2 => "two",
+        _ => ""
+    };
+
+    private static string Initials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length == 1
+            ? parts[0][0].ToString().ToUpper()
+            : $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+
+    private sealed class FriendSelection
+    {
+        public FriendSelection(FriendResponseDto f) { FullName = f.FullName; Email = f.Email; }
+        public string FullName { get; }
+        public string Email { get; }
+        public bool IsSelected { get; set; }
+        public bool CanUpload { get; set; } = true;
     }
 }

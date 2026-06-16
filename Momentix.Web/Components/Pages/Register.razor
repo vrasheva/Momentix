@@ -1,58 +1,86 @@
 @page "/register"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
 
-<div class="auth-wrap">
-    <section class="auth-panel">
-        <h1 class="page-title">Register</h1>
-        <p class="page-description">Create a Momentix account for albums, capsules and challenges.</p>
+<div class="auth-shell">
+    <div class="auth-left">
+        <div class="auth-collage">
+            <img src="images/auth/flatlay-desk.jpg" alt="" />
+            <img class="tall" src="images/auth/polaroids-pile.jpg" alt="" />
+            <img src="images/auth/bw-photos.jpg" alt="" />
+        </div>
+    </div>
 
-        <EditForm Model="model" OnValidSubmit="DoRegister" class="form-stack">
-            <div class="field">
-                <label>Full name</label>
-                <InputText class="input" @bind-Value="model.FullName" />
+    <div class="auth-right">
+        <div class="auth-form-wrap">
+            <div class="auth-left-logo">
+                <span class="logo-mark" style="background:@model.ThemeColor">M</span>
+                <span class="auth-left-logo-name">Momentix</span>
             </div>
-            <div class="field">
-                <label>Email</label>
-                <InputText class="input" @bind-Value="model.Email" type="email" />
-            </div>
+            <div class="auth-tagline-title">Създай своя акаунт.</div>
+            <div class="auth-tagline-desc">Избери тема, която те следва навсякъде в приложението.</div>
 
-            <button class="secondary-button full-width" type="button" @onclick="SendRegistrationEmail" disabled="@(isBusy || isSendingEmail)">
-                @(isSendingEmail ? "Sending email..." : "Send test email")
-            </button>
+            <div class="auth-form-title">Регистрация</div>
+            <div class="auth-form-sub">Създай Momentix акаунт за албуми, капсули и предизвикателства.</div>
 
-            @if (!string.IsNullOrWhiteSpace(emailStatus))
-            {
-                <div class="status-message">@emailStatus</div>
-            }
+            <EditForm Model="model" OnValidSubmit="DoRegister" class="auth-form-stack">
+                <div class="field">
+                    <label>Пълно име</label>
+                    <InputText class="input" @bind-Value="model.FullName" placeholder="Твоето име" />
+                </div>
+                <div class="field">
+                    <label>Имейл</label>
+                    <InputText class="input" @bind-Value="model.Email" type="text" placeholder="email@example.com" />
+                </div>
+                <div class="field">
+                    <label>Парола</label>
+                    <InputText class="input" @bind-Value="model.Password" type="password" placeholder="••••••••" />
+                </div>
+                <div class="field">
+                    <label>Цвят на темата</label>
+                    <div class="theme-picker theme-picker-plain">
+                        @foreach (var t in Themes)
+                        {
+                            <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Hex)">
+                                <div class="theme-dot @(model.ThemeColor == t.Hex ? "active" : "")"
+                                     style="background:@t.Hex"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
 
-            <div class="field">
-                <label>Password</label>
-                <InputText class="input" @bind-Value="model.Password" type="password" />
-            </div>
-            <div class="field">
-                <label>Theme color</label>
-                <input type="color" @bind="model.ThemeColor" />
-            </div>
+                @if (!string.IsNullOrWhiteSpace(error))
+                {
+                    <div class="error-message">@error</div>
+                }
 
-            @if (!string.IsNullOrWhiteSpace(error))
-            {
-                <div class="error-message">@error</div>
-            }
-
-            <button class="primary-button full-width" type="submit" disabled="@isBusy">@(isBusy ? "Creating..." : "Create account")</button>
-            <a class="secondary-button full-width" href="login">I already have an account</a>
-        </EditForm>
-    </section>
+                <button class="btn-primary full-width" type="submit"
+                        style="background:@model.ThemeColor"
+                        disabled="@isBusy">
+                    @(isBusy ? "Регистриране..." : "Регистрирай се")
+                </button>
+                <div class="auth-divider"></div>
+                <a class="btn-secondary full-width" href="login">Вече имам акаунт</a>
+            </EditForm>
+        </div>
+    </div>
 </div>
 
 @code {
-    private readonly RegisterDto model = new() { ThemeColor = "#167a72" };
+    private readonly RegisterDto model = new() { ThemeColor = "#111111" };
     private bool isBusy;
-    private bool isSendingEmail;
     private string? error;
-    private string? emailStatus;
+
+    private static readonly (string Hex, string Name)[] Themes =
+    [
+        ("#378ADD", "Синя"),
+        ("#7F77DD", "Лилава"),
+        ("#1D9E75", "Зелена"),
+        ("#EF9F27", "Жълта"),
+        ("#111111", "Тъмна"),
+    ];
 
     protected override void OnInitialized()
     {
@@ -60,25 +88,7 @@
             Nav.NavigateTo("/albums");
     }
 
-    private async Task SendRegistrationEmail()
-    {
-        isSendingEmail = true;
-        error = null;
-        emailStatus = null;
-
-        var ok = await Api.PostAsync("Auth/send-registration-email", new SendRegistrationEmailDto
-        {
-            Email = model.Email,
-            FullName = model.FullName
-        });
-
-        if (ok)
-            emailStatus = "Test email sent.";
-        else
-            error = Api.LastError ?? "Email could not be sent.";
-
-        isSendingEmail = false;
-    }
+    private void SelectTheme(string hex) => model.ThemeColor = hex;
 
     private async Task DoRegister()
     {
@@ -88,7 +98,7 @@
         var response = await Api.PostAsync<RegisterDto, AuthResponseDto>("Auth/register", model);
         if (response == null)
         {
-            error = Api.LastError ?? "Registration failed.";
+            error = Api.LastError ?? "Грешка при регистрация.";
             isBusy = false;
             return;
         }

@@ -2,56 +2,85 @@
 @implements IDisposable
 @inject AuthSession Auth
 
-<div class="app-shell">
-    <aside class="app-sidebar">
-        <NavMenu />
-    </aside>
+@{
+    var isAuthPage = Nav.Uri.Contains("/login") || Nav.Uri.Contains("/register");
+}
 
-    <main class="app-main">
-        <header class="app-topbar">
-            <div>
-                <div class="eyebrow">Memory workspace</div>
-                <div class="top-title">Momentix</div>
-            </div>
+@if (isAuthPage)
+{
+    @Body
+}
+else
+{
+    <div class="app-shell" style="--theme:@Auth.ThemeColor;--theme-light:@(Auth.ThemeColor)22;--theme-text:@Auth.ThemeColor;--sidebar-bg:@Auth.ThemeColor;">
+        <aside class="app-sidebar">
+            <NavMenu />
+        </aside>
 
-            @if (Auth.IsLoggedIn)
-            {
-                <div class="user-chip">
-                    <span class="avatar" style="background:@Auth.ThemeColor">@Initials</span>
-                    <span>@Auth.FullName</span>
+        <main class="app-main">
+            <header class="app-topbar">
+                <div class="topbar-crumb">
+                    @if (Auth.IsLoggedIn)
+                    {
+                        <a href="/profile" class="topbar-av" title="Профил">@Initials</a>
+                    }
+                    Momentix › <span>@PageTitle</span>
                 </div>
-            }
-        </header>
 
-        <section class="app-content">
-            @Body
-        </section>
-    </main>
-</div>
+                @if (Auth.IsLoggedIn)
+                {
+                    <a href="/profile" class="user-chip">
+                        <span class="user-chip-av">@Initials</span>
+                        <span class="user-chip-name">@Auth.FullName</span>
+                    </a>
+                }
+            </header>
+
+            <section class="app-content">
+                @Body
+            </section>
+        </main>
+    </div>
+}
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">x</span>
+    Възникна грешка.
+    <a href="." class="reload">Презареди</a>
+    <span class="dismiss">×</span>
 </div>
 
 @code {
+    private string PageTitle => Nav?.Uri?.TrimEnd('/') switch
+    {
+        var u when u.EndsWith("albums") => "Албуми",
+        var u when u.EndsWith("capsules") => "Капсули",
+        var u when u.EndsWith("friends") => "Приятели",
+        var u when u.EndsWith("challenges") => "Предизвикателства",
+        var u when u.EndsWith("profile") => "Профил",
+        var u when u.EndsWith("notifications") => "Известия",
+        _ => "Momentix"
+    };
+
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+
     private string Initials => string.IsNullOrWhiteSpace(Auth.FullName)
         ? "?"
-        : string.Join(string.Empty, Auth.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(part => char.ToUpperInvariant(part[0])));
+        : string.Join(string.Empty,
+            Auth.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2).Select(p => char.ToUpperInvariant(p[0])));
 
     protected override void OnInitialized()
     {
         Auth.Changed += OnAuthChanged;
+        Nav.LocationChanged += OnLocationChanged;
     }
 
-    private void OnAuthChanged()
-    {
-        _ = InvokeAsync(StateHasChanged);
-    }
+    private void OnAuthChanged() => _ = InvokeAsync(StateHasChanged);
+    private void OnLocationChanged(object? s, LocationChangedEventArgs e) => _ = InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
         Auth.Changed -= OnAuthChanged;
+        Nav.LocationChanged -= OnLocationChanged;
     }
 }

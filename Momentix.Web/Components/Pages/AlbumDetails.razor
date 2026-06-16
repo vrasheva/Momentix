@@ -1,135 +1,127 @@
-﻿@page "/albums/{AlbumId:int}"
+@page "/albums/{AlbumId:int}"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
 
-<div class="page-header">
+<div class="flex-between mb-16">
     <div>
-        <div class="eyebrow">Album</div>
-        <h1 class="page-title">@(album?.Title ?? "Album")</h1>
-        <p class="page-description">@(album?.Description ?? "Photos and letters shared in this album.")</p>
+        <h1 class="page-title" style="margin-bottom:0">@(album?.Title ?? "Албум")</h1>
+        <p class="page-subtitle" style="margin-bottom:0">@(album?.Description ?? "Снимки и писма, споделени в този албум.")</p>
     </div>
-    <a class="secondary-button" href="albums">Back</a>
+    <a class="btn-secondary" href="albums">Назад</a>
 </div>
 
 @if (!string.IsNullOrWhiteSpace(error))
 {
-    <p class="error-message">@error</p>
+    <div class="error-message">@error</div>
 }
 @if (!string.IsNullOrWhiteSpace(status))
 {
-    <p class="status-message">@status</p>
+    <div class="badge mb-16">@status</div>
 }
 
 @if (isLoading)
 {
-    <div class="empty-state">Loading album...</div>
+    <div class="empty-state">Зареждане на албума...</div>
 }
 else if (album == null)
 {
-    <div class="empty-state">Album not found.</div>
+    <div class="empty-state">Албумът не е намерен.</div>
 }
 else
 {
-    <div class="grid two">
-        <section class="panel">
-            <h2 class="section-title">Add memory</h2>
+    <div class="friends-layout">
+        <div class="card">
+            <div class="section-label">Добави спомен</div>
             <div class="form-stack">
                 <div class="field">
-                    <label>Photo</label>
+                    <label>Снимка</label>
                     <InputFile OnChange="OnPhotoSelected" accept="image/*" />
                     @if (photoFile != null)
                     {
-                        <span class="muted">Selected: @photoFile.Name</span>
+                        <span class="album-meta">Избрано: @photoFile.Name</span>
                     }
                 </div>
-                <button class="primary-button" type="button" @onclick="UploadPhoto" disabled="@(isBusy || photoFile == null)">Upload photo</button>
+                <button class="btn-primary" type="button" @onclick="UploadPhoto" disabled="@(isBusy || photoFile == null)">Качи снимка</button>
 
-                <hr />
-
-                <div class="field">
-                    <label>Letter</label>
-                    <InputTextArea class="input" @bind-Value="letter.Text" />
+                <div class="field mt-16">
+                    <label>Писмо</label>
+                    <InputTextArea class="input" @bind-Value="letter.Text" placeholder="Напиши писмо..." />
                 </div>
-                <button class="secondary-button" type="button" @onclick="AddLetter" disabled="@isBusy">Add letter</button>
+                <button class="btn-secondary" type="button" @onclick="AddLetter" disabled="@isBusy">Добави писмо</button>
             </div>
-        </section>
+        </div>
 
-        <section class="panel">
-            <h2 class="section-title">People</h2>
-            <div class="item-list">
-                @foreach (var member in members)
-                {
-                    <div class="member-row">
-                        <div class="person">
-                            <strong>@member.FullName</strong>
-                            <span class="muted">@member.RoleText</span>
-                        </div>
+        <div class="card">
+            <div class="section-label">Хора</div>
+            @foreach (var member in members)
+            {
+                <div class="friend-row">
+                    <span class="friend-av" style="background:@(member.AvatarColor)33;color:@member.AvatarColor">@member.Initials</span>
+                    <div class="friend-info">
+                        <div class="friend-name">@member.FullName</div>
+                        <div class="friend-email">@member.RoleText</div>
                     </div>
-                }
-            </div>
+                </div>
+            }
 
             @if (CanShare)
             {
-                <hr />
-                <div class="form-stack">
-                    <div class="field">
-                        <label>Share with friend</label>
-                        <select @bind="selectedFriendEmail">
-                            <option value="">Select friend</option>
-                            @foreach (var friend in friends)
-                            {
-                                <option value="@friend.Email">@friend.FullName (@friend.Email)</option>
-                            }
-                        </select>
-                    </div>
-                    <label class="actions">
-                        <input type="checkbox" @bind="shareCanUpload" />
-                        <span>Can upload photos</span>
-                    </label>
-                    <button class="primary-button" type="button" @onclick="ShareAlbum" disabled="@(isBusy || string.IsNullOrWhiteSpace(selectedFriendEmail))">Share album</button>
+                <div class="field mt-16">
+                    <label>Сподели с приятел</label>
+                    <select class="input" @bind="selectedFriendEmail">
+                        <option value="">Избери приятел</option>
+                        @foreach (var friend in friends)
+                        {
+                            <option value="@friend.Email">@friend.FullName (@friend.Email)</option>
+                        }
+                    </select>
                 </div>
+                <label class="d-flex gap-8 mb-16">
+                    <input type="checkbox" @bind="shareCanUpload" />
+                    <span>Може да качва снимки</span>
+                </label>
+                <button class="btn-primary" type="button" @onclick="ShareAlbum" disabled="@(isBusy || string.IsNullOrWhiteSpace(selectedFriendEmail))">Сподели албум</button>
             }
-        </section>
+        </div>
     </div>
 
-    <section class="panel" style="margin-top:18px">
-        <h2 class="section-title">Memories</h2>
+    <div class="albums-section">
+        <div class="section-label">Спомени</div>
         @if (media.Count == 0)
         {
-            <div class="empty-state">No photos or letters yet.</div>
+            <div class="empty-state">Няма снимки или писма все още.</div>
         }
         else
         {
-            <div class="media-grid">
+            <div class="albums-grid">
                 @foreach (var item in media)
                 {
-                    <article class="media-tile">
+                    <div class="card" style="padding:0;overflow:hidden;display:flex;flex-direction:column">
                         @if (item.Type == MediaType.Image)
                         {
-                            <img src="@Api.ToBrowserUrl(item.Url)" alt="Album memory" />
+                            <div class="album-photo" style="aspect-ratio:1">
+                                <img src="@Api.ToBrowserUrl(item.Url)" alt="Спомен от албума" style="width:100%;height:100%;object-fit:cover" />
+                            </div>
                         }
                         else if (item.Type == MediaType.Letter)
                         {
-                            <div class="media-body">
-                                <div class="letter-box">@item.Url</div>
-                            </div>
+                            <div style="padding:10px;flex:1">@item.Url</div>
                         }
                         else
                         {
-                            <div class="media-body">Unsupported media type: @item.Type</div>
+                            <div style="padding:10px">Неподдържан вид съдържание: @item.Type</div>
                         }
-                        <div class="media-body">
-                            <div class="meta">By @item.UploadedByName</div>
-                            <div class="actions" style="margin-top:10px">
-                                <button class="danger-button" type="button" @onclick="() => DeleteMedia(item.Id)">Delete</button>
-                            </div>
+                        <div style="padding:10px">
+                            <div class="album-meta">от @item.UploadedByName</div>
+                            <button class="btn-danger mt-8" type="button" @onclick="() => DeleteMedia(item.Id)">Изтрий</button>
                         </div>
-                    </article>
+                    </div>
                 }
             </div>
         }
-    </section>
+    </div>
 }
 
 @code {
@@ -199,14 +191,14 @@ else
         var uploaded = await Api.PostFileAsync<MediaResponseDto>($"Media/album/{AlbumId}/photo", photoFile);
         if (uploaded == null)
         {
-            error = Api.LastError ?? "Could not upload photo.";
+            error = Api.LastError ?? "Снимката не беше качена.";
             isBusy = false;
             return;
         }
 
         media.Insert(0, uploaded);
         photoFile = null;
-        status = "Photo uploaded.";
+        status = "Снимката е качена.";
         isBusy = false;
     }
 
@@ -214,7 +206,7 @@ else
     {
         if (string.IsNullOrWhiteSpace(letter.Text))
         {
-            error = "Letter text is required.";
+            error = "Текстът на писмото е задължителен.";
             return;
         }
 
@@ -225,14 +217,14 @@ else
         var created = await Api.PostAsync<CreateLetterMediaDto, MediaResponseDto>($"Media/album/{AlbumId}/letter", letter);
         if (created == null)
         {
-            error = Api.LastError ?? "Could not add letter.";
+            error = Api.LastError ?? "Писмото не беше добавено.";
             isBusy = false;
             return;
         }
 
         media.Insert(0, created);
         letter.Text = string.Empty;
-        status = "Letter added.";
+        status = "Писмото е добавено.";
         isBusy = false;
     }
 
@@ -250,13 +242,13 @@ else
 
         if (!ok)
         {
-            error = Api.LastError ?? "Could not share album.";
+            error = Api.LastError ?? "Албумът не беше споделен.";
             isBusy = false;
             return;
         }
 
         selectedFriendEmail = string.Empty;
-        status = "Album shared.";
+        status = "Албумът е споделен.";
         await LoadAlbum();
         isBusy = false;
     }
@@ -266,11 +258,11 @@ else
         var ok = await Api.DeleteAsync($"Media/{id}");
         if (!ok)
         {
-            error = Api.LastError ?? "Could not delete media.";
+            error = Api.LastError ?? "Съдържанието не беше изтрито.";
             return;
         }
 
         media.RemoveAll(item => item.Id == id);
-        status = "Media deleted.";
+        status = "Съдържанието е изтрито.";
     }
 }

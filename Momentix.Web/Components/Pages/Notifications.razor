@@ -1,0 +1,117 @@
+@page "/notifications"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject AuthSession Auth
+@inject MomentixApiClient Api
+@inject NavigationManager Nav
+
+<h1 class="page-title">Известия</h1>
+<p class="page-subtitle">Следи последните събития по твоите албуми, капсули и приятелства.</p>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="error-message">@error</div>
+}
+
+<div class="card">
+    <div class="flex-between mb-12">
+        <div class="section-label" style="margin-bottom:0">
+            @(unreadCount == 0 ? "Всички известия са прочетени" : $"{unreadCount} непрочетени известия")
+        </div>
+        <button class="btn-sm" type="button" @onclick="MarkAllAsRead" disabled="@(isBusy || unreadCount == 0)">
+            Прочети всички
+        </button>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="empty-state">Зареждане на известията...</div>
+    }
+    else if (notifications.Count == 0)
+    {
+        <div class="empty-state">Няма известия все още.</div>
+    }
+    else
+    {
+        @foreach (var n in notifications)
+        {
+            <div class="friend-row" style="cursor:pointer" @onclick="() => OpenNotification(n)">
+                <span class="badge @(n.IsRead ? "badge-grey" : "badge-green")">@(n.IsRead ? "Прочетено" : "Ново")</span>
+                <div class="friend-info">
+                    <div class="friend-name">@n.Title</div>
+                    <div class="friend-email">@n.Message</div>
+                </div>
+                <div class="friend-actions">
+                    <span class="badge">@n.TimeText</span>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<NotificationResponseDto> notifications = new();
+    private int unreadCount;
+    private bool isLoading;
+    private bool isBusy;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        isLoading = true;
+        error = null;
+
+        notifications = await Api.GetAsync<List<NotificationResponseDto>>("Notifications") ?? new();
+        var unread = await Api.GetAsync<NotificationUnreadCountDto>("Notifications/unread-count");
+        unreadCount = unread?.Count ?? notifications.Count(n => !n.IsRead);
+
+        if (Api.LastError != null)
+            error = Api.LastError;
+
+        isLoading = false;
+    }
+
+    private async Task MarkAllAsRead()
+    {
+        isBusy = true;
+        await Api.PostAsync("Notifications/read-all");
+        await Load();
+        isBusy = false;
+    }
+
+    private async Task OpenNotification(NotificationResponseDto n)
+    {
+        if (!n.IsRead)
+            await Api.PostAsync($"Notifications/{n.Id}/read");
+
+        switch (n.RelatedEntityType)
+        {
+            case "Album" when n.RelatedEntityId.HasValue:
+                Nav.NavigateTo($"/albums/{n.RelatedEntityId.Value}");
+                return;
+            case "TimeCapsule" when n.RelatedEntityId.HasValue:
+                Nav.NavigateTo($"/capsules/{n.RelatedEntityId.Value}");
+                return;
+            case "FriendRequest":
+            case "Friend":
+                Nav.NavigateTo("/friends");
+                return;
+            case "ChallengeSubmission":
+                Nav.NavigateTo("/challenges");
+                return;
+            default:
+                await Load();
+                return;
+        }
+    }
+}

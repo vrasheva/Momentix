@@ -4,6 +4,7 @@ public class ChallengeSubmissionResponseDto
 {
     public int Id { get; set; }
     public int ChallengeId { get; set; }
+    public string UserId { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string MediaUrl { get; set; } = string.Empty;
     public DateTime SubmittedAt { get; set; }

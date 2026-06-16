@@ -2,61 +2,62 @@
 @inject AuthSession Auth
 @inject NavigationManager Nav
 
-<div class="brand-block">
-    <a class="brand-mark" href="/">M</a>
-    <div>
-        <div class="brand-name">Momentix</div>
-        <div class="brand-subtitle">albums and capsules</div>
-    </div>
+<div class="sidebar-logo">
+    <a href="/profile" class="logo-mark" title="Профил">@Initials</a>
+    <span class="sidebar-brand">Momentix</span>
+    <a href="/notifications" class="sidebar-bell" title="Известия">
+        <i class="ti ti-bell"></i>
+    </a>
 </div>
 
 <nav class="side-nav">
-    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-        <span class="nav-icon">H</span>
-        <span>Home</span>
+    <NavLink class="nav-item" href="albums" Match="NavLinkMatch.Prefix">
+        <i class="nav-icon ti ti-photo"></i>
+        <span>Албуми</span>
     </NavLink>
-
-    @if (Auth.IsLoggedIn)
-    {
-        <NavLink class="nav-link" href="albums">
-            <span class="nav-icon">A</span>
-            <span>Albums</span>
-        </NavLink>
-        <NavLink class="nav-link" href="capsules">
-            <span class="nav-icon">T</span>
-            <span>Time Capsules</span>
-        </NavLink>
-        <NavLink class="nav-link" href="friends">
-            <span class="nav-icon">F</span>
-            <span>Friends</span>
-        </NavLink>
-        <NavLink class="nav-link" href="challenges">
-            <span class="nav-icon">C</span>
-            <span>Challenges</span>
-        </NavLink>
-    }
-    else
-    {
-        <NavLink class="nav-link" href="login">
-            <span class="nav-icon">L</span>
-            <span>Login</span>
-        </NavLink>
-        <NavLink class="nav-link" href="register">
-            <span class="nav-icon">R</span>
-            <span>Register</span>
-        </NavLink>
-    }
+    <NavLink class="nav-item" href="capsules" Match="NavLinkMatch.Prefix">
+        <i class="nav-icon ti ti-clock"></i>
+        <span>Капсули</span>
+    </NavLink>
+    <NavLink class="nav-item" href="friends" Match="NavLinkMatch.Prefix">
+        <i class="nav-icon ti ti-users"></i>
+        <span>Приятели</span>
+    </NavLink>
+    <NavLink class="nav-item" href="challenges" Match="NavLinkMatch.Prefix">
+        <i class="nav-icon ti ti-star"></i>
+        <span>Предизвикателства</span>
+    </NavLink>
 </nav>
 
 @if (Auth.IsLoggedIn)
 {
-    <button class="secondary-button full-width" type="button" @onclick="Logout">Sign out</button>
+    <div class="sidebar-bottom">
+        <a href="/profile" class="sidebar-user">
+            <span class="sidebar-av">@Initials</span>
+            <span class="sidebar-username">@Auth.FullName</span>
+        </a>
+        <button class="sidebar-logout" title="Изход" type="button" @onclick="Logout">
+            <i class="ti ti-logout"></i>
+        </button>
+    </div>
 }
 
 @code {
+    private string Initials => string.IsNullOrWhiteSpace(Auth.FullName)
+        ? "?"
+        : string.Join(string.Empty,
+            Auth.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2).Select(p => char.ToUpperInvariant(p[0])));
+
     protected override void OnInitialized()
     {
         Auth.Changed += OnAuthChanged;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            StateHasChanged();
     }
 
     private void Logout()
@@ -65,13 +66,6 @@
         Nav.NavigateTo("/login");
     }
 
-    private void OnAuthChanged()
-    {
-        _ = InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        Auth.Changed -= OnAuthChanged;
-    }
+    private void OnAuthChanged() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() => Auth.Changed -= OnAuthChanged;
 }

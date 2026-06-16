@@ -26,6 +26,19 @@ public class AuthSession
         Changed?.Invoke();
     }
 
+    public void UpdateProfile(string fullName, string email)
+    {
+        FullName = fullName;
+        Email = email;
+        Changed?.Invoke();
+    }
+
+    public void UpdateTheme(string themeColor)
+    {
+        ThemeColor = themeColor;
+        Changed?.Invoke();
+    }
+
     public void SignOut()
     {
         Token = null;

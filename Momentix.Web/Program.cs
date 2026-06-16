@@ -22,6 +22,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseAntiforgery();
 
+app.MapGet("/", () => Results.Redirect("/login"));
+
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -1,120 +1,116 @@
-﻿@page "/friends"
+@page "/friends"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
 @inject MomentixApiClient Api
 @inject NavigationManager Nav
 
-<div class="page-header">
-    <div>
-        <h1 class="page-title">Friends</h1>
-        <p class="page-description">Find users, send requests and accept incoming friend requests.</p>
-    </div>
-</div>
+<h1 class="page-title">Приятели</h1>
+<p class="page-subtitle">Намирай потребители, изпращай заявки и приемай покани.</p>
 
 @if (!string.IsNullOrWhiteSpace(error))
 {
-    <p class="error-message">@error</p>
+    <div class="error-message">@error</div>
 }
 @if (!string.IsNullOrWhiteSpace(status))
 {
-    <p class="status-message">@status</p>
+    <div class="badge mb-16">@status</div>
 }
 
-<div class="grid two">
-    <section class="panel">
-        <h2 class="section-title">Find users</h2>
-        <div class="form-stack">
-            <div class="actions">
-                <input class="input" placeholder="Search by name or email" @bind="search" @bind:event="oninput" />
-                <button class="primary-button" type="button" @onclick="SearchUsers" disabled="@isBusy">Search</button>
-            </div>
-
-            @if (users.Count == 0)
+<div class="friends-layout">
+    <div>
+        <div class="card">
+            <div class="section-label">Моите приятели</div>
+            @if (friends.Count == 0)
             {
-                <div class="empty-state">No users found.</div>
+                <div class="empty-state">Все още нямаш приятели.</div>
             }
             else
             {
-                <div class="item-list">
-                    @foreach (var user in users)
-                    {
-                        <article class="card friend-row">
-                            <div class="person">
-                                <strong>@user.FullName</strong>
-                                <span class="muted">@user.Email</span>
-                            </div>
-                            <div class="actions">
-                                @if (user.IsFriend)
-                                {
-                                    <span class="badge">Friend</span>
-                                }
-                                else if (user.HasPendingOutgoingRequest)
-                                {
-                                    <span class="badge gold">Pending</span>
-                                }
-                                else if (user.HasPendingIncomingRequest && user.IncomingRequestId.HasValue)
-                                {
-                                    <button class="primary-button" type="button" @onclick="() => AcceptRequest(user.IncomingRequestId.Value)">Accept</button>
-                                }
-                                else
-                                {
-                                    <button class="secondary-button" type="button" @onclick="() => SendRequest(user.UserId)">Add friend</button>
-                                }
-                            </div>
-                        </article>
-                    }
-                </div>
-            }
-        </div>
-    </section>
-
-    <section class="panel">
-        <h2 class="section-title">Incoming requests</h2>
-        @if (incomingRequests.Count == 0)
-        {
-            <div class="empty-state">No pending requests.</div>
-        }
-        else
-        {
-            <div class="item-list">
-                @foreach (var request in incomingRequests)
-                {
-                    <article class="card friend-row">
-                        <div class="person">
-                            <strong>@request.RequesterName</strong>
-                            <span class="muted">@request.RequesterEmail</span>
-                        </div>
-                        <div class="actions">
-                            <button class="primary-button" type="button" @onclick="() => AcceptRequest(request.Id)">Accept</button>
-                            <button class="secondary-button" type="button" @onclick="() => DeclineRequest(request.Id)">Decline</button>
-                        </div>
-                    </article>
-                }
-            </div>
-        }
-
-        <hr />
-
-        <h2 class="section-title">My friends</h2>
-        @if (friends.Count == 0)
-        {
-            <div class="empty-state">You do not have friends yet.</div>
-        }
-        else
-        {
-            <div class="item-list">
                 @foreach (var friend in friends)
                 {
-                    <article class="card friend-row">
-                        <div class="person">
-                            <strong>@friend.FullName</strong>
-                            <span class="muted">@friend.Email</span>
+                    <div class="friend-row">
+                        <span class="friend-av">@Initials(friend.FullName)</span>
+                        <div class="friend-info">
+                            <div class="friend-name">@friend.FullName</div>
+                            <div class="friend-email">@friend.Email</div>
                         </div>
-                        <button class="danger-button" type="button" @onclick="() => RemoveFriend(friend.UserId)">Remove</button>
-                    </article>
+                        <div class="friend-actions">
+                            <button class="btn-sm" type="button" @onclick="() => RemoveFriend(friend.UserId)">Премахни</button>
+                        </div>
+                    </div>
                 }
-            </div>
+            }
+        </div>
+
+        <div class="card mb-16">
+            <div class="section-label">Получени заявки</div>
+            @if (incomingRequests.Count == 0)
+            {
+                <div class="empty-state">Няма получени заявки.</div>
+            }
+            else
+            {
+                @foreach (var request in incomingRequests)
+                {
+                    <div class="friend-row">
+                        <span class="friend-av">@Initials(request.RequesterName)</span>
+                        <div class="friend-info">
+                            <div class="friend-name">@request.RequesterName</div>
+                            <div class="friend-email">@request.RequesterEmail</div>
+                        </div>
+                        <div class="friend-actions">
+                            <button class="btn-theme-sm" type="button" @onclick="() => AcceptRequest(request.Id)">Приеми</button>
+                            <button class="btn-sm" type="button" @onclick="() => DeclineRequest(request.Id)">Откажи</button>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-label">Намери потребители</div>
+        <div class="search-row">
+            <input class="input" placeholder="Търси по име или имейл" @bind="search" @bind:event="oninput" @onkeyup="OnSearchKeyUp" />
+            <button class="btn-primary" type="button" @onclick="SearchUsers" disabled="@isBusy">Търси</button>
+        </div>
+
+        @if (users.Count == 0)
+        {
+            <div class="empty-state">Няма намерени потребители.</div>
         }
-    </section>
+        else
+        {
+            @foreach (var user in users)
+            {
+                <div class="friend-row">
+                    <span class="friend-av">@Initials(user.FullName)</span>
+                    <div class="friend-info">
+                        <div class="friend-name">@user.FullName</div>
+                        <div class="friend-email">@user.Email</div>
+                    </div>
+                    <div class="friend-actions">
+                        @if (user.IsFriend)
+                        {
+                            <span class="badge-green badge">Приятел</span>
+                        }
+                        else if (user.HasPendingOutgoingRequest)
+                        {
+                            <span class="badge-amber badge">Изчаква</span>
+                        }
+                        else if (user.HasPendingIncomingRequest && user.IncomingRequestId.HasValue)
+                        {
+                            <button class="btn-theme-sm" type="button" @onclick="() => AcceptRequest(user.IncomingRequestId.Value)">Приеми</button>
+                        }
+                        else
+                        {
+                            <button class="btn-sm" type="button" @onclick="() => SendRequest(user.UserId)">Добави</button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
 </div>
 
 @code {
@@ -145,6 +141,12 @@
         await SearchUsers();
     }
 
+    private async Task OnSearchKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await SearchUsers();
+    }
+
     private async Task SearchUsers()
     {
         isBusy = true;
@@ -157,22 +159,22 @@
 
     private async Task SendRequest(string userId)
     {
-        await RunAction(async () => await Api.PostAsync($"Friends/requests/{userId}"), "Friend request sent.");
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{userId}"), "Заявката е изпратена.");
     }
 
     private async Task AcceptRequest(int requestId)
     {
-        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/accept"), "Friend request accepted.");
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/accept"), "Заявката е приета.");
     }
 
     private async Task DeclineRequest(int requestId)
     {
-        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/decline"), "Friend request declined.");
+        await RunAction(async () => await Api.PostAsync($"Friends/requests/{requestId}/decline"), "Заявката е отказана.");
     }
 
     private async Task RemoveFriend(string userId)
     {
-        await RunAction(async () => await Api.DeleteAsync($"Friends/{userId}"), "Friend removed.");
+        await RunAction(async () => await Api.DeleteAsync($"Friends/{userId}"), "Приятелят е премахнат.");
     }
 
     private async Task RunAction(Func<Task<bool>> action, string successMessage)
@@ -184,7 +186,7 @@
         var ok = await action();
         if (!ok)
         {
-            error = Api.LastError ?? "Action failed.";
+            error = Api.LastError ?? "Действието не беше изпълнено.";
             isBusy = false;
             return;
         }
@@ -192,5 +194,13 @@
         status = successMessage;
         await LoadAll();
         isBusy = false;
+    }
+
+    private static string Initials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "?";
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0][0].ToString().ToUpper();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
     }
 }
