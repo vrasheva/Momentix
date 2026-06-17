@@ -53,16 +53,6 @@ else
             }
         </div>
 
-        <div class="card">
-            <div class="section-label">Опции за гласуване</div>
-            <p class="page-subtitle" style="margin-bottom:0">Познай темата на предизвикателството.</p>
-            <div class="vote-options">
-                @foreach (var option in voteOptions)
-                {
-                    <span class="vote-chip">@option</span>
-                }
-            </div>
-        </div>
     </div>
 
     <div class="feed-section-title">Публикации</div>
@@ -94,19 +84,18 @@ else
                                 </button>
                             }
                         </div>
-                        <div class="album-meta">@submission.VoteCount гласа</div>
-                        <div class="vote-options mt-8">
-                            <span class="@GetAiBadgeClass(submission)">@GetAiLabel(submission)</span>
-                        </div>
-                        @if (!string.IsNullOrWhiteSpace(submission.AiFeedback))
-                        {
-                            <div class="album-meta mt-8">@submission.AiFeedback</div>
-                        }
-                        <div class="vote-options mt-12">
-                            @foreach (var option in voteOptions)
+                        <div class="heart-row">
+                            @if (submission.UserId != Auth.UserId)
                             {
-                                <span class="vote-chip" @onclick="() => Vote(submission.Id, option)">@option</span>
+                                <button class="heart-btn @(submission.IsLikedByCurrentUser ? "liked" : "")"
+                                        type="button" title="@(submission.IsLikedByCurrentUser ? "Премахни харесване" : "Харесай")"
+                                        @onclick="() => ToggleLike(submission)">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </button>
                             }
+                            <span class="heart-count">@submission.VoteCount</span>
                         </div>
                     </div>
                 </div>
@@ -116,7 +105,6 @@ else
 }
 
 @code {
-    private readonly string[] voteOptions = { "Зелено", "Блестящо", "Животно", "Любим детайл" };
     private ChallengeResponseDto? challenge;
     private List<ChallengeSubmissionResponseDto> submissions = new();
     private IBrowserFile? challengePhoto;
@@ -224,27 +212,28 @@ else
             await LoadChallenge(clearMessages: false);
     }
 
-    private async Task Vote(int submissionId, string option)
+    private async Task ToggleLike(ChallengeSubmissionResponseDto submission)
     {
-        isBusy = true;
         error = null;
-        status = null;
-
-        var ok = await Api.PostAsync($"Challenges/submissions/{submissionId}/vote", new CreateChallengeVoteDto
+        if (submission.IsLikedByCurrentUser)
         {
-            SelectedOption = option
-        });
-
-        if (!ok)
-        {
-            error = Api.LastError ?? "Гласът не беше записан.";
-            isBusy = false;
-            return;
+            var ok = await Api.DeleteAsync($"Challenges/submissions/{submission.Id}/vote");
+            if (ok)
+            {
+                submission.IsLikedByCurrentUser = false;
+                submission.VoteCount = Math.Max(0, submission.VoteCount - 1);
+            }
         }
-
-        status = "Гласът е записан.";
-        await LoadChallenge(clearMessages: false);
-        isBusy = false;
+        else
+        {
+            var ok = await Api.PostAsync($"Challenges/submissions/{submission.Id}/vote",
+                new CreateChallengeVoteDto { SelectedOption = "Like" });
+            if (ok)
+            {
+                submission.IsLikedByCurrentUser = true;
+                submission.VoteCount++;
+            }
+        }
     }
 
     private static string BuildSubmitStatus(ChallengeSubmissionResponseDto submission)
@@ -258,30 +247,6 @@ else
         return string.IsNullOrWhiteSpace(submission.AiFeedback)
             ? "Снимката е изпратена. AI проверката не беше възможна."
             : $"Снимката е изпратена. {submission.AiFeedback}";
-    }
-
-    private static string GetAiLabel(ChallengeSubmissionResponseDto submission)
-    {
-        if (submission.AiIsSatisfied == true)
-            return $"AI: съвпада {FormatConfidence(submission)}";
-
-        if (submission.AiIsSatisfied == false)
-            return $"AI: не съвпада {FormatConfidence(submission)}";
-
-        return submission.AiEvaluatedAt.HasValue || !string.IsNullOrWhiteSpace(submission.AiFeedback)
-            ? "AI: недостъпен"
-            : "AI: непроверена";
-    }
-
-    private static string GetAiBadgeClass(ChallengeSubmissionResponseDto submission)
-    {
-        if (submission.AiIsSatisfied == true)
-            return "badge badge-green";
-
-        if (submission.AiIsSatisfied == false)
-            return "badge badge-red";
-
-        return "badge badge-amber";
     }
 
     private static string FormatConfidence(ChallengeSubmissionResponseDto submission) =>

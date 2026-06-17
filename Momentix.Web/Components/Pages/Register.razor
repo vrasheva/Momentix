@@ -16,7 +16,7 @@
     <div class="auth-right">
         <div class="auth-form-wrap">
             <div class="auth-left-logo">
-                <span class="logo-mark" style="background:@model.ThemeColor">M</span>
+                <span class="logo-mark" style="background:@CurrentHex">M</span>
                 <span class="auth-left-logo-name">Momentix</span>
             </div>
             <div class="auth-tagline-title">Създай своя акаунт.</div>
@@ -43,8 +43,8 @@
                     <div class="theme-picker theme-picker-plain">
                         @foreach (var t in Themes)
                         {
-                            <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Hex)">
-                                <div class="theme-dot @(model.ThemeColor == t.Hex ? "active" : "")"
+                            <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Name)">
+                                <div class="theme-dot @(model.ThemeColor == t.Name ? "active" : "")"
                                      style="background:@t.Hex"></div>
                             </div>
                         }
@@ -57,7 +57,7 @@
                 }
 
                 <button class="btn-primary full-width" type="submit"
-                        style="background:@model.ThemeColor"
+                        style="background:@CurrentHex"
                         disabled="@isBusy">
                     @(isBusy ? "Регистриране..." : "Регистрирай се")
                 </button>
@@ -69,18 +69,20 @@
 </div>
 
 @code {
-    private readonly RegisterDto model = new() { ThemeColor = "#111111" };
+    private readonly RegisterDto model = new() { ThemeColor = "Black" };
     private bool isBusy;
     private string? error;
 
-    private static readonly (string Hex, string Name)[] Themes =
+    private static readonly (string Name, string Hex, string Label)[] Themes =
     [
-        ("#378ADD", "Синя"),
-        ("#7F77DD", "Лилава"),
-        ("#1D9E75", "Зелена"),
-        ("#EF9F27", "Жълта"),
-        ("#111111", "Тъмна"),
+        ("Blue",   "#60A5FA", "Синя"),
+        ("Purple", "#A78BFA", "Лилава"),
+        ("Green",  "#34D399", "Зелена"),
+        ("Yellow", "#FBBF24", "Жълта"),
+        ("Black",  "#1F2937", "Тъмна"),
     ];
+
+    private string CurrentHex => Themes.FirstOrDefault(t => t.Name == model.ThemeColor).Hex ?? "#1F2937";
 
     protected override void OnInitialized()
     {
@@ -88,7 +90,7 @@
             Nav.NavigateTo("/albums");
     }
 
-    private void SelectTheme(string hex) => model.ThemeColor = hex;
+    private void SelectTheme(string name) => model.ThemeColor = name;
 
     private async Task DoRegister()
     {

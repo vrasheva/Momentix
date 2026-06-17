@@ -1,6 +1,7 @@
 @page "/profile"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject AuthSession Auth
+@inject MomentixApiClient Api
 @inject NavigationManager Nav
 
 <h1 class="page-title">Профил</h1>
@@ -63,9 +64,9 @@
             <div class="theme-picker">
                 @foreach (var t in Themes)
                 {
-                    <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Hex)">
-                        <div class="theme-dot @(Auth.ThemeColor == t.Hex ? "active" : "")" style="background:@t.Hex"></div>
-                        <span class="theme-dot-name">@t.Name</span>
+                    <div class="theme-dot-wrap" @onclick="() => SelectTheme(t.Name)" style="cursor:pointer">
+                        <div class="theme-dot @(Auth.ThemeColor == t.Name ? "active" : "")" style="background:@t.Hex"></div>
+                        <span class="theme-dot-name">@t.Label</span>
                     </div>
                 }
             </div>
@@ -82,13 +83,13 @@
     private string emailDraft = string.Empty;
     private string? status;
 
-    private static readonly (string Hex, string Name)[] Themes =
+    private static readonly (string Name, string Hex, string Label)[] Themes =
     [
-        ("#378ADD", "Синя"),
-        ("#7F77DD", "Лилава"),
-        ("#1D9E75", "Зелена"),
-        ("#EF9F27", "Жълта"),
-        ("#111111", "Тъмна"),
+        ("Blue",   "#60A5FA", "Синя"),
+        ("Purple", "#A78BFA", "Лилава"),
+        ("Green",  "#34D399", "Зелена"),
+        ("Yellow", "#FBBF24", "Жълта"),
+        ("Black",  "#1F2937", "Тъмна"),
     ];
 
     private string Initials => string.IsNullOrWhiteSpace(Auth.FullName)
@@ -148,9 +149,10 @@
         status = "Смяната на паролата ще бъде добавена скоро.";
     }
 
-    private void SelectTheme(string hex)
+    private async Task SelectTheme(string name)
     {
-        Auth.UpdateTheme(hex);
+        Auth.UpdateTheme(name);
+        await Api.PatchAsync("Auth/theme", new { ThemeColor = name });
         status = "Темата е променена.";
     }
 

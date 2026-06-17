@@ -76,6 +76,14 @@ public class MomentixApiClient
         return await ReadResponse(response);
     }
 
+    public async Task<bool> PatchAsync<TRequest>(string endpoint, TRequest payload)
+    {
+        using var request = CreateRequest(HttpMethod.Patch, endpoint);
+        request.Content = JsonContent.Create(payload, options: JsonOptions);
+        using var response = await _httpClient.SendAsync(request);
+        return await ReadResponse(response);
+    }
+
     public async Task<bool> DeleteAsync(string endpoint)
     {
         using var request = CreateRequest(HttpMethod.Delete, endpoint);

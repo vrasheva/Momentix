@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Momentix.Data.DTOs;
 using Momentix.Data.Models;
 using Momentix.API.Services;
 using System.Net.Mail;
+using System.Security.Claims;
 
 namespace Momentix.API.Controllers
 {
@@ -87,6 +89,19 @@ namespace Momentix.API.Controllers
             {
                 return BadRequest("Email address is not valid.");
             }
+        }
+
+        [HttpPatch("theme")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTheme([FromBody] UpdateThemeDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByIdAsync(userId!);
+            if (user == null) return Unauthorized();
+
+            user.ThemeColor = dto.ThemeColor;
+            await _userManager.UpdateAsync(user);
+            return Ok();
         }
 
         [HttpPost("login")]

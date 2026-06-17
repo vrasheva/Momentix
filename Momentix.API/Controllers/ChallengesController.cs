@@ -83,6 +83,7 @@ public class ChallengesController : ControllerBase
                 MediaUrl = s.MediaUrl,
                 SubmittedAt = s.SubmittedAt,
                 VoteCount = s.Votes.Count,
+                IsLikedByCurrentUser = s.Votes.Any(v => v.VotedByUserId == userId),
                 AiIsSatisfied = s.AiIsSatisfied,
                 AiConfidence = s.AiConfidence,
                 AiFeedback = s.AiFeedback,
@@ -276,6 +277,21 @@ public class ChallengesController : ControllerBase
 
         await _context.SaveChangesAsync();
         return Ok("Vote saved.");
+    }
+
+    [HttpDelete("submissions/{submissionId}/vote")]
+    public async Task<IActionResult> UnlikeSubmission(int submissionId)
+    {
+        var userId = GetUserId();
+        var vote = await _context.ChallengeVotes
+            .FirstOrDefaultAsync(v => v.SubmissionId == submissionId && v.VotedByUserId == userId);
+
+        if (vote == null)
+            return Ok();
+
+        _context.ChallengeVotes.Remove(vote);
+        await _context.SaveChangesAsync();
+        return Ok();
     }
 
     [HttpDelete("submissions/{submissionId}")]

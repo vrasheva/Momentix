@@ -100,11 +100,12 @@ public partial class ProfileViewModel : BaseViewModel
         StatusMessage = string.Empty;
     });
 
-    public IRelayCommand<string> SelectThemeCommand => new RelayCommand<string>(theme =>
+    public IRelayCommand<string> SelectThemeCommand => new AsyncRelayCommand<string>(async theme =>
     {
         if (string.IsNullOrEmpty(theme)) return;
         ThemeService.Instance.ApplyTheme(theme, false);
         OnPropertyChanged(nameof(SelectedTheme));
+        await _apiService.PatchAsync("Auth/theme", new Momentix.Data.DTOs.UpdateThemeDto { ThemeColor = theme });
     });
 
     public IRelayCommand LogoutCommand => new AsyncRelayCommand(async () =>

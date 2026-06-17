@@ -9,6 +9,7 @@ public class ChallengeSubmissionResponseDto
     public string MediaUrl { get; set; } = string.Empty;
     public DateTime SubmittedAt { get; set; }
     public int VoteCount { get; set; }
+    public bool IsLikedByCurrentUser { get; set; }
     public bool? AiIsSatisfied { get; set; }
     public int? AiConfidence { get; set; }
     public string? AiFeedback { get; set; }

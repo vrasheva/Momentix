@@ -138,6 +138,15 @@ public class ApiService
         return response.IsSuccessStatusCode;
     }
 
+    public async Task<bool> PatchAsync<TRequest>(string endpoint, TRequest data)
+    {
+        LastErrorMessage = string.Empty;
+        var response = await _httpClient.PatchAsJsonAsync(endpoint, data);
+        if (!response.IsSuccessStatusCode)
+            LastErrorMessage = await response.Content.ReadAsStringAsync();
+        return response.IsSuccessStatusCode;
+    }
+
     public async Task<bool> DeleteAsync(string endpoint)
     {
         LastErrorMessage = string.Empty;

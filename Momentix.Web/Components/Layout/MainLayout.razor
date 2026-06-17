@@ -12,7 +12,7 @@
 }
 else
 {
-    <div class="app-shell" style="--theme:@Auth.ThemeColor;--theme-light:@(Auth.ThemeColor)22;--theme-text:@Auth.ThemeColor;--sidebar-bg:@Auth.ThemeColor;">
+    <div class="app-shell" style="--theme:@Auth.ThemeHex;--theme-light:@(Auth.ThemeHex)22;--theme-text:@Auth.ThemeHex;--sidebar-bg:@Auth.ThemeHex;">
         <aside class="app-sidebar">
             <NavMenu />
         </aside>
@@ -73,6 +73,12 @@ else
     {
         Auth.Changed += OnAuthChanged;
         Nav.LocationChanged += OnLocationChanged;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            _ = InvokeAsync(StateHasChanged);
     }
 
     private void OnAuthChanged() => _ = InvokeAsync(StateHasChanged);
