@@ -41,7 +41,7 @@ public class ApiService
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri("http://10.0.2.2:5036/api/"),
-            Timeout = TimeSpan.FromSeconds(20)
+            Timeout = TimeSpan.FromSeconds(120)
         };
 
         var savedToken = Preferences.Get("auth_token", string.Empty);

@@ -80,6 +80,10 @@ namespace Momentix.Mobile.ViewModels
                 {
                     foreach (var album in result)
                     {
+                        album.ThumbnailUrls = album.ThumbnailUrls
+                            .Select(ApiService.ToDeviceUrl)
+                            .ToList();
+
                         if (album.IsOwner && album.MemberCount == 0)
                             MyAlbums.Add(album);
                         if (album.IsOwner && album.MemberCount > 0)

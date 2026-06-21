@@ -48,7 +48,7 @@ namespace Momentix.API.Controllers
                 {
                     Id = tc.Id,
                     Title = tc.Title,
-                    Description = tc.Description,
+                    Description = (tc.OwnerId == userId || tc.IsUnlocked || tc.UnlockAt <= now) ? tc.Description : null,
                     UnlockAt = tc.UnlockAt,
                     CreatedAt = tc.CreatedAt,
                     IsUnlocked = tc.IsUnlocked || tc.UnlockAt <= now,
@@ -87,19 +87,22 @@ namespace Momentix.API.Controllers
             if (!hasAccess)
                 return Forbid();
 
+            var isOwner = capsule.OwnerId == userId;
+            var isUnlocked = capsule.IsUnlocked || capsule.UnlockAt <= now;
+
             return Ok(new TimeCapsuleResponseDto
             {
                 Id = capsule.Id,
                 Title = capsule.Title,
-                Description = capsule.Description,
+                Description = (isOwner || isUnlocked) ? capsule.Description : null,
                 UnlockAt = capsule.UnlockAt,
                 CreatedAt = capsule.CreatedAt,
-                IsUnlocked = capsule.IsUnlocked || capsule.UnlockAt <= now,
+                IsUnlocked = isUnlocked,
                 OwnerName = capsule.Owner.FullName,
-                IsOwner = capsule.OwnerId == userId,
+                IsOwner = isOwner,
                 MemberCount = capsule.Members.Count,
                 MediaCount = capsule.MediaItems.Count,
-                TimeRemaining = (capsule.IsUnlocked || capsule.UnlockAt <= now) ? null : capsule.UnlockAt - now
+                TimeRemaining = isUnlocked ? null : capsule.UnlockAt - now
             });
         }
 

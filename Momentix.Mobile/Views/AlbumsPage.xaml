@@ -87,16 +87,16 @@
                         </Border.GestureRecognizers>
                         <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                             <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding MyAlbum0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding MyAlbum0.ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto0}"/>
+                                <Image Source="{Binding MyAlbum0.Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto0}"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding MyAlbum0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding MyAlbum0.ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto1}"/>
+                                <Image Source="{Binding MyAlbum0.Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto1}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding MyAlbum0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding MyAlbum0.ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto2}"/>
+                                <Image Source="{Binding MyAlbum0.Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto2}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding MyAlbum0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding MyAlbum0.ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto3}"/>
+                                <Image Source="{Binding MyAlbum0.Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding MyAlbum0.HasPhoto3}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                     WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
@@ -130,16 +130,16 @@
                                     </Border.GestureRecognizers>
                                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                                         <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
+                                            <Image Source="{Binding Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
                                         </Border>
                                         <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
+                                            <Image Source="{Binding Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
+                                            <Image Source="{Binding Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
+                                            <Image Source="{Binding Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                                 WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
@@ -177,16 +177,16 @@
                         </Border.GestureRecognizers>
                         <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                             <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto0}"/>
+                                <Image Source="{Binding SharedWithMe0.Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto0}"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto1}"/>
+                                <Image Source="{Binding SharedWithMe0.Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto1}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto2}"/>
+                                <Image Source="{Binding SharedWithMe0.Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto2}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding SharedWithMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedWithMe0.ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto3}"/>
+                                <Image Source="{Binding SharedWithMe0.Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding SharedWithMe0.HasPhoto3}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                     WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
@@ -221,16 +221,16 @@
                                     </Border.GestureRecognizers>
                                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                                         <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
+                                            <Image Source="{Binding Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
                                         </Border>
                                         <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
+                                            <Image Source="{Binding Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
+                                            <Image Source="{Binding Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
+                                            <Image Source="{Binding Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                                 WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
@@ -285,16 +285,16 @@
                         </Border.GestureRecognizers>
                         <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                             <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding SharedByMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedByMe0.ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto0}"/>
+                                <Image Source="{Binding SharedByMe0.Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto0}"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding SharedByMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedByMe0.ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto1}"/>
+                                <Image Source="{Binding SharedByMe0.Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto1}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding SharedByMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedByMe0.ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto2}"/>
+                                <Image Source="{Binding SharedByMe0.Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto2}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding SharedByMe0.Color}" StrokeThickness="0">
-                                <Image Source="{Binding SharedByMe0.ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto3}"/>
+                                <Image Source="{Binding SharedByMe0.Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding SharedByMe0.HasPhoto3}"/>
                             </Border>
                             <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                     WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">
@@ -326,16 +326,16 @@
                                     </Border.GestureRecognizers>
                                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*" RowSpacing="1" ColumnSpacing="1">
                                         <Border Grid.Row="0" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[0]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
+                                            <Image Source="{Binding Thumbnail0}" Aspect="AspectFill" IsVisible="{Binding HasPhoto0}"/>
                                         </Border>
                                         <Border Grid.Row="0" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[1]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
+                                            <Image Source="{Binding Thumbnail1}" Aspect="AspectFill" IsVisible="{Binding HasPhoto1}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="0" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[2]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
+                                            <Image Source="{Binding Thumbnail2}" Aspect="AspectFill" IsVisible="{Binding HasPhoto2}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="{Binding Color}" StrokeThickness="0">
-                                            <Image Source="{Binding ThumbnailUrls[3]}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
+                                            <Image Source="{Binding Thumbnail3}" Aspect="AspectFill" IsVisible="{Binding HasPhoto3}"/>
                                         </Border>
                                         <Border Grid.Row="1" Grid.Column="1" BackgroundColor="#111111" StrokeThickness="0"
                                                 WidthRequest="28" HeightRequest="18" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,4,4" ZIndex="10">

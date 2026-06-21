@@ -15,7 +15,11 @@ public class AlbumResponseDto
     public string Color { get; set; } = "#EEEDFE";
     public List<string> ThumbnailUrls { get; set; } = new();
 
-    // Computed properties за XAML binding
+    public string? Thumbnail0 => ThumbnailUrls.Count > 0 ? ThumbnailUrls[0] : null;
+    public string? Thumbnail1 => ThumbnailUrls.Count > 1 ? ThumbnailUrls[1] : null;
+    public string? Thumbnail2 => ThumbnailUrls.Count > 2 ? ThumbnailUrls[2] : null;
+    public string? Thumbnail3 => ThumbnailUrls.Count > 3 ? ThumbnailUrls[3] : null;
+
     public bool HasPhoto0 => ThumbnailUrls.Count > 0;
     public bool HasPhoto1 => ThumbnailUrls.Count > 1;
     public bool HasPhoto2 => ThumbnailUrls.Count > 2;

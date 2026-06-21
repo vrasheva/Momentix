@@ -207,7 +207,7 @@ public partial class CreateTimeCapsuleViewModel : BaseViewModel
                 friend.IsInvited = false;
 
             OnPropertyChanged(nameof(SelectedPhotoCountText));
-            await Shell.Current.GoToAsync("..");
+            await Shell.Current.GoToAsync("//TimeCapsulesPage");
         }
         catch (Exception ex) { ErrorMessage = ex.Message; }
         finally { IsLoading = false; }
